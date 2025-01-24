@@ -528,8 +528,6 @@ def handle_missing_values():
                 st.session_state.data = filtered_data.copy()
                 st.success("Tratamentos aplicados com sucesso!")
 
-        else:
-            st.success("Não há valores ausentes para tratar.")  # Mensagem informando que não há valores ausentes
 
         # Navegação
         col1, col2 = st.columns(2)
