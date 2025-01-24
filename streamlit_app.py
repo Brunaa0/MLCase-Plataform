@@ -452,7 +452,7 @@ def handle_missing_values():
                 st.write("Resumo dos Valores Ausentes:")
                 st.dataframe(missing_data.rename("Total de Valores Ausentes"))
             else:
-                st.sucess("Não há valores ausentes nos dados.")
+                st.success("Não há valores ausentes nos dados.")
 
         # Exibir os valores ausentes
         display_missing_values(filtered_data)
