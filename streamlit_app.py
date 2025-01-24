@@ -106,9 +106,18 @@ def initialize_state():
 
 # Função auxiliar para escolher o delimitador para ficheiros CSV
 def choose_delimiter():
-    delimiters = [",", ";", "\t", "|"]
+    # Lista de delimitadores possíveis, incluindo a opção em branco
+    delimiters = [",", ";", "\t", "|", "Outro"]  # Adiciona a opção "Outro"
+    
+    # Cria o selectbox para o usuário escolher o delimitador
     delimiter = st.sidebar.selectbox("Escolha o delimitador para CSV", delimiters, index=0)
+    
+    # Se o usuário escolher a opção "Outro", permite que ele insira um delimitador personalizado
+    if delimiter == "Outro":
+        delimiter = st.sidebar.text_input("Digite o delimitador personalizado:")
+    
     return delimiter
+
 
 # Função para a etapa de upload do arquivo
 def upload_file():
