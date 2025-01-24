@@ -452,7 +452,7 @@ def handle_missing_values():
                 st.write("Resumo dos Valores Ausentes:")
                 st.dataframe(missing_data.rename("Total de Valores Ausentes"))
             else:
-                st.write("Não há valores ausentes nos dados.")
+                st.sucess("Não há valores ausentes nos dados.")
 
         # Exibir os valores ausentes
         display_missing_values(filtered_data)
@@ -3954,7 +3954,7 @@ def main():
     initialize_session_state()
 
     # Verificar o estado atual da etapa
-    st.write(f"Estado inicial: {st.session_state.step}")
+    #st.write(f"Estado inicial: {st.session_state.step}")
 
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
@@ -3987,7 +3987,7 @@ def main():
         st.rerun()
 
     # Exibir o estado após a execução para depuração
-    st.write(f"Estado final: {st.session_state.step}")
+    #st.write(f"Estado final: {st.session_state.step}")
 
 
 if __name__ == "__main__":
