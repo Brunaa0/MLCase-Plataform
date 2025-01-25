@@ -2393,7 +2393,7 @@ def model_selection():
 
         # Avançar para Seleção de Features SOMENTE após o gráfico de métricas ser mostrado
         if st.session_state.get('treino_concluido', False):
-            st.write("### Passo Final - Avançar para Seleção de Features")
+            st.write("### Avançar para Seleção de Features")
 
             # Garantir que há treinos realizados
             if 'treinos_realizados' in st.session_state and st.session_state['treinos_realizados']:
