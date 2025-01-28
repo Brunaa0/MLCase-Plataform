@@ -3843,16 +3843,14 @@ def clustering_final_page():
 
     # **Gráficos Interativos das Métricas**
     st.subheader("Gráfico Interativo de Métricas")
-    
-    # Lista das métricas
     metrics_to_plot = ["Silhouette Score", "Davies-Bouldin Index", "Calinski-Harabasz Score"]
+    selected_metric = st.selectbox("Selecione a métrica para visualizar:", metrics_to_plot)
     
-    # Verificar se o re-treino foi feito
-    if "retrain_metrics" in st.session_state:
-        selected_metric = st.selectbox("Selecione a métrica para visualizar:", metrics_to_plot)
-        
-        # Criar o gráfico para a métrica selecionada
-        if selected_metric:
+    # Criar o gráfico
+    if selected_metric:
+        # Verificar se os dados do re-treino estão presentes
+        if "retrain_metrics" in st.session_state:
+            # Se o re-treino foi realizado, exibe "Treino Inicial" e "Re-Treino"
             data_to_plot = pd.DataFrame({
                 "Treino": ["Treino Inicial", "Re-Treino"],
                 selected_metric: [
@@ -3860,32 +3858,27 @@ def clustering_final_page():
                     retrain_metrics[selected_metric]
                 ]
             })
+        else:
+            # Se o re-treino não foi realizado, exibe todas as métricas para "Treino Inicial"
+            data_to_plot = pd.DataFrame({
+                "Treino": ["Treino Inicial"] * len(metrics_to_plot),
+                selected_metric: [initial_metrics[metric] for metric in metrics_to_plot]
+            })
     
-            # Criar gráfico de barras
-            fig, ax = plt.subplots(figsize=(6, 4))
-            ax.bar(data_to_plot["Treino"], data_to_plot[selected_metric], color=['#a8ddb5', '#005a32'], edgecolor='black')
-            ax.set_title(f"Comparação de {selected_metric}", fontsize=14, fontweight='bold')
-            ax.set_ylabel(selected_metric, fontsize=12)
-            ax.set_xlabel("Treino", fontsize=12)
-            ax.tick_params(axis='both', which='major', labelsize=10)
-            st.pyplot(fig)
+        # Criar gráfico com base nos dados disponíveis
+        fig, ax = plt.subplots(figsize=(6, 4))
     
-    else:
-        # Caso só tenha o treino inicial, exibe todas as métricas no mesmo gráfico
-        data_to_plot = pd.DataFrame({
-            "Métrica": metrics_to_plot,
-            "Treino Inicial": [initial_metrics[metric] for metric in metrics_to_plot]
-        })
+        # Ajustar a largura das barras com 'width' (valor de 0.2 a 0.8)
+        bar_width = 0.4  # Largura das barras (quanto menor, mais finas elas são)
+        
+        ax.bar(data_to_plot["Treino"], data_to_plot[selected_metric], color=['#a8ddb5', '#005a32'], edgecolor='black', width=bar_width)
     
-        # Criar gráfico de barras
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.bar(data_to_plot["Métrica"], data_to_plot["Treino Inicial"], color='#a8ddb5', edgecolor='black')
-        ax.set_title("Comparação de Métricas no Treino Inicial", fontsize=14, fontweight='bold')
-        ax.set_ylabel("Valor da Métrica", fontsize=12)
-        ax.set_xlabel("Métricas", fontsize=12)
+        ax.set_title(f"Comparação de {selected_metric}", fontsize=14, fontweight='bold')
+        ax.set_ylabel(selected_metric, fontsize=12)
+        ax.set_xlabel("Treino", fontsize=12)
         ax.tick_params(axis='both', which='major', labelsize=10)
-        plt.xticks(rotation=45)
         st.pyplot(fig)
+
 
 
 
