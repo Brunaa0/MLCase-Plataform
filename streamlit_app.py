@@ -3867,23 +3867,12 @@ def clustering_final_page():
     
         # Criar gráfico com base nos dados disponíveis
         fig, ax = plt.subplots(figsize=(6, 4))
-    
-        # Ajustar a largura das barras com 'width' (valor de 0.2 a 0.8)
-        bar_width = 0.4  # Largura das barras (quanto menor, mais finas elas são)
-        
-        ax.bar(data_to_plot["Treino"], data_to_plot[selected_metric], color=['#a8ddb5', '#005a32'], edgecolor='black', width=bar_width)
-    
+        ax.bar(data_to_plot["Treino"], data_to_plot[selected_metric], color=['#a8ddb5', '#005a32'], edgecolor='black')
         ax.set_title(f"Comparação de {selected_metric}", fontsize=14, fontweight='bold')
         ax.set_ylabel(selected_metric, fontsize=12)
         ax.set_xlabel("Treino", fontsize=12)
         ax.tick_params(axis='both', which='major', labelsize=10)
-    
-        # Ajuste do limite do eixo Y (ajustar conforme necessário para a métrica)
-        ax.set_ylim(0, 1)  # Ajustando para um intervalo de 0 a 1, que é típico para métricas como o Silhouette Score
-    
-        st.pyplot(fig)
-    
-
+        st.pyplot(fig) 
 
 
     # Gerar o relatório PDF
