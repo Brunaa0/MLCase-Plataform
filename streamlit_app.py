@@ -3869,7 +3869,7 @@ def clustering_final_page():
         fig, ax = plt.subplots(figsize=(6, 4))
     
         # Ajustar a largura das barras com 'width' (valor de 0.2 a 0.8)
-        bar_width = 0.4  # Largura das barras (quanto menor, mais finas elas são)
+        bar_width = 0.1  # Largura das barras (quanto menor, mais finas elas são)
         
         ax.bar(data_to_plot["Treino"], data_to_plot[selected_metric], color=['#a8ddb5', '#005a32'], edgecolor='black', width=bar_width)
     
