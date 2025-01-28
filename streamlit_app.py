@@ -3841,20 +3841,31 @@ def clustering_final_page():
     st.success(f"🎉 **{melhor_modelo}** com Silhouette Score: {max(initial_metrics['Silhouette Score'], retrain_silhouette_score or 0):.4f}")
 
     # **Gráficos Interativos das Métricas**
+    # **Gráficos Interativos das Métricas**
     st.subheader("Gráfico Interativo de Métricas")
     metrics_to_plot = ["Silhouette Score", "Davies-Bouldin Index", "Calinski-Harabasz Score"]
     selected_metric = st.selectbox("Selecione a métrica para visualizar:", metrics_to_plot)
-
+    
     # Criar o gráfico
     if selected_metric:
-        data_to_plot = pd.DataFrame({
-            "Treino": ["Treino Inicial", "Re-Treino"] if "retrain_metrics" in st.session_state else ["Treino Inicial"],
-            selected_metric: [
-                initial_metrics[selected_metric],
-                retrain_metrics[selected_metric] if "retrain_metrics" in st.session_state else None
-            ]
-        }).dropna()
-
+        # Verificar se os dados do re-treino estão presentes
+        if "retrain_metrics" in st.session_state:
+            # Se o re-treino foi realizado, exibe "Treino Inicial" e "Re-Treino"
+            data_to_plot = pd.DataFrame({
+                "Treino": ["Treino Inicial", "Re-Treino"],
+                selected_metric: [
+                    initial_metrics[selected_metric],
+                    retrain_metrics[selected_metric]
+                ]
+            })
+        else:
+            # Se o re-treino não foi realizado, apenas "Treino Inicial"
+            data_to_plot = pd.DataFrame({
+                "Treino": ["Treino Inicial"],
+                selected_metric: [initial_metrics[selected_metric]]
+            })
+    
+        # Criar gráfico com base nos dados disponíveis
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.bar(data_to_plot["Treino"], data_to_plot[selected_metric], color=['#a8ddb5', '#005a32'], edgecolor='black')
         ax.set_title(f"Comparação de {selected_metric}", fontsize=14, fontweight='bold')
@@ -3862,6 +3873,7 @@ def clustering_final_page():
         ax.set_xlabel("Treino", fontsize=12)
         ax.tick_params(axis='both', which='major', labelsize=10)
         st.pyplot(fig)
+
 
     # Gerar o relatório PDF
     # Gerar o relatório PDF
