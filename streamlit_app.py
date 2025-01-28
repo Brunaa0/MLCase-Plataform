@@ -1970,9 +1970,9 @@ def model_selection():
                 st.success(f"Modelo inicial treinado com sucesso usando {best_n_clusters_retrain} clusters!")
                 st.session_state.training_completed = True  # Marcar como concluído
 
-        # Exibir métricas e próxima ação apenas após o treinamento
+        # Exibir métricas e próxima ação apenas após o treino
         if st.session_state.get("training_completed", False):
-            st.write("### Métricas do Treinamento Inicial")
+            st.write("### Métricas do Treino Inicial")
             st.table(pd.DataFrame([st.session_state.initial_metrics]))
 
             # Escolher ação seguinte
@@ -2297,7 +2297,7 @@ def model_selection():
         # 6. Treino do Modelo
         if st.session_state.validation_confirmed:
             if st.button("Treinar o Modelo"):
-                st.session_state.validation_confirmed = False  # Resetando após o treinamento
+                st.session_state.validation_confirmed = False  # Resetando após o treino
                 st.success("Treino iniciado com sucesso!")
 
                 # Recuperar o modelo selecionado
@@ -2323,7 +2323,7 @@ def model_selection():
                 X_test = st.session_state.X_test
                 y_test = st.session_state.y_test
 
-                # **Remover parâmetros inválidos antes do treinamento**
+                # **Remover parâmetros inválidos antes do treino**
                 if 'manual_params' in st.session_state:
                     if manual_params.get('kernel') == 'linear' and 'gamma' in manual_params:
                         del manual_params['gamma']  # Remove o parâmetro local
@@ -2337,7 +2337,7 @@ def model_selection():
                 X_train = imputer.fit_transform(X_train)  # Tratamento no conjunto de treino
                 X_test = imputer.transform(X_test)        # Tratamento no conjunto de teste
 
-                # Exibir resumo das escolhas feitas antes do treinamento
+                # Exibir resumo das escolhas feitas antes do treino
                 st.write("### Resumo das Escolhas Feitas:")
                 st.write(f"**Modelo Selecionado**: {model_name}")
                 st.write(f"**Coluna Alvo**: {target_column}")
@@ -2350,7 +2350,7 @@ def model_selection():
                     model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params
                 )
 
-                # **Salvar apenas os parâmetros válidos no estado global após o treinamento**
+                # **Salvar apenas os parâmetros válidos no estado global após o treino**
                 if 'Best Parameters' in resultado:
                     st.session_state['best_params'] = resultado['Best Parameters']  # Para treino inicial
                     st.session_state['best_params_selected'] = resultado['Best Parameters']  # Para seleção de features
@@ -2390,7 +2390,7 @@ def model_selection():
                     # Marcar o treino como concluído
                     st.session_state['treino_concluido'] = True
                 else:
-                    st.error("O treinamento do modelo falhou.")
+                    st.error("O treino do modelo falhou.")
 
         # Avançar para Seleção de Features SOMENTE após o gráfico de métricas ser mostrado
         if st.session_state.get('treino_concluido', False):
@@ -3156,7 +3156,7 @@ def execute_training():
         )
 
         # Depuração
-        st.write("Conteúdo de metrics após treinamento:", st.session_state.get('metrics', {}))
+        st.write("Conteúdo de metrics após treino:", st.session_state.get('metrics', {}))
 
         # Avançar para a página final
         st.session_state.step = 'final_page'
@@ -3698,7 +3698,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     pdf.cell(0, 10, txt=best_model_type, ln=True)
     pdf.ln(10)
 
-    # Adicionar métricas do treinamento inicial e re-treino
+    # Adicionar métricas do treino inicial e re-treino
     pdf.set_font("Times", style="B", size=12)
     pdf.cell(0, 10, txt="Métricas Obtidas", ln=True)
     pdf.set_font("Times", size=9)
@@ -3791,18 +3791,18 @@ def clustering_final_page():
 
     # Verificar se os dados estão disponíveis
     if "selected_model_name" not in st.session_state or "initial_metrics" not in st.session_state:
-        st.error("Nenhuma informação de clustering disponível. Por favor, execute o treinamento primeiro.")
+        st.error("Nenhuma informação de clustering disponível. Por favor, execute o treino primeiro.")
         return
 
     # Mostrar o modelo selecionado
     st.subheader("Modelo Selecionado")
     st.write(f"**Modelo:** {st.session_state.selected_model_name}")
 
-    # Exibir métricas do treinamento inicial
+    # Exibir métricas do treino inicial
     st.subheader("Métricas do Treino Inicial")
     st.table(pd.DataFrame([st.session_state.initial_metrics]))
 
-    # Interpretação personalizada para o treinamento inicial
+    # Interpretação personalizada para o treino inicial
     initial_metrics = st.session_state.initial_metrics
     st.write("**Interpretação do Treino Inicial:**")
     st.markdown(f"""
