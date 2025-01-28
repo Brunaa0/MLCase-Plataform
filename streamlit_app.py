@@ -3841,7 +3841,6 @@ def clustering_final_page():
     st.success(f"🎉 **{melhor_modelo}** com Silhouette Score: {max(initial_metrics['Silhouette Score'], retrain_silhouette_score or 0):.4f}")
 
     # **Gráficos Interativos das Métricas**
-    # **Gráficos Interativos das Métricas**
     st.subheader("Gráfico Interativo de Métricas")
     metrics_to_plot = ["Silhouette Score", "Davies-Bouldin Index", "Calinski-Harabasz Score"]
     selected_metric = st.selectbox("Selecione a métrica para visualizar:", metrics_to_plot)
@@ -3859,10 +3858,10 @@ def clustering_final_page():
                 ]
             })
         else:
-            # Se o re-treino não foi realizado, apenas "Treino Inicial"
+            # Se o re-treino não foi realizado, exibe todas as métricas para "Treino Inicial"
             data_to_plot = pd.DataFrame({
-                "Treino": ["Treino Inicial"],
-                selected_metric: [initial_metrics[selected_metric]]
+                "Treino": ["Treino Inicial"] * len(metrics_to_plot),
+                selected_metric: [initial_metrics[metric] for metric in metrics_to_plot]
             })
     
         # Criar gráfico com base nos dados disponíveis
@@ -3875,7 +3874,6 @@ def clustering_final_page():
         st.pyplot(fig)
 
 
-    # Gerar o relatório PDF
     # Gerar o relatório PDF
     pdf_buffer = gerar_relatorio_clustering_pdf(
         initial_metrics,
