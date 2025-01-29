@@ -2196,6 +2196,8 @@ def model_selection():
 
                                 manual_params[param] = st.number_input(
                                     f"Escolha o valor para '{param}':",
+                                     # Escrever os valores disponíveis
+                                    st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
                                     min_value=float(min(values)) if param_type == float else int(min(values)),
                                     max_value=float(max(values)) if param_type == float else int(max(values)),
                                     value=float(values[0]) if param_type == float else int(values[0]),
