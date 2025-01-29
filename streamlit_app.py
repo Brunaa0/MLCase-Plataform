@@ -1328,8 +1328,9 @@ def get_default_param_grid(model_name):
         }
     elif model_name == "Random Forest":
         return {
-            'n_estimators': [10, 50, 100],
-            'max_depth': [None, 10, 20]
+            'max_depth': [None, 10, 20],
+            #'n_estimators': [10, 50, 100]
+            
         }
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
@@ -1358,7 +1359,6 @@ def configure_manual_params(model_key, param_grid, manual_params):
         'epsilon': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
         'gamma': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
         'degree': {'min': 1, 'max': 5, 'step': 1, 'default': 3},
-        'max_depth': {'min': 1, 'max': 20, 'step': 1, 'default': None} 
     }
 
     # Criar widgets para parâmetros
