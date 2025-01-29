@@ -1323,7 +1323,7 @@ def get_default_param_grid(model_name):
         }
     elif model_name == "K-Nearest Neighbors (KNN)":
         return {
-            'n_neighbors': [3, 5, 7],
+            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20
             'weights': ['uniform', 'distance']
         }
     elif model_name == "Random Forest":
