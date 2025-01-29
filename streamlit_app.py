@@ -1383,14 +1383,23 @@ def configure_manual_params(model_key, param_grid, manual_params):
                 st.write(f"**{param}** (Intervalo: {config['min']} a {config['max']})")
 
                 # Configuração interativa
-                manual_params[param] = st.number_input(
-                    f"{param}:",
-                    min_value=config['min'],
-                    max_value=config['max'],
-                    value=config['default'],
-                    step=config['step'],
-                    key=f"{model_key}_{param}"
-                )
+                if param == 'max_depth':  # Verifica se o parâmetro é 'max_depth'
+                    manual_params[param] = st.selectbox(
+                        f"{param}:",
+                        options=[None] + list(range(1, 21)),  # Inclusão de None
+                        index=0 if config['default'] is None else list(range(1, 21)).index(config['default']),
+                        key=f"{model_key}_{param}"
+                    )
+                else:
+                    # Para outros parâmetros numéricos
+                    manual_params[param] = st.number_input(
+                        f"{param}:",
+                        min_value=config['min'],
+                        max_value=config['max'],
+                        value=config['default'],
+                        step=config['step'],
+                        key=f"{model_key}_{param}"
+                    )
 
     # **Configuração dinâmica para 'gamma' com base no kernel**
     if 'kernel' in manual_params and manual_params['kernel'] == 'rbf':
@@ -1418,6 +1427,7 @@ def configure_manual_params(model_key, param_grid, manual_params):
     st.write("Parâmetros manuais salvos:", st.session_state['manual_params'])
 
     return manual_params
+
 
 
 
