@@ -1329,7 +1329,7 @@ def get_default_param_grid(model_name):
     elif model_name == "Random Forest":
         return {
             'max_depth': [None, 10, 20],
-            #'n_estimators': [10, 50, 100]
+            'n_estimators': [10, 50, 100]
             
         }
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
