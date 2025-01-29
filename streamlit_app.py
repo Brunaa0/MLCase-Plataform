@@ -1358,6 +1358,7 @@ def configure_manual_params(model_key, param_grid, manual_params):
         'epsilon': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
         'gamma': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
         'degree': {'min': 1, 'max': 5, 'step': 1, 'default': 3},
+        'max_depth': {'min': 1, 'max': 20, 'step': 1, 'default': None} 
     }
 
     # Criar widgets para parâmetros
@@ -1459,7 +1460,7 @@ def configure_svr(model_key, manual_params):
     manual_params['kernel'] = kernel
 
     # Configuração adicional para kernels específicos
-    if kernel == "rbf" or kernel == "poly":
+    if kernel == "rbf":
         gamma = st.number_input("Parâmetro gamma", min_value=0.0, max_value=1.0, step=0.1, value=0.1)
         manual_params['gamma'] = gamma
 
