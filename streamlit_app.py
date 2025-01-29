@@ -2191,28 +2191,35 @@ def model_selection():
 
                             # **Tratar parâmetros numéricos**
                             elif isinstance(values[0], (int, float)):
+                                # Mostrar os valores disponíveis para o parâmetro
+                                st.write(f"Parâmetro: **{param}** | Intervalo disponível: [{min(values)}, {max(values)}]")
+                            
                                 # Verificar o tipo de dado (float ou int) para parametrização
                                 param_type = float if any(isinstance(v, float) for v in values) else int
-
+                            
+                                # Criar o número interativo
                                 manual_params[param] = st.number_input(
                                     f"Escolha o valor para '{param}':",
-                                     # Escrever os valores disponíveis
-                                    st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
                                     min_value=float(min(values)) if param_type == float else int(min(values)),
                                     max_value=float(max(values)) if param_type == float else int(max(values)),
                                     value=float(values[0]) if param_type == float else int(values[0]),
                                     step=0.1 if param_type == float else 1,  # Ajuste o step dinamicamente
                                     key=f"{model_key}_{param}"
                                 )
-
+                            
                             # **Tratar parâmetros categóricos (ex.: 'weights')**
                             elif isinstance(values[0], str):
+                                # Mostrar os valores disponíveis para o parâmetro
+                                st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
+                            
+                                # Criar o selectbox interativo
                                 manual_params[param] = st.selectbox(
                                     f"Escolha o valor para '{param}':",
                                     values,  # Lista de valores permitidos
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
+
 
                         # Salvar os parâmetros manuais no estado global
                         st.session_state['manual_params'] = manual_params
