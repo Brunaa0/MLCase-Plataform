@@ -1327,10 +1327,11 @@ def get_default_param_grid(model_name):
             'weights': ['uniform', 'distance']
         }
     elif model_name == "Random Forest":
+        # Geração dinâmica de max_depth como range
+        max_depth_range = [None] + list(range(5, 21, 5))  # [None, 5, 10, 15, 20]
         return {
-            'max_depth': [None, 10, 20],
+            'max_depth': max_depth_range,
             'n_estimators': [10, 50, 100]
-            
         }
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
@@ -1342,6 +1343,7 @@ def get_default_param_grid(model_name):
         return {}  # Regressão Linear geralmente não tem hiperparâmetros ajustáveis
     else:
         return {}
+
 
 def configure_manual_params(model_key, param_grid, manual_params):
     """
