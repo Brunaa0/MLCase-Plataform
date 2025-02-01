@@ -1554,7 +1554,8 @@ def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_se
         # Inicializar parâmetros manuais como vazio, se não fornecido
         if manual_params is None:
             manual_params = {}
-
+        # Verifica se max_depth está no param_grid antes de iniciar o GridSearch
+        print("Parâmetros antes do GridSearchCV:", param_grid)
         # Obter o nome do modelo
         model_name = None
         if isinstance(model, SVC):
