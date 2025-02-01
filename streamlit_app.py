@@ -2159,19 +2159,18 @@ def model_selection():
                     manual_params = st.session_state.manual_params
 
                     # Configuração manual dos parâmetros
-                    # Configuração manual dos parâmetros
                     if param_choice == "Escolher manualmente os parâmetros de GridSearch":
                         # Recuperar o modelo selecionado
                         model_key = st.session_state.selected_model_name
-
+                    
                         # Inicializar os parâmetros padrão do modelo selecionado
                         param_grid = get_default_param_grid(model_key)
-
+                    
                         # Se não houver parâmetros padrão, informar o usuário
                         if not param_grid:
                             st.warning(f"Parâmetros padrão não definidos para o modelo {model_key}.")
                             param_grid = {}
-
+                    
                         # Exibir os parâmetros para o usuário ajustar manualmente
                         manual_params = {}
                         for param, values in param_grid.items():
@@ -2184,7 +2183,7 @@ def model_selection():
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-
+                    
                             # **Mostrar 'gamma' apenas se o kernel for 'rbf'**
                             elif param == "gamma":
                                 if "kernel" in manual_params and manual_params["kernel"] == "rbf":
@@ -2200,7 +2199,7 @@ def model_selection():
                                     manual_params.pop(param, None)
                                     if 'manual_params' in st.session_state and param in st.session_state['manual_params']:
                                         del st.session_state['manual_params'][param]
-
+                    
                             # **Tratar parâmetros numéricos**
                             elif isinstance(values[0], (int, float)):
                                 # Mostrar os valores disponíveis para o parâmetro
@@ -2219,6 +2218,16 @@ def model_selection():
                                     key=f"{model_key}_{param}"
                                 )
                             
+                            # **Tratar `max_depth` separadamente como um selectbox**
+                            elif param == "max_depth":
+                                st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
+                                manual_params[param] = st.selectbox(
+                                    f"Escolha o valor para '{param}':",
+                                    values,
+                                    index=0,  # Primeiro valor como padrão
+                                    key=f"{model_key}_{param}"
+                                )
+                    
                             # **Tratar parâmetros categóricos (ex.: 'weights')**
                             elif isinstance(values[0], str):
                                 # Mostrar os valores disponíveis para o parâmetro
@@ -2231,11 +2240,11 @@ def model_selection():
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-
-
+                    
                         # Salvar os parâmetros manuais no estado global
                         st.session_state['manual_params'] = manual_params
                         st.write("Parâmetros manuais salvos:", manual_params)
+
 
 
                 # Confirmar configurações do GridSearch
