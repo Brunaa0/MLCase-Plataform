@@ -2764,7 +2764,7 @@ def feature_selection():
             X_train = X_train[selected_features]
             X_test = X_test[selected_features]
 
-            st.write(f"Features selecionadas manualmente: {selected_features}")
+            st.write(f"Features selecionadas manualmente: {selected_features}")  # Exibindo as features selecionadas manualmente
         else:
             # Seleção automática
             important_features = X_train.columns[importances > 0.01]
@@ -2774,6 +2774,8 @@ def feature_selection():
 
             X_train = X_train[important_features]
             X_test = X_test[important_features]
+
+            st.write(f"Features selecionadas automaticamente: {important_features.tolist()}")  # Exibindo as features selecionadas automaticamente
 
         # Salvar resultados no estado
         st.session_state.X_train_selected = X_train
