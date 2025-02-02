@@ -2764,7 +2764,7 @@ def feature_selection():
             X_train = X_train[selected_features]
             X_test = X_test[selected_features]
 
-            st.write(f"Features selecionadas manualmente: {selected_features}")  # Exibindo as features selecionadas manualmente
+            st.write(f"Features selecionadas manualmente: {selected_features}")
         else:
             # Seleção automática
             important_features = X_train.columns[importances > 0.01]
@@ -2774,8 +2774,6 @@ def feature_selection():
 
             X_train = X_train[important_features]
             X_test = X_test[important_features]
-
-            st.write(f"Features selecionadas automaticamente: {important_features.tolist()}")  # Exibindo as features selecionadas automaticamente
 
         # Salvar resultados no estado
         st.session_state.X_train_selected = X_train
@@ -2988,10 +2986,7 @@ def evaluate_and_compare_models():
         st.write(f"Features antes da seleção: {st.session_state.X_train.shape[1]}")
         st.write(f"Features após a seleção: {X_train.shape[1]}")
 
-        # Exibir os nomes das features selecionadas
-        st.write(f"Features selecionadas: {selected_features.tolist()}")
-
-        
+    
         # **Formatar Métricas com 4 Casas Decimais**
         def format_metric(value):
             try:
@@ -4051,4 +4046,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
