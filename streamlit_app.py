@@ -2987,7 +2987,8 @@ def evaluate_and_compare_models():
         st.write(f"Features após a seleção: {X_train.shape[1]}")
 
         # Exibir os nomes das features selecionadas
-        st.write(f"Features selecionadas: {selected_features.tolist()}")
+        st.write(f"Features selecionadas: {selected_columns.tolist()}")
+
         
         # **Formatar Métricas com 4 Casas Decimais**
         def format_metric(value):
