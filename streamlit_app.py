@@ -2674,25 +2674,6 @@ def feature_selection():
         scoring_options[model_type]
     )
     
-    with st.expander("O que é o limiar de importância?"):
-        st.write("""
-        O limiar de importância determina o valor mínimo de relevância que uma variável precisa ter para ser incluída
-        no modelo. Esta relevância é calculada pelo modelo de Machine Learning com base na contribuição da variável 
-        para prever a variável alvo.
-        
-        Por exemplo:
-        - Se o limiar for 0.01, significa que apenas as variáveis com importância superior a 0.01 serão mantidas no modelo.
-        
-        Este limiar ajuda a reduzir o número de variáveis no modelo, tornando-o mais simples e eficiente.
-        O valor padrão para este limiar é 0.01.
-        """)
-
-    # Sliders para definir os limiares
-    correlation_threshold = st.slider(
-        "Defina o limiar de correlação (entre 0 e 1):",
-        0.0, 1.0, value=0.9, step=0.01
-    )
-    
     # Explicação sobre os limiares
     with st.expander("O que é o limiar de correlação?"):
         st.write("""
@@ -2706,12 +2687,31 @@ def feature_selection():
         
         O valor padrão para este limiar é 0.9.
         """)
-
+    
+    # Sliders para definir os limiares
+    correlation_threshold = st.slider(
+        "Defina o limiar de correlação (entre 0 e 1):",
+        0.0, 1.0, value=0.9, step=0.01
+    )
+    
+    # Explicação sobre os limiares
+    with st.expander("O que é o limiar de importância?"):
+        st.write("""
+        O limiar de importância determina o valor mínimo de relevância que uma variável precisa ter para ser incluída
+        no modelo. Esta relevância é calculada pelo modelo de Machine Learning com base na contribuição da variável 
+        para prever a variável alvo.
+        
+        Por exemplo:
+        - Se o limiar for 0.01, significa que apenas as variáveis com importância superior a 0.01 serão mantidas no modelo.
+        
+        Este limiar ajuda a reduzir o número de variáveis no modelo, tornando-o mais simples e eficiente.
+        O valor padrão para este limiar é 0.01.
+        """)
+    # Sliders para definir os limiares    
     importance_threshold = st.slider(
         "Defina o limiar de importância (entre 0 e 1):",
         0.0, 1.0, value=0.01, step=0.01
     )
-
 
 
     # Simular os dados do estado da aplicação
