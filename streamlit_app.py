@@ -2790,11 +2790,21 @@ def feature_selection():
 # Função para treinar e armazenar métricas
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
     try:
-        # Imports necessários
         from sklearn.impute import SimpleImputer
         from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
         from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
         from sklearn.model_selection import GridSearchCV, KFold
+
+        # Debugging inicial
+        st.write("Depuração dos dados no início do treino:")
+        st.write(f"Shape de X_train: {X_train.shape}")
+        st.write(f"Shape de y_train: {y_train.shape}")
+        st.write(f"Shape de X_test: {X_test.shape}")
+        st.write(f"Shape de y_test: {y_test.shape}")
+        st.write("Primeiras linhas de X_train:")
+        st.write(X_train.head())
+        st.write("Primeiros valores de y_train:")
+        st.write(y_train[:5])
 
         # Imputar valores ausentes
         imputer = SimpleImputer(strategy="mean")
@@ -2809,34 +2819,16 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 
         # Verificar se há features suficientes
         if X_train.shape[1] == 0:
-            st.error("Nenhuma feature disponível para treino após a seleção. Ajuste o limiar ou os critérios de seleção.")
+            st.error("Nenhuma feature disponível para treino após a seleção. Ajuste os limiares.")
             return None
 
-        # Garantir que y_train e y_test são válidos
-        if y_train.dtype == 'object':
-            from sklearn.preprocessing import LabelEncoder
-            le = LabelEncoder()
-            y_train = le.fit_transform(y_train)
-            y_test = le.transform(y_test)
-        else:
-            if y_train.isnull().any():
-                y_train = y_train.fillna(y_train.mean())
-            if y_test.isnull().any():
-                y_test = y_test.fillna(y_test.mean())
+        # Garantir que y_train e y_test não possuem valores nulos
+        if y_train.isnull().any():
+            y_train = y_train.fillna(y_train.mean())
+        if y_test.isnull().any():
+            y_test = y_test.fillna(y_test.mean())
 
-        # Debugging dos dados
-        st.write("Debugging dos dados antes do treino:")
-        st.write(f"Shape de X_train: {X_train.shape}")
-        st.write(f"Shape de X_test: {X_test.shape}")
-        st.write(f"Shape de y_train: {y_train.shape}")
-        st.write(f"Shape de y_test: {y_test.shape}")
-
-        st.write("Primeiras linhas de X_train:")
-        st.write(X_train.head())
-        st.write("Primeiras linhas de X_test:")
-        st.write(X_test.head())
-
-        # Treino do modelo
+        # Treinar o modelo
         if use_grid_search and metric_type == "Sem Seleção":
             param_grid = st.session_state.get('param_grid', {})
             if not param_grid:
@@ -2845,7 +2837,6 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
             scoring = 'accuracy' if st.session_state.model_type == "Classificação" else 'r2'
-
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
             best_model = grid_search.best_estimator_
@@ -2856,8 +2847,8 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             best_model = model
             best_params = {}
 
+        # Previsões e métricas
         y_pred = best_model.predict(X_test)
-
         if st.session_state.model_type == "Classificação":
             metrics = {
                 'F1-Score': f1_score(y_test, y_pred, average='weighted'),
@@ -2888,6 +2879,7 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             'Accuracy': "N/A",
             'Best Parameters': {}
         }
+
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
