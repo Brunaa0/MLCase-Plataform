@@ -2662,21 +2662,18 @@ def select_important_features(X, y, model_type, scoring, threshold=0.01):
 # Função principal de seleção de features
 def feature_selection():
     st.header("Seleção de Features")
-
-    # Explicação sobre os limiares
-    with st.expander("O que é o limiar de correlação?"):
-        st.write("""
-        O limiar de correlação define o grau de semelhança entre duas variáveis. Quando a correlação entre duas
-        variáveis ultrapassa este limite, consideramos que uma delas é redundante e pode ser removida para evitar 
-        duplicação de informação no modelo.
-        
-        Por exemplo:
-        - Se o limiar de correlação for 0.9, significa que duas variáveis com mais de 90% de semelhança (correlação) 
-          serão tratadas como redundantes.
-        
-        O valor padrão para este limiar é 0.9.
-        """)
-
+    
+    # Escolha do scoring
+    scoring_options = {
+        "Classificação": ['accuracy', 'precision', 'recall', 'f1'],
+        "Regressão": ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+    }
+    model_type = st.session_state.get("model_type", "Regressão")
+    scoring = st.selectbox(
+        "Escolha o scoring para avaliar o modelo:",
+        scoring_options[model_type]
+    )
+    
     with st.expander("O que é o limiar de importância?"):
         st.write("""
         O limiar de importância determina o valor mínimo de relevância que uma variável precisa ter para ser incluída
@@ -2695,22 +2692,27 @@ def feature_selection():
         "Defina o limiar de correlação (entre 0 e 1):",
         0.0, 1.0, value=0.9, step=0.01
     )
+    
+    # Explicação sobre os limiares
+    with st.expander("O que é o limiar de correlação?"):
+        st.write("""
+        O limiar de correlação define o grau de semelhança entre duas variáveis. Quando a correlação entre duas
+        variáveis ultrapassa este limite, consideramos que uma delas é redundante e pode ser removida para evitar 
+        duplicação de informação no modelo.
+        
+        Por exemplo:
+        - Se o limiar de correlação for 0.9, significa que duas variáveis com mais de 90% de semelhança (correlação) 
+          serão tratadas como redundantes.
+        
+        O valor padrão para este limiar é 0.9.
+        """)
 
     importance_threshold = st.slider(
         "Defina o limiar de importância (entre 0 e 1):",
         0.0, 1.0, value=0.01, step=0.01
     )
 
-    # Escolha do scoring
-    scoring_options = {
-        "Classificação": ['accuracy', 'precision', 'recall', 'f1'],
-        "Regressão": ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
-    }
-    model_type = st.session_state.get("model_type", "Regressão")
-    scoring = st.selectbox(
-        "Escolha o scoring para avaliar o modelo:",
-        scoring_options[model_type]
-    )
+
 
     # Simular os dados do estado da aplicação
     if "X_train" not in st.session_state or "y_train" not in st.session_state:
