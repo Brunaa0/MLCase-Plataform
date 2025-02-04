@@ -2652,149 +2652,179 @@ def select_scoring():
         st.success("Escolha salva com sucesso!")
 
 
-# Função para remover features altamente correlacionadas
+# Função para remover features correlacionadas
 def remove_highly_correlated_features(df, threshold=0.9):
     corr_matrix = df.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
+    #st.write(f"Features removidas por alta correlação: {to_drop}")
     return df.drop(columns=to_drop)
 
-# Função para selecionar features importantes com base na importância
-def select_important_features(X, y, model_type, scoring, threshold=0.01):
-    # Escolher o modelo adequado
-    if model_type == "Classificação":
+
+# Função para selecionar features importantes com RandomForest
+def select_important_features(X, y, threshold=0.01):
+    # Escolher o modelo apropriado com base no tipo de problema
+    if st.session_state.model_type == "Classificação":
         model = RandomForestClassifier(n_estimators=50, random_state=42)
-    elif model_type == "Regressão":
+    elif st.session_state.model_type == "Regressão":
+        # Mesmo para SVR, usamos RandomForestRegressor para calcular importâncias
         model = RandomForestRegressor(n_estimators=50, random_state=42)
     else:
-        raise ValueError("Tipo de modelo desconhecido. Escolha entre 'Classificação' ou 'Regressão'.")
-
-    # Treinar o modelo para calcular importâncias
+        raise ValueError("Tipo de problema desconhecido. Verifique se 'model_type' está definido corretamente.")
+    
+    # Ajustar o modelo
     model.fit(X, y)
+    
+    # Obter as importâncias das features
     feature_importances = model.feature_importances_
-
-    # Calcular a métrica (scoring) para cada feature com cross-validation
-    scores = cross_val_score(model, X, y, cv=5, scoring=scoring)
-    st.write(f"Média do scoring ({scoring}): {scores.mean():.4f}")
-
-    # Selecionar features com importância acima do limiar
+    
+    # Selecionar features importantes com base no threshold
     important_features = X.columns[feature_importances > threshold]
-    return X[important_features], feature_importances
+    
+    return X[important_features]
 
 # Função principal de seleção de features
+
 def feature_selection():
+    # Verificar página e estado
+    if st.session_state.get("page") == "final_page":
+        final_page()
+        return
+
+    if st.session_state.step != 'feature_selection':
+        return
+
     st.header("Seleção de Features")
-    
-    # Escolha do scoring
-    scoring_options = {
-        "Classificação": ['accuracy', 'precision', 'recall', 'f1'],
-        "Regressão": ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+
+    # Mapeamento de modelos
+    model_name_map = {
+        "Support Vector Classification (SVC)": "SVC",
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",
+        "Random Forest": "RandomForestClassifier",
+        "Regressão Linear Simples (RLS)": "LinearRegression",
+        "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
-    model_type = st.session_state.get("model_type", "Regressão")
-    scoring = st.selectbox(
-        "Escolha o scoring para avaliar o modelo:",
-        scoring_options[model_type]
-    )
-    
-    # Explicação sobre os limiares
-    with st.expander("O que é o limiar de correlação?"):
-        st.write("""
-        O limiar de correlação define o grau de semelhança entre duas variáveis. Quando a correlação entre duas
-        variáveis ultrapassa este limite, consideramos que uma delas é redundante e pode ser removida para evitar 
-        duplicação de informação no modelo.
-        
-        Por exemplo:
-        - Se o limiar de correlação for 0.9, significa que duas variáveis com mais de 90% de semelhança (correlação) 
-          serão tratadas como redundantes.
-        
-        O valor padrão para este limiar é 0.9.
-        """)
-    
-    # Sliders para definir os limiares
-    correlation_threshold = st.slider(
-        "Defina o limiar de correlação (entre 0 e 1):",
-        0.0, 1.0, value=0.9, step=0.01
-    )
-    
-    # Explicação sobre os limiares
-    with st.expander("O que é o limiar de importância?"):
-        st.write("""
-        O limiar de importância determina o valor mínimo de relevância que uma variável precisa ter para ser incluída
-        no modelo. Esta relevância é calculada pelo modelo de Machine Learning com base na contribuição da variável 
-        para prever a variável alvo.
-        
-        Por exemplo:
-        - Se o limiar for 0.01, significa que apenas as variáveis com importância superior a 0.01 serão mantidas no modelo.
-        
-        Este limiar ajuda a reduzir o número de variáveis no modelo, tornando-o mais simples e eficiente.
-        O valor padrão para este limiar é 0.01.
-        """)
-    # Sliders para definir os limiares    
-    importance_threshold = st.slider(
-        "Defina o limiar de importância (entre 0 e 1):",
-        0.0, 1.0, value=0.01, step=0.01
-    )
+    reverse_model_name_map = {v: k for k, v in model_name_map.items()}
 
-
-    # Simular os dados do estado da aplicação
-    if "X_train" not in st.session_state or "y_train" not in st.session_state:
-        st.warning("Por favor, carregue os dados e configure o treino antes de realizar a seleção de features.")
+    # Obter modelo selecionado
+    original_model_name = st.session_state.get("selected_model_name", None)
+    if not original_model_name:
+        st.error("Nenhum modelo foi selecionado para a seleção de features.")
         return
 
-    X_train = st.session_state["X_train"]
-    y_train = st.session_state["y_train"]
+    mapped_model_name = model_name_map.get(original_model_name, original_model_name)
+    models = st.session_state.get("models", {})
 
-    # Remoção de features correlacionadas
-    X_train = remove_highly_correlated_features(X_train, correlation_threshold)
+    # Verificar se o modelo existe
+    model_key = reverse_model_name_map.get(mapped_model_name, mapped_model_name)
+    if model_key not in models:
+        st.error(f"Modelo {mapped_model_name} não encontrado.")
+        return
 
+    # Obter modelo e dados
+    model = models[model_key]
+    X_train = st.session_state.X_train
+    y_train = st.session_state.y_train
+    X_test = st.session_state.X_test
+
+    # Escolher o scoring
+    scoring_options = (
+        ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+        if st.session_state.model_type == "Classificação"
+        else ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+    )
+    scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
+
+    # Salvar o scoring no estado
+    st.session_state["selected_scoring"] = scoring
+
+    # Selecionar método - Automático ou Manual
+    selection_method = st.radio("Escolha o método de seleção de features:", ("Automático", "Manual"), index=0)
+
+    # Aplicar pré-processamento antes da seleção de features
+    correlation_threshold = 0.9
+    corr_matrix = X_train.corr().abs()
+    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    to_drop = [column for column in upper.columns if any(upper[column] > correlation_threshold)]
+    X_train = X_train.drop(to_drop, axis=1)
+    X_test = X_test.drop(to_drop, axis=1)
+
+    # Verificar se há features restantes após a remoção
     if X_train.shape[1] == 0:
-        st.error("Nenhuma feature disponível após a remoção de correlações altas. Ajuste o limiar.")
+        st.error("Nenhuma feature disponível após remoção por correlação.")
         return
 
-    st.write(f"Número de features restantes após remoção de correlações: {X_train.shape[1]}")
+    # Selecionar modelo para cálculo de importância
+    try:
+        if st.session_state.model_type == "Classificação":
+            importance_model = RandomForestClassifier(n_estimators=100, random_state=42)
+        else:
+            importance_model = RandomForestRegressor(n_estimators=100, random_state=42)
 
-    # Seleção de features importantes
-    X_train_selected, importances = select_important_features(
-        X_train, y_train, model_type, scoring, importance_threshold
-    )
+        # Treinar o modelo
+        importance_model.fit(X_train, y_train)
 
-    if X_train_selected.shape[1] == 0:
-        st.error("Nenhuma feature foi selecionada com base no limiar de importância. Ajuste o limiar.")
+        # Calcular importâncias
+        importances = importance_model.feature_importances_
+        importances_df = pd.DataFrame({
+            'Feature': X_train.columns,
+            'Importance': importances
+        }).sort_values(by='Importance', ascending=False)
+
+        # Aplicar seleção manual
+        if selection_method == "Manual":
+            max_features = X_train.shape[1]
+            k_features = st.slider(
+                "Escolha o número de features:",
+                1, max_features, value=min(3, max_features), step=1
+            )
+
+            # Selecionar as 'k_features' mais importantes
+            selected_features = importances_df['Feature'].iloc[:k_features].tolist()
+
+            # Filtrar os dados para usar apenas as features selecionadas
+            X_train = X_train[selected_features]
+            X_test = X_test[selected_features]
+
+            st.write(f"Features selecionadas manualmente: {selected_features}")
+        else:
+            # Seleção automática
+            important_features = X_train.columns[importances > 0.01]
+            if len(important_features) == 0:
+                st.warning("Nenhuma feature passou pelo filtro de importância. Usando todas as features disponíveis.")
+                important_features = X_train.columns
+
+            X_train = X_train[important_features]
+            X_test = X_test[important_features]
+
+        # Salvar resultados no estado
+        st.session_state.X_train_selected = X_train
+        st.session_state.X_test_selected = X_test
+        st.session_state.feature_selection_done = True
+
+    except Exception as e:
+        st.error(f"Erro ao calcular importâncias das features: {str(e)}")
         return
 
-    st.write(f"Número de features selecionadas: {X_train_selected.shape[1]}")
-
-    # Criar um DataFrame para importâncias ordenadas
-    importances_df = pd.DataFrame({
-        "Feature": X_train.columns,
-        "Importance": importances
-    }).sort_values(by="Importance", ascending=False)
-    
-    # Exibir gráfico de barras com limiar de importância
-    st.write("Gráfico de Importância das Features:")
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(importances_df["Feature"], importances_df["Importance"], color='skyblue')
-    ax.axhline(y=importance_threshold, color='red', linestyle='--', label='Limiar de Importância')
-    ax.set_xticklabels(importances_df["Feature"], rotation=90)
-    ax.set_title("Importância das Features")
-    ax.set_ylabel("Importância")
-    ax.set_xlabel("Features")
-    ax.legend()
-    
-    # Exibir valores no topo de cada barra (opcional)
-    for i, v in enumerate(importances_df["Importance"]):
-        ax.text(i, v + 0.01, f"{v:.2f}", ha='center', fontsize=8)
-    
-    st.pyplot(fig)
-    
-    # Salvar o resultado no estado da aplicação
-    st.session_state["X_train_selected"] = X_train_selected
-    st.session_state["feature_selection_done"] = True
-
-    # Botão para confirmar e avançar
+    # Botão para avançar
     if st.button("Confirmar Seleção de Features"):
-        st.session_state["step"] = "train_and_store_metrics"
+        st.session_state.step = 'train_and_store_metrics'
         st.rerun()
+
+#Função para Treinar e Armazenar as metricas
+import json
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    r2_score, mean_squared_error, mean_absolute_error
+)
+from sklearn.preprocessing import LabelEncoder
+
 
 # Função para treinar e armazenar métricas
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
@@ -2810,56 +2840,64 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
         X_test = pd.DataFrame(imputer.transform(X_test), columns=X_test.columns)
 
-        # Garantir o formato 2D de X_train e X_test
-        if len(X_train.shape) == 1:
-            X_train = X_train.values.reshape(-1, 1)
-        if len(X_test.shape) == 1:
-            X_test = X_test.values.reshape(-1, 1)
-
-        # Verificar se há features suficientes
-        if X_train.shape[1] == 0:
-            st.error("Nenhuma feature disponível para treino após a seleção de features. Ajuste o limiar ou os critérios de seleção.")
-            return None
-
-        # Garantir que y_train e y_test são válidos
+        # Garantir que y_train e y_test sejam válidos
         if y_train.dtype == 'object':
             from sklearn.preprocessing import LabelEncoder
             le = LabelEncoder()
             y_train = le.fit_transform(y_train)
             y_test = le.transform(y_test)
         else:
-            if y_train.isnull().any():
-                y_train = y_train.fillna(y_train.mean())
-            if y_test.isnull().any():
-                y_test = y_test.fillna(y_test.mean())
+            y_train = y_train.fillna(y_train.mean())
+            y_test = y_test.fillna(y_test.mean())
 
-        # Debugging dos dados
-        st.write("Debugging dos dados antes do treino:")
-        st.write(f"Shape de X_train: {X_train.shape}")
-        st.write(f"Shape de X_test: {X_test.shape}")
-        st.write(f"Shape de y_train: {y_train.shape}")
-        st.write(f"Shape de y_test: {y_test.shape}")
+        # **RECUPERAR PARÂMETROS SALVOS**
+        if metric_type == "Com Seleção":
+            saved_params = st.session_state.get('best_params_selected', None) or st.session_state.get('best_params', None)
+        else:
+            saved_params = st.session_state.get('best_params', None)
 
-        # Treino do modelo
+        # **APLICAR PARÂMETROS SALVOS APENAS SE COMPATÍVEIS COM O MODELO**
+        if saved_params and hasattr(model, 'get_params') and all(param in model.get_params() for param in saved_params):
+            st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
+            model.set_params(**saved_params)
+
+
+        # **TREINO COM GRIDSEARCH OU DIRETO**
         if use_grid_search and metric_type == "Sem Seleção":
-            param_grid = st.session_state.get('param_grid', {})
-            if not param_grid:
-                st.error("Os parâmetros do GridSearchCV não foram configurados.")
-                return None
+            param_grid = st.session_state.get('param_grid', {
+                'n_neighbors': [3, 5, 7, 9],
+                'weights': ['uniform', 'distance']
+            })
 
+            # Definir estratégia de validação cruzada
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-            scoring = 'accuracy' if st.session_state.model_type == "Classificação" else 'r2'
+            if st.session_state.model_type == "Classificação":
+                scoring = 'accuracy'
+            else:
+                scoring = 'r2'
 
+            # Aplicar GridSearch
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
+
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
+
+            # **SALVAR PARÂMETROS NO ESTADO GLOBAL**
             st.session_state['best_params'] = best_params
+            st.session_state['best_params_selected'] = best_params
+
         else:
             model.fit(X_train, y_train)
             best_model = model
-            best_params = {}
+            best_params = saved_params if saved_params else {}
 
+        # **SALVAR MODELO TREINADO NO ESTADO GLOBAL**
+        st.session_state['trained_model'] = best_model
+        st.session_state['trained_model_name'] = best_model.__class__.__name__
+        
+
+        # **AVALIAR O MODELO**
         y_pred = best_model.predict(X_test)
 
         if st.session_state.model_type == "Classificação":
@@ -2878,21 +2916,16 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
                 'Best Parameters': best_params
             }
 
+        # **SALVAR MÉTRICAS NO ESTADO GLOBAL**
+        if 'metrics' not in st.session_state:
+            st.session_state['metrics'] = {}
         st.session_state['metrics'][metric_type] = metrics
+
         return metrics
 
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
-        return {
-            'Erro': str(e),
-            'R²': "N/A",
-            'MSE': "N/A",
-            'MAE': "N/A",
-            'F1-Score': "N/A",
-            'Accuracy': "N/A",
-            'Best Parameters': {}
-        }
-
+        return None
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
@@ -2974,8 +3007,11 @@ def evaluate_and_compare_models():
         # Validar redução de features
         st.write(f"Features antes da seleção: {st.session_state.X_train.shape[1]}")
         st.write(f"Features após a seleção: {X_train.shape[1]}")
-        st.write("Features selecionadas:", list(X_train.columns))
-    
+
+        # Exibir os nomes das features selecionadas
+        st.write(f"Features selecionadas: {selected_columns.tolist()}")
+
+        
         # **Formatar Métricas com 4 Casas Decimais**
         def format_metric(value):
             try:
