@@ -2723,7 +2723,6 @@ def feature_selection():
     y_train = st.session_state["y_train"]
 
     # Remoção de features correlacionadas
-    st.write("Removendo features altamente correlacionadas...")
     X_train = remove_highly_correlated_features(X_train, correlation_threshold)
 
     if X_train.shape[1] == 0:
@@ -2733,7 +2732,6 @@ def feature_selection():
     st.write(f"Número de features restantes após remoção de correlações: {X_train.shape[1]}")
 
     # Seleção de features importantes
-    st.write("Selecionando features importantes com base no modelo...")
     X_train_selected, importances = select_important_features(
         X_train, y_train, model_type, scoring, importance_threshold
     )
@@ -2744,15 +2742,29 @@ def feature_selection():
 
     st.write(f"Número de features selecionadas: {X_train_selected.shape[1]}")
 
-    # Exibir gráfico de importâncias
+    # Criar um DataFrame para importâncias ordenadas
     importances_df = pd.DataFrame({
         "Feature": X_train.columns,
         "Importance": importances
     }).sort_values(by="Importance", ascending=False)
-
+    
+    # Exibir gráfico de barras com limiar de importância
     st.write("Gráfico de Importância das Features:")
-    st.bar_chart(importances_df.set_index("Feature")["Importance"])
-
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(importances_df["Feature"], importances_df["Importance"], color='skyblue')
+    ax.axhline(y=importance_threshold, color='red', linestyle='--', label='Limiar de Importância')
+    ax.set_xticklabels(importances_df["Feature"], rotation=90)
+    ax.set_title("Importância das Features")
+    ax.set_ylabel("Importância")
+    ax.set_xlabel("Features")
+    ax.legend()
+    
+    # Exibir valores no topo de cada barra (opcional)
+    for i, v in enumerate(importances_df["Importance"]):
+        ax.text(i, v + 0.01, f"{v:.2f}", ha='center', fontsize=8)
+    
+    st.pyplot(fig)
+    
     # Salvar o resultado no estado da aplicação
     st.session_state["X_train_selected"] = X_train_selected
     st.session_state["feature_selection_done"] = True
