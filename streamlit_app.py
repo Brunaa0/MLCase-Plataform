@@ -2730,8 +2730,7 @@ def feature_selection():
         return
 
     st.write(f"Número de features restantes após remoção de correlações: {X_train.shape[1]}")
-    st.write("Primeiras linhas de X_train após remoção de correlações:")
-    st.write(X_train.head())
+
 
     # Seleção de features importantes
     X_train_selected, importances = select_important_features(
@@ -2742,8 +2741,6 @@ def feature_selection():
         return
 
     st.write(f"Número de features selecionadas: {X_train_selected.shape[1]}")
-    st.write("Primeiras linhas de X_train_selected:")
-    st.write(X_train_selected.head())
 
     # Criar um DataFrame para importâncias ordenadas
     importances_df = pd.DataFrame({
@@ -2764,8 +2761,23 @@ def feature_selection():
     st.pyplot(fig)
 
     # Garantir formato 2D
+    # Garantir formato e validar dados após seleção
     if len(X_train_selected.shape) == 1:
         X_train_selected = X_train_selected.values.reshape(-1, 1)
+    
+    # Depuração dos dados
+    st.write("Debugging dos dados antes do treino:")
+    st.write(f"Shape de X_train_selected: {X_train_selected.shape}")
+    st.write(f"Shape de y_train: {y_train.shape}")
+    st.write("Primeiras linhas de X_train_selected:")
+    st.write(X_train_selected.head())
+    st.write("Primeiros valores de y_train:")
+    st.write(y_train[:5])
+    
+    # Verificar se os dados estão vazios
+    if X_train_selected.shape[1] == 0:
+        st.error("Nenhuma feature restante após a seleção de features. Ajuste o limiar de importância.")
+        return
 
     st.session_state["X_train_selected"] = X_train_selected
     st.session_state["feature_selection_done"] = True
