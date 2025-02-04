@@ -2630,11 +2630,6 @@ def select_scoring():
         st.success("Escolha salva com sucesso!")
 
 
-# Função para remover features correlacionadas
-import streamlit as st
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
 # Função para remover features altamente correlacionadas
 def remove_highly_correlated_features(df, threshold=0.9):
     corr_matrix = df.corr().abs()
@@ -2643,7 +2638,7 @@ def remove_highly_correlated_features(df, threshold=0.9):
     return df.drop(columns=to_drop)
 
 # Função para selecionar features importantes com base na importância
-def select_important_features(X, y, model_type, threshold=0.01):
+def select_important_features(X, y, model_type, scoring, threshold=0.01):
     # Escolher o modelo adequado
     if model_type == "Classificação":
         model = RandomForestClassifier(n_estimators=50, random_state=42)
@@ -2655,6 +2650,10 @@ def select_important_features(X, y, model_type, threshold=0.01):
     # Treinar o modelo para calcular importâncias
     model.fit(X, y)
     feature_importances = model.feature_importances_
+
+    # Calcular a métrica (scoring) para cada feature com cross-validation
+    scores = cross_val_score(model, X, y, cv=5, scoring=scoring)
+    st.write(f"Média do scoring ({scoring}): {scores.mean():.4f}")
 
     # Selecionar features com importância acima do limiar
     important_features = X.columns[feature_importances > threshold]
@@ -2702,6 +2701,17 @@ def feature_selection():
         0.0, 1.0, value=0.01, step=0.01
     )
 
+    # Escolha do scoring
+    scoring_options = {
+        "Classificação": ['accuracy', 'precision', 'recall', 'f1'],
+        "Regressão": ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+    }
+    model_type = st.session_state.get("model_type", "Regressão")
+    scoring = st.selectbox(
+        "Escolha o scoring para avaliar o modelo:",
+        scoring_options[model_type]
+    )
+
     # Simular os dados do estado da aplicação
     if "X_train" not in st.session_state or "y_train" not in st.session_state:
         st.warning("Por favor, carregue os dados e configure o treino antes de realizar a seleção de features.")
@@ -2709,7 +2719,6 @@ def feature_selection():
 
     X_train = st.session_state["X_train"]
     y_train = st.session_state["y_train"]
-    model_type = st.session_state.get("model_type", "Regressão")
 
     # Remoção de features correlacionadas
     st.write("Removendo features altamente correlacionadas...")
@@ -2723,7 +2732,9 @@ def feature_selection():
 
     # Seleção de features importantes
     st.write("Selecionando features importantes com base no modelo...")
-    X_train_selected, importances = select_important_features(X_train, y_train, model_type, importance_threshold)
+    X_train_selected, importances = select_important_features(
+        X_train, y_train, model_type, scoring, importance_threshold
+    )
 
     if X_train_selected.shape[1] == 0:
         st.error("Nenhuma feature foi selecionada com base no limiar de importância. Ajuste o limiar.")
