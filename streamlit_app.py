@@ -1,60 +1,82 @@
 ########### Bibliotecas Necessárias ###########
 
 
-# Streamlit
+# -------------------------------------
+# Bibliotecas do Streamlit
+# -------------------------------------
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Manipulação de Dados
+# -------------------------------------
+# Manipulação e Análise de Dados
+# -------------------------------------
 import pandas as pd
 import numpy as np
 
-# Visualização de Dadosstre
+# -------------------------------------
+# Visualização de Dados
+# -------------------------------------
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-# Modelos e Métricas
-from sklearn.model_selection import (
-    train_test_split, KFold, LeaveOneOut, cross_val_score, GridSearchCV
-)
+# -------------------------------------
+# Modelos de Machine Learning
+# -------------------------------------
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.svm import SVC
+from sklearn.svm import SVC, SVR
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import svm, tree, neighbors
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, 
-    confusion_matrix, classification_report, roc_auc_score
-)
-from sklearn.decomposition import PCA
-import io
-from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
-import pickle
-from io import BytesIO
-from fpdf import FPDF
-import tempfile
-from datetime import datetime
-import tempfile
-import requests
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVR
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-import re
 
+# -------------------------------------
 # Seleção de Features
+# -------------------------------------
 from mlxtend.feature_selection import SequentialFeatureSelector
 
+# -------------------------------------
+# Métricas de Avaliação
+# -------------------------------------
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score, 
+    confusion_matrix, classification_report, roc_auc_score,
+    mean_squared_error, mean_absolute_error, r2_score,
+    silhouette_score, davies_bouldin_score, calinski_harabasz_score
+)
+
+# -------------------------------------
+# Pré-Processamento e Pipeline
+# -------------------------------------
+from sklearn.model_selection import (
+    train_test_split, KFold, LeaveOneOut, cross_val_score, GridSearchCV
+)
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.impute import SimpleImputer
+
+# -------------------------------------
 # Utilitários
+# -------------------------------------
 import os
 import joblib
-import time
+import pickle
+import io
+from io import BytesIO
+import tempfile
+from datetime import datetime
 from decimal import Decimal
 from fractions import Fraction
 from scipy.sparse import csr_matrix
 import scipy
+import time
+import json
+import requests
+
+# -------------------------------------
+# Bibliotecas Adicionais para Geração de Relatórios
+# -------------------------------------
+from fpdf import FPDF
+
 
 ##############################################
 
@@ -2774,22 +2796,6 @@ def feature_selection():
         st.session_state["step"] = "train_and_store_metrics"
         st.rerun()
 
-
-#Função para Treinar e Armazenar as metricas
-import json
-
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.impute import SimpleImputer
-from sklearn.model_selection import GridSearchCV, KFold
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    r2_score, mean_squared_error, mean_absolute_error
-)
-from sklearn.preprocessing import LabelEncoder
-
-
 # Função para treinar e armazenar métricas
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
     try:
@@ -2804,64 +2810,56 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
         X_test = pd.DataFrame(imputer.transform(X_test), columns=X_test.columns)
 
-        # Garantir que y_train e y_test sejam válidos
+        # Garantir o formato 2D de X_train e X_test
+        if len(X_train.shape) == 1:
+            X_train = X_train.values.reshape(-1, 1)
+        if len(X_test.shape) == 1:
+            X_test = X_test.values.reshape(-1, 1)
+
+        # Verificar se há features suficientes
+        if X_train.shape[1] == 0:
+            st.error("Nenhuma feature disponível para treino após a seleção de features. Ajuste o limiar ou os critérios de seleção.")
+            return None
+
+        # Garantir que y_train e y_test são válidos
         if y_train.dtype == 'object':
             from sklearn.preprocessing import LabelEncoder
             le = LabelEncoder()
             y_train = le.fit_transform(y_train)
             y_test = le.transform(y_test)
         else:
-            y_train = y_train.fillna(y_train.mean())
-            y_test = y_test.fillna(y_test.mean())
+            if y_train.isnull().any():
+                y_train = y_train.fillna(y_train.mean())
+            if y_test.isnull().any():
+                y_test = y_test.fillna(y_test.mean())
 
-        # **RECUPERAR PARÂMETROS SALVOS**
-        if metric_type == "Com Seleção":
-            saved_params = st.session_state.get('best_params_selected', None) or st.session_state.get('best_params', None)
-        else:
-            saved_params = st.session_state.get('best_params', None)
+        # Debugging dos dados
+        st.write("Debugging dos dados antes do treino:")
+        st.write(f"Shape de X_train: {X_train.shape}")
+        st.write(f"Shape de X_test: {X_test.shape}")
+        st.write(f"Shape de y_train: {y_train.shape}")
+        st.write(f"Shape de y_test: {y_test.shape}")
 
-        # **APLICAR PARÂMETROS SALVOS APENAS SE COMPATÍVEIS COM O MODELO**
-        if saved_params and hasattr(model, 'get_params') and all(param in model.get_params() for param in saved_params):
-            st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
-            model.set_params(**saved_params)
-
-
-        # **TREINO COM GRIDSEARCH OU DIRETO**
+        # Treino do modelo
         if use_grid_search and metric_type == "Sem Seleção":
-            param_grid = st.session_state.get('param_grid', {
-                'n_neighbors': [3, 5, 7, 9],
-                'weights': ['uniform', 'distance']
-            })
+            param_grid = st.session_state.get('param_grid', {})
+            if not param_grid:
+                st.error("Os parâmetros do GridSearchCV não foram configurados.")
+                return None
 
-            # Definir estratégia de validação cruzada
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-            if st.session_state.model_type == "Classificação":
-                scoring = 'accuracy'
-            else:
-                scoring = 'r2'
+            scoring = 'accuracy' if st.session_state.model_type == "Classificação" else 'r2'
 
-            # Aplicar GridSearch
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
-
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
-
-            # **SALVAR PARÂMETROS NO ESTADO GLOBAL**
             st.session_state['best_params'] = best_params
-            st.session_state['best_params_selected'] = best_params
-
         else:
             model.fit(X_train, y_train)
             best_model = model
-            best_params = saved_params if saved_params else {}
+            best_params = {}
 
-        # **SALVAR MODELO TREINADO NO ESTADO GLOBAL**
-        st.session_state['trained_model'] = best_model
-        st.session_state['trained_model_name'] = best_model.__class__.__name__
-        
-
-        # **AVALIAR O MODELO**
         y_pred = best_model.predict(X_test)
 
         if st.session_state.model_type == "Classificação":
@@ -2880,16 +2878,21 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
                 'Best Parameters': best_params
             }
 
-        # **SALVAR MÉTRICAS NO ESTADO GLOBAL**
-        if 'metrics' not in st.session_state:
-            st.session_state['metrics'] = {}
         st.session_state['metrics'][metric_type] = metrics
-
         return metrics
 
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
-        return None
+        return {
+            'Erro': str(e),
+            'R²': "N/A",
+            'MSE': "N/A",
+            'MAE': "N/A",
+            'F1-Score': "N/A",
+            'Accuracy': "N/A",
+            'Best Parameters': {}
+        }
+
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
