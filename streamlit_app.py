@@ -2810,7 +2810,7 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
         X_test = pd.DataFrame(imputer.transform(X_test), columns=X_test.columns)
 
-        # Garantir o formato 2D de X_train e X_test
+        # Garantir que X_train e X_test estão no formato 2D
         if len(X_train.shape) == 1:
             X_train = X_train.values.reshape(-1, 1)
         if len(X_test.shape) == 1:
@@ -2818,7 +2818,7 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 
         # Verificar se há features suficientes
         if X_train.shape[1] == 0:
-            st.error("Nenhuma feature disponível para treino após a seleção de features. Ajuste o limiar ou os critérios de seleção.")
+            st.error("Nenhuma feature disponível para treino após a seleção. Ajuste o limiar ou os critérios de seleção.")
             return None
 
         # Garantir que y_train e y_test são válidos
@@ -2839,6 +2839,11 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.write(f"Shape de X_test: {X_test.shape}")
         st.write(f"Shape de y_train: {y_train.shape}")
         st.write(f"Shape de y_test: {y_test.shape}")
+
+        st.write("Primeiras linhas de X_train:")
+        st.write(X_train.head())
+        st.write("Primeiras linhas de X_test:")
+        st.write(X_test.head())
 
         # Treino do modelo
         if use_grid_search and metric_type == "Sem Seleção":
@@ -2892,7 +2897,6 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             'Accuracy': "N/A",
             'Best Parameters': {}
         }
-
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
