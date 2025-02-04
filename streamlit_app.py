@@ -2970,7 +2970,7 @@ def evaluate_and_compare_models():
         # Validar redução de features
         st.write(f"Features antes da seleção: {st.session_state.X_train.shape[1]}")
         st.write(f"Features após a seleção: {X_train.shape[1]}")
-        st.write("Features selecionadas:", list(X_train_selected.columns))
+        st.write("Features selecionadas:", list(X_train.columns))
     
         # **Formatar Métricas com 4 Casas Decimais**
         def format_metric(value):
