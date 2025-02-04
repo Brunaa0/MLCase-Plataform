@@ -2740,6 +2740,7 @@ def feature_selection():
         st.write("Importância das Features:")
         st.bar_chart(importances_df.set_index('Feature')['Importance'])
 
+        # Seleção de features (Manual ou Automático)
         if selection_method == "Manual":
             k_features = st.slider("Escolha o número de features:", 1, X_train.shape[1], 5, step=1)
             selected_features = importances_df['Feature'].iloc[:k_features].tolist()
@@ -2747,13 +2748,19 @@ def feature_selection():
             X_test = X_test[selected_features]
             st.write(f"Features selecionadas manualmente: {selected_features}")
         else:
-            importance_threshold = st.slider("Defina o limiar de importância:", 0.0, 1.0, 0.01, step=0.01)
+            # Automático: Slider para definir o limiar de importância
+            importance_threshold = st.slider(
+                "Defina o limiar de importância:",
+                0.0, 1.0, value=0.01, step=0.01
+            )
             important_features = X_train.columns[importances > importance_threshold]
             if len(important_features) == 0:
                 st.warning("Nenhuma feature passou pelo filtro de importância. Usando todas as features disponíveis.")
                 important_features = X_train.columns
             X_train = X_train[important_features]
             X_test = X_test[important_features]
+            st.write(f"Features selecionadas automaticamente: {list(important_features)}")
+
 
         st.session_state.X_train_selected = X_train
         st.session_state.X_test_selected = X_test
