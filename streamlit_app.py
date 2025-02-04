@@ -2631,146 +2631,122 @@ def select_scoring():
 
 
 # Função para remover features correlacionadas
+import streamlit as st
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+# Função para remover features altamente correlacionadas
 def remove_highly_correlated_features(df, threshold=0.9):
     corr_matrix = df.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
-    #st.write(f"Features removidas por alta correlação: {to_drop}")
     return df.drop(columns=to_drop)
 
-
-# Função para selecionar features importantes com RandomForest
-def select_important_features(X, y, threshold=0.01):
-    # Escolher o modelo apropriado com base no tipo de problema
-    if st.session_state.model_type == "Classificação":
+# Função para selecionar features importantes com base na importância
+def select_important_features(X, y, model_type, threshold=0.01):
+    # Escolher o modelo adequado
+    if model_type == "Classificação":
         model = RandomForestClassifier(n_estimators=50, random_state=42)
-    elif st.session_state.model_type == "Regressão":
-        # Mesmo para SVR, usamos RandomForestRegressor para calcular importâncias
+    elif model_type == "Regressão":
         model = RandomForestRegressor(n_estimators=50, random_state=42)
     else:
-        raise ValueError("Tipo de problema desconhecido. Verifique se 'model_type' está definido corretamente.")
-    
-    # Ajustar o modelo
+        raise ValueError("Tipo de modelo desconhecido. Escolha entre 'Classificação' ou 'Regressão'.")
+
+    # Treinar o modelo para calcular importâncias
     model.fit(X, y)
-    
-    # Obter as importâncias das features
     feature_importances = model.feature_importances_
-    
-    # Selecionar features importantes com base no threshold
+
+    # Selecionar features com importância acima do limiar
     important_features = X.columns[feature_importances > threshold]
-    
-    return X[important_features]
+    return X[important_features], feature_importances
 
 # Função principal de seleção de features
-
 def feature_selection():
-    if st.session_state.get("page") == "final_page":
-        final_page()
-        return
-
-    if st.session_state.step != 'feature_selection':
-        return
-
     st.header("Seleção de Features")
 
-    # Mapeamento de modelos
-    model_name_map = {
-        "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",
-        "Random Forest": "RandomForestClassifier",
-        "Regressão Linear Simples (RLS)": "LinearRegression",
-        "Regressão por Vetores de Suporte (SVR)": "SVR"
-    }
-    reverse_model_name_map = {v: k for k, v in model_name_map.items()}
+    # Explicação sobre os limiares
+    with st.expander("O que é o limiar de correlação?"):
+        st.write("""
+        O limiar de correlação define o grau de semelhança entre duas variáveis. Quando a correlação entre duas
+        variáveis ultrapassa este limite, consideramos que uma delas é redundante e pode ser removida para evitar 
+        duplicação de informação no modelo.
+        
+        Por exemplo:
+        - Se o limiar de correlação for 0.9, significa que duas variáveis com mais de 90% de semelhança (correlação) 
+          serão tratadas como redundantes.
+        
+        O valor padrão para este limiar é 0.9.
+        """)
 
-    original_model_name = st.session_state.get("selected_model_name", None)
-    if not original_model_name:
-        st.error("Nenhum modelo foi selecionado para a seleção de features.")
-        return
+    with st.expander("O que é o limiar de importância?"):
+        st.write("""
+        O limiar de importância determina o valor mínimo de relevância que uma variável precisa ter para ser incluída
+        no modelo. Esta relevância é calculada pelo modelo de Machine Learning com base na contribuição da variável 
+        para prever a variável alvo.
+        
+        Por exemplo:
+        - Se o limiar for 0.01, significa que apenas as variáveis com importância superior a 0.01 serão mantidas no modelo.
+        
+        Este limiar ajuda a reduzir o número de variáveis no modelo, tornando-o mais simples e eficiente.
+        O valor padrão para este limiar é 0.01.
+        """)
 
-    mapped_model_name = model_name_map.get(original_model_name, original_model_name)
-    models = st.session_state.get("models", {})
-
-    model_key = reverse_model_name_map.get(mapped_model_name, mapped_model_name)
-    if model_key not in models:
-        st.error(f"Modelo {mapped_model_name} não encontrado.")
-        return
-
-    model = models[model_key]
-    X_train = st.session_state.X_train
-    y_train = st.session_state.y_train
-    X_test = st.session_state.X_test
-
-    scoring_options = (
-        ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-        if st.session_state.model_type == "Classificação"
-        else ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+    # Sliders para definir os limiares
+    correlation_threshold = st.slider(
+        "Defina o limiar de correlação (entre 0 e 1):",
+        0.0, 1.0, value=0.9, step=0.01
     )
-    scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
-    st.session_state["selected_scoring"] = scoring
 
-    selection_method = st.radio("Escolha o método de seleção de features:", ("Automático", "Manual"), index=0)
+    importance_threshold = st.slider(
+        "Defina o limiar de importância (entre 0 e 1):",
+        0.0, 1.0, value=0.01, step=0.01
+    )
 
-    # Remoção por correlação
-    correlation_threshold = st.slider("Defina o limiar de correlação:", 0.0, 1.0, 0.9, step=0.01)
-    corr_matrix = X_train.corr().abs()
-    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    to_drop = [column for column in upper.columns if any(upper[column] > correlation_threshold)]
-    X_train = X_train.drop(to_drop, axis=1)
-    X_test = X_test.drop(to_drop, axis=1)
+    # Simular os dados do estado da aplicação
+    if "X_train" not in st.session_state or "y_train" not in st.session_state:
+        st.warning("Por favor, carregue os dados e configure o treino antes de realizar a seleção de features.")
+        return
+
+    X_train = st.session_state["X_train"]
+    y_train = st.session_state["y_train"]
+    model_type = st.session_state.get("model_type", "Regressão")
+
+    # Remoção de features correlacionadas
+    st.write("Removendo features altamente correlacionadas...")
+    X_train = remove_highly_correlated_features(X_train, correlation_threshold)
 
     if X_train.shape[1] == 0:
-        st.error("Nenhuma feature disponível após remoção por correlação.")
+        st.error("Nenhuma feature disponível após a remoção de correlações altas. Ajuste o limiar.")
         return
 
-    try:
-        if st.session_state.model_type == "Classificação":
-            importance_model = RandomForestClassifier(n_estimators=100, random_state=42)
-        else:
-            importance_model = RandomForestRegressor(n_estimators=100, random_state=42)
+    st.write(f"Número de features restantes após remoção de correlações: {X_train.shape[1]}")
 
-        importance_model.fit(X_train, y_train)
-        importances = importance_model.feature_importances_
-        importances_df = pd.DataFrame({
-            'Feature': X_train.columns,
-            'Importance': importances
-        }).sort_values(by='Importance', ascending=False)
+    # Seleção de features importantes
+    st.write("Selecionando features importantes com base no modelo...")
+    X_train_selected, importances = select_important_features(X_train, y_train, model_type, importance_threshold)
 
-        # Visualizar importâncias
-        st.write("Importância das Features:")
-        st.bar_chart(importances_df.set_index('Feature')['Importance'])
-
-        # Seleção de features (Manual ou Automático)
-        if selection_method == "Manual":
-            k_features = st.slider("Escolha o número de features:", 1, X_train.shape[1], 5, step=1)
-            selected_features = importances_df['Feature'].iloc[:k_features].tolist()
-            X_train = X_train[selected_features]
-            X_test = X_test[selected_features]
-            st.write(f"Features selecionadas manualmente: {selected_features}")
-        else:
-            # Automático: Slider para definir o limiar de importância
-            importance_threshold = st.slider(
-                "Defina o limiar de importância:",
-                0.0, 1.0, value=0.01, step=0.01
-            )
-            important_features = X_train.columns[importances > importance_threshold]
-            if len(important_features) == 0:
-                st.warning("Nenhuma feature passou pelo filtro de importância. Usando todas as features disponíveis.")
-                important_features = X_train.columns
-            X_train = X_train[important_features]
-            X_test = X_test[important_features]
-            st.write(f"Features selecionadas automaticamente: {list(important_features)}")
-
-
-        st.session_state.X_train_selected = X_train
-        st.session_state.X_test_selected = X_test
-        st.session_state.feature_selection_done = True
-    except Exception as e:
-        st.error(f"Erro ao calcular importâncias das features: {str(e)}")
+    if X_train_selected.shape[1] == 0:
+        st.error("Nenhuma feature foi selecionada com base no limiar de importância. Ajuste o limiar.")
         return
 
+    st.write(f"Número de features selecionadas: {X_train_selected.shape[1]}")
+
+    # Exibir gráfico de importâncias
+    importances_df = pd.DataFrame({
+        "Feature": X_train.columns,
+        "Importance": importances
+    }).sort_values(by="Importance", ascending=False)
+
+    st.write("Gráfico de Importância das Features:")
+    st.bar_chart(importances_df.set_index("Feature")["Importance"])
+
+    # Salvar o resultado no estado da aplicação
+    st.session_state["X_train_selected"] = X_train_selected
+    st.session_state["feature_selection_done"] = True
+
+    # Botão para confirmar e avançar
     if st.button("Confirmar Seleção de Features"):
-        st.session_state.step = 'train_and_store_metrics'
+        st.session_state["step"] = "train_and_store_metrics"
         st.rerun()
 
 
