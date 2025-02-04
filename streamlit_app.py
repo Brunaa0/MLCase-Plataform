@@ -2651,7 +2651,6 @@ def select_scoring():
             file.write(st.session_state.selected_scoring)
         st.success("Escolha salva com sucesso!")
 
-
 # Função para remover features altamente correlacionadas
 def remove_highly_correlated_features(df, threshold=0.9):
     corr_matrix = df.corr().abs()
@@ -2661,7 +2660,6 @@ def remove_highly_correlated_features(df, threshold=0.9):
 
 # Função para selecionar features importantes com base na importância
 def select_important_features(X, y, model_type, scoring, threshold=0.01):
-    # Escolher o modelo adequado
     if model_type == "Classificação":
         model = RandomForestClassifier(n_estimators=50, random_state=42)
     elif model_type == "Regressão":
@@ -2669,15 +2667,12 @@ def select_important_features(X, y, model_type, scoring, threshold=0.01):
     else:
         raise ValueError("Tipo de modelo desconhecido. Escolha entre 'Classificação' ou 'Regressão'.")
 
-    # Treinar o modelo para calcular importâncias
     model.fit(X, y)
     feature_importances = model.feature_importances_
 
-    # Calcular a métrica (scoring) para cada feature com cross-validation
     scores = cross_val_score(model, X, y, cv=5, scoring=scoring)
     st.write(f"Média do scoring ({scoring}): {scores.mean():.4f}")
 
-    # Selecionar features com importância acima do limiar
     important_features = X.columns[feature_importances > threshold]
     return X[important_features], feature_importances
 
@@ -2702,39 +2697,23 @@ def feature_selection():
         O limiar de correlação define o grau de semelhança entre duas variáveis. Quando a correlação entre duas
         variáveis ultrapassa este limite, consideramos que uma delas é redundante e pode ser removida para evitar 
         duplicação de informação no modelo.
-        
-        Por exemplo:
-        - Se o limiar de correlação for 0.9, significa que duas variáveis com mais de 90% de semelhança (correlação) 
-          serão tratadas como redundantes.
-        
-        O valor padrão para este limiar é 0.9.
         """)
     
-    # Sliders para definir os limiares
     correlation_threshold = st.slider(
         "Defina o limiar de correlação (entre 0 e 1):",
         0.0, 1.0, value=0.9, step=0.01
     )
     
-    # Explicação sobre os limiares
     with st.expander("O que é o limiar de importância?"):
         st.write("""
         O limiar de importância determina o valor mínimo de relevância que uma variável precisa ter para ser incluída
-        no modelo. Esta relevância é calculada pelo modelo de Machine Learning com base na contribuição da variável 
-        para prever a variável alvo.
-        
-        Por exemplo:
-        - Se o limiar for 0.01, significa que apenas as variáveis com importância superior a 0.01 serão mantidas no modelo.
-        
-        Este limiar ajuda a reduzir o número de variáveis no modelo, tornando-o mais simples e eficiente.
-        O valor padrão para este limiar é 0.01.
+        no modelo.
         """)
-    # Sliders para definir os limiares    
+    
     importance_threshold = st.slider(
         "Defina o limiar de importância (entre 0 e 1):",
         0.0, 1.0, value=0.01, step=0.01
     )
-
 
     # Simular os dados do estado da aplicação
     if "X_train" not in st.session_state or "y_train" not in st.session_state:
@@ -2746,55 +2725,55 @@ def feature_selection():
 
     # Remoção de features correlacionadas
     X_train = remove_highly_correlated_features(X_train, correlation_threshold)
-
     if X_train.shape[1] == 0:
         st.error("Nenhuma feature disponível após a remoção de correlações altas. Ajuste o limiar.")
         return
 
     st.write(f"Número de features restantes após remoção de correlações: {X_train.shape[1]}")
+    st.write("Primeiras linhas de X_train após remoção de correlações:")
+    st.write(X_train.head())
 
     # Seleção de features importantes
     X_train_selected, importances = select_important_features(
         X_train, y_train, model_type, scoring, importance_threshold
     )
-
     if X_train_selected.shape[1] == 0:
         st.error("Nenhuma feature foi selecionada com base no limiar de importância. Ajuste o limiar.")
         return
 
     st.write(f"Número de features selecionadas: {X_train_selected.shape[1]}")
+    st.write("Primeiras linhas de X_train_selected:")
+    st.write(X_train_selected.head())
 
     # Criar um DataFrame para importâncias ordenadas
     importances_df = pd.DataFrame({
         "Feature": X_train.columns,
         "Importance": importances
     }).sort_values(by="Importance", ascending=False)
-    
+
     # Exibir gráfico de barras com limiar de importância
     st.write("Gráfico de Importância das Features:")
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.bar(importances_df["Feature"], importances_df["Importance"], color='skyblue')
     ax.axhline(y=importance_threshold, color='red', linestyle='--', label='Limiar de Importância')
-    ax.set_xticklabels(importances_df["Feature"], rotation=90)
+    ax.set_xticklabels(importances_df["Feature"], rotation=45, ha='right')
     ax.set_title("Importância das Features")
     ax.set_ylabel("Importância")
     ax.set_xlabel("Features")
     ax.legend()
-    
-    # Exibir valores no topo de cada barra (opcional)
-    for i, v in enumerate(importances_df["Importance"]):
-        ax.text(i, v + 0.01, f"{v:.2f}", ha='center', fontsize=8)
-    
     st.pyplot(fig)
-    
-    # Salvar o resultado no estado da aplicação
+
+    # Garantir formato 2D
+    if len(X_train_selected.shape) == 1:
+        X_train_selected = X_train_selected.values.reshape(-1, 1)
+
     st.session_state["X_train_selected"] = X_train_selected
     st.session_state["feature_selection_done"] = True
 
-    # Botão para confirmar e avançar
     if st.button("Confirmar Seleção de Features"):
         st.session_state["step"] = "train_and_store_metrics"
         st.rerun()
+
 
 # Função para treinar e armazenar métricas
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
