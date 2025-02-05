@@ -78,6 +78,7 @@ import requests
 from fpdf import FPDF
 
 
+
 ##############################################
 
 # Função JavaScript para a página voltar ao topo
@@ -3007,8 +3008,9 @@ def evaluate_and_compare_models():
         # Validar redução de features
         st.write(f"Features antes da seleção: {st.session_state.X_train.shape[1]}")
         st.write(f"Features após a seleção: {X_train.shape[1]}")
-
-        
+        for feature in X_train.columns:
+            st.write(f"- {feature}")
+    
         # **Formatar Métricas com 4 Casas Decimais**
         def format_metric(value):
             try:
