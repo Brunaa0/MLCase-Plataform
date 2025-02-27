@@ -2730,27 +2730,11 @@ def select_important_features(X, y, threshold=0.01, model_type=None):
 
 
 # Função principal de seleção de features
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    r2_score, mean_squared_error, mean_absolute_error
-)
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    r2_score, mean_squared_error, mean_absolute_error
-)
 
 def feature_selection():
     # Verificar página e estado
@@ -2801,8 +2785,6 @@ def feature_selection():
         else ['r2', 'mean_squared_error', 'mean_absolute_error']
     )
     scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
-
-    # Salvar o scoring no estado
     st.session_state["selected_scoring"] = scoring
 
     # Escolher o método de seleção (Apenas exibe a escolha, sem executar nada ainda)
@@ -2824,9 +2806,14 @@ def feature_selection():
     # Se for Manual, exibir o slider para escolher o número de features
     if st.session_state["selection_method"] == "Manual":
         max_features = X_train.shape[1]
+        
+        # Apenas exibir o slider após o usuário confirmar a escolha do método
+        if "num_features" not in st.session_state:
+            st.session_state["num_features"] = min(5, max_features)
+
         k_features = st.slider(
             "Escolha o número de features:",
-            1, max_features, value=min(5, max_features), step=1
+            1, max_features, value=st.session_state["num_features"], step=1
         )
 
         # Botão para confirmar a escolha do número de features
@@ -2904,6 +2891,7 @@ def feature_selection():
     if st.button("Confirmar Seleção de Features"):
         st.session_state.step = 'train_and_store_metrics'
         st.rerun()
+
 
 
 #Função para Treinar e Armazenar as metricas
