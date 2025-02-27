@@ -2730,7 +2730,6 @@ def select_important_features(X, y, threshold=0.01, model_type=None):
 
 
 # Função principal de seleção de features
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -2793,18 +2792,31 @@ def feature_selection():
     scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
     st.session_state["selected_scoring"] = scoring  # Salvar scoring no estado global
 
-    # Escolha do método de seleção de features
-    selection_method = st.radio("Escolha o método de seleção de features:", ("Automático", "Manual"), index=0)
+    # Escolha do método de seleção de features (Apenas exibe a escolha, ainda não aplica)
+    selection_method = st.radio(
+        "Escolha o método de seleção de features:",
+        ("Automático", "Manual"), index=0
+    )
+
+    # Botão para confirmar a escolha do método
+    if st.button("Confirmar Escolha do Método"):
+        st.session_state["selection_method"] = selection_method  # Salvar no estado
+        st.session_state["method_confirmed"] = True
+        st.rerun()
+
+    # Se o método ainda não foi confirmado, interrompe aqui
+    if not st.session_state.get("method_confirmed", False):
+        return
 
     # Remover features altamente correlacionadas
     correlation_threshold = 0.9
     corr_matrix = X_train.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper.columns if any(upper[column] > correlation_threshold)]
-    
+
     if to_drop:
         st.warning(f"Removendo features altamente correlacionadas: {to_drop}")
-    
+
     X_train = X_train.drop(to_drop, axis=1)
     X_test = X_test.drop(to_drop, axis=1)
 
@@ -2830,38 +2842,41 @@ def feature_selection():
             'Importance': importances
         }).sort_values(by='Importance', ascending=False)
 
-        # Se o usuário escolher "Manual", permitir que ele defina o número de features
-        if selection_method == "Manual":
+        # Se o usuário escolheu "Manual", exibir o slider para selecionar o número de features
+        if st.session_state["selection_method"] == "Manual":
             max_features = X_train.shape[1]
             k_features = st.slider(
                 "Escolha o número de features:", 1, max_features, value=min(5, max_features), step=1
             )
 
-            # Selecionar as `k_features` mais importantes
-            selected_features = importances_df['Feature'].iloc[:k_features].tolist()
+            # Botão para confirmar a escolha do número de features
+            if st.button("Confirmar Número de Features"):
+                st.session_state["num_features"] = k_features
+                st.session_state["features_confirmed"] = True
+                st.rerun()
 
-            # Atualizar os conjuntos de treino e teste para incluir apenas essas features
-            X_train = X_train[selected_features]
-            X_test = X_test[selected_features]
+            # Se ainda não confirmou, interrompe aqui
+            if not st.session_state.get("features_confirmed", False):
+                return
 
-            st.success(f"Features selecionadas manualmente: {selected_features}")
+            # Selecionar as `num_features` mais importantes
+            selected_features = importances_df['Feature'].iloc[:st.session_state["num_features"]].tolist()
 
         else:
             # Método Automático: Manter todas as features com importância maior que 0.01
-            important_features = importances_df[importances_df['Importance'] > 0.01]['Feature'].tolist()
+            selected_features = importances_df[importances_df['Importance'] > 0.01]['Feature'].tolist()
 
-            if len(important_features) == 0:
+            if len(selected_features) == 0:
                 st.warning("Nenhuma feature passou pelo filtro de importância. Mantendo todas as features disponíveis.")
-                important_features = importances_df['Feature'].tolist()
+                selected_features = importances_df['Feature'].tolist()
 
-            X_train = X_train[important_features]
-            X_test = X_test[important_features]
-
-            st.success(f"Features selecionadas automaticamente: {important_features}")
+        # Atualizar os conjuntos de treino e teste para incluir apenas as features selecionadas
+        X_train = X_train[selected_features]
+        X_test = X_test[selected_features]
 
         # Exibir as features selecionadas
-        st.write("🔍 **Features Selecionadas para o Novo Treino:**")
-        st.write(X_train.columns.tolist())
+        st.success("🔍 Features Selecionadas para o Novo Treino:")
+        st.write(selected_features)
 
         # Atualizar estado global com as novas features
         st.session_state.X_train_selected = X_train
@@ -2876,6 +2891,7 @@ def feature_selection():
     if st.button("Confirmar Seleção de Features"):
         st.session_state.step = 'train_and_store_metrics'
         st.rerun()
+
 
 #Função para Treinar e Armazenar as metricas
 import json
