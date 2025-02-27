@@ -2843,6 +2843,12 @@ def feature_selection():
             X_train = X_train[important_features]
             X_test = X_test[important_features]
 
+        # Verificar se as features selecionadas estão sendo usadas corretamente no novo treino
+        st.write("🔍 Verificando Features Utilizadas no Novo Treino")
+        st.write(f"Total de Features Selecionadas: {X_train.shape[1]}")
+        st.write("Lista de Features Utilizadas:")
+        st.write(X_train.columns.tolist())  # Exibe a lista real das colunas usadas no treino
+
         # Salvar resultados no estado
         st.session_state.X_train_selected = X_train
         st.session_state.X_test_selected = X_test
