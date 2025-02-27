@@ -3331,9 +3331,15 @@ def gerar_relatorio_pdf(comparison_df, best_model, st_session_state):
     # Função auxiliar para criar gráficos e salvar como arquivos temporários
     def criar_grafico(metric_name, values_sem, values_com):
         plt.figure(figsize=(6, 4))
-        plt.bar(['Sem Seleção', 'Com Seleção'], 
-                [values_sem, values_com], 
-                color=['lightgreen', 'darkgreen'])
+        bars = plt.bar(['Sem Seleção', 'Com Seleção'], 
+                [values_sem, values_com])
+        
+        # Adicionar valores nas barras
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+                    f'{height:.4f}', ha='center', va='bottom', fontsize=10)
+        
         plt.title(f"Comparação de {metric_name}")
         plt.ylabel(metric_name)
         plt.xticks(fontsize=10)
@@ -3392,6 +3398,38 @@ def gerar_relatorio_pdf(comparison_df, best_model, st_session_state):
     pdf.cell(50, 10, txt=clean_text("Melhor Modelo Treinado:"), ln=0)
     pdf.cell(0, 10, txt=clean_text(best_model), ln=1)
 
+    # Adicionar informações sobre os conjuntos de dados
+    if 'X_train' in st_session_state and 'X_train_selected' in st_session_state:
+        X_train = st_session_state.get('X_train')
+        X_test = st_session_state.get('X_test')
+        X_train_selected = st_session_state.get('X_train_selected')
+        
+        total_samples = X_train.shape[0] + X_test.shape[0]
+        train_percent = (X_train.shape[0] / total_samples) * 100
+        test_percent = (X_test.shape[0] / total_samples) * 100
+        
+        pdf.ln(5)
+        pdf.set_font("Times", style="B", size=11)
+        pdf.cell(0, 10, txt=clean_text("Informações dos Conjuntos de Dados"), ln=True)
+        pdf.set_font("Times", size=10)
+        
+        pdf.cell(0, 10, txt=clean_text(f"• Amostras de Treino: {X_train.shape[0]} ({train_percent:.1f}% do total)"), ln=True)
+        pdf.cell(0, 10, txt=clean_text(f"• Amostras de Teste: {X_test.shape[0]} ({test_percent:.1f}% do total)"), ln=True)
+        pdf.cell(0, 10, txt=clean_text(f"• Features Originais: {X_train.shape[1]}"), ln=True)
+        pdf.cell(0, 10, txt=clean_text(f"• Features Após Seleção: {X_train_selected.shape[1]}"), ln=True)
+    
+    # Adicionar features selecionadas
+    if 'selected_features' in st_session_state:
+        selected_features = st_session_state.get('selected_features')
+        
+        pdf.ln(5)
+        pdf.set_font("Times", style="B", size=11)
+        pdf.cell(0, 10, txt=clean_text("Features Selecionadas"), ln=True)
+        pdf.set_font("Times", size=10)
+        
+        for i, feature in enumerate(selected_features):
+            pdf.cell(0, 10, txt=clean_text(f"• {feature}"), ln=True)
+    
     pdf.ln(5)
 
     # **Tabela de Métricas**
@@ -3457,7 +3495,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, st_session_state):
         pdf.multi_cell(0, 10, txt=clean_text(interpretation))
         pdf.ln(5)
 
-  # **Gráficos**
+    # **Gráficos**
     pdf.set_font("Times", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Gráficos de Comparação"), ln=True)
     pdf.ln(5)
@@ -3477,6 +3515,9 @@ def gerar_relatorio_pdf(comparison_df, best_model, st_session_state):
 
     # Iterar sobre as métricas para criar os gráficos
     for i, metric in enumerate(metrics_to_plot):
+        if metric not in comparison_df.columns:
+            continue  # Pular métricas não presentes
+            
         # Gerar os gráficos para cada métrica
         values_sem = safe_float(comparison_df.iloc[0][metric])
         values_com = safe_float(comparison_df.iloc[1][metric])
@@ -3496,10 +3537,37 @@ def gerar_relatorio_pdf(comparison_df, best_model, st_session_state):
         os.remove(temp_filename)
 
         # Verificar se a posição ultrapassou o limite da página
-        if y_pos + graph_height > 280:  # Limite da página (ajuste conforme necessário)
+        if y_pos + graph_height > 280:  # Limite da página
             pdf.add_page()
             y_pos = 20  # Resetar a posição para a próxima página
             x_pos = start_x
+
+    # Conclusão - Melhor Modelo
+    pdf.add_page()
+    pdf.set_font("Times", style="B", size=12)
+    pdf.cell(0, 10, txt=clean_text("Conclusão Final"), ln=True)
+    pdf.set_font("Times", size=11)
+    
+    # Determinar qual métrica foi usada para seleção
+    primary_metric = "R²" if model_type == "Regressão" else "F1-Score"
+    best_metric_value = comparison_df.loc[comparison_df['Modelo'] == best_model, primary_metric].values[0]
+    
+    pdf.multi_cell(0, 10, txt=clean_text(f"O melhor modelo identificado foi '{best_model}', com um valor de {primary_metric} de {format_metric(best_metric_value)}."))
+    
+    # Adicionar recomendações
+    pdf.ln(5)
+    pdf.set_font("Times", style="B", size=11)
+    pdf.cell(0, 10, txt=clean_text("Recomendações"), ln=True)
+    pdf.set_font("Times", size=10)
+    
+    if best_model == "Com Seleção de Features":
+        pdf.multi_cell(0, 10, txt=clean_text("• Recomenda-se utilizar o modelo com seleção de features, que apresentou melhor desempenho."))
+        pdf.multi_cell(0, 10, txt=clean_text("• As features selecionadas contêm a informação mais relevante para a predição do modelo."))
+    else:
+        pdf.multi_cell(0, 10, txt=clean_text("• Recomenda-se utilizar o modelo sem seleção de features, que apresentou melhor desempenho."))
+        pdf.multi_cell(0, 10, txt=clean_text("• A eliminação de features resultou em perda de informações importantes para a predição."))
+    
+    pdf.multi_cell(0, 10, txt=clean_text("• Sugere-se avaliar o modelo em dados adicionais para garantir a generalização dos resultados."))
 
     # **Salvar o PDF no buffer**
     pdf_buffer = BytesIO()
