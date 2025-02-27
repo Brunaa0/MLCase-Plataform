@@ -2993,11 +2993,6 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
-import streamlit as st
-import pandas as pd
-import json
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
@@ -3009,18 +3004,13 @@ def evaluate_and_compare_models():
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
         return
 
-    # Mapeamento de nomes de modelos
-    model_name_map = {
-        "SVC": "Support Vector Classification (SVC)",
-        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
-        "RandomForestClassifier": "Random Forest",
-        "LinearRegression": "Regressão Linear Simples (RLS)",
-        "SVR": "Regressão por Vetores de Suporte (SVR)"
-    }
-
-    # Obter o modelo selecionado
-    original_model_name = st.session_state.get('selected_model_name', 'Não Selecionado')
-    mapped_model_name = model_name_map.get(original_model_name, original_model_name)
+    # Recuperar métricas originais salvas anteriormente
+    original_metrics = st.session_state.get('resultado_sem_selecao', {})
+    
+    # Verificar se as métricas originais existem
+    if not original_metrics:
+        st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento inicial.")
+        return
 
     # Obter dados originais
     X_train_original = st.session_state.X_train.copy()
@@ -3054,44 +3044,16 @@ def evaluate_and_compare_models():
     
     # Normalizar com StandardScaler
     scaler = StandardScaler()
-    X_train_scaled = pd.DataFrame(
-        scaler.fit_transform(X_train_original), 
-        columns=X_train_original.columns, 
-        index=X_train_original.index
+    X_train_scaled_selected = pd.DataFrame(
+        scaler.fit_transform(X_train_selected), 
+        columns=valid_features, 
+        index=X_train_selected.index
     )
-    X_test_scaled = pd.DataFrame(
-        scaler.transform(X_test_original), 
-        columns=X_test_original.columns, 
-        index=X_test_original.index
+    X_test_scaled_selected = pd.DataFrame(
+        scaler.transform(X_test_selected), 
+        columns=valid_features, 
+        index=X_test_selected.index
     )
-    
-    # Selecionar colunas para o treino sem seleção de features
-    X_train_scaled_original = X_train_scaled.copy()
-    X_test_scaled_original = X_test_scaled.copy()
-    
-    # Selecionar colunas para o treino com seleção de features
-    X_train_scaled_selected = X_train_scaled[valid_features]
-    X_test_scaled_selected = X_test_scaled[valid_features]
-    
-    # Usar LinearRegression
-    model_before = LinearRegression()
-    model_before.fit(X_train_scaled_original, y_train)
-    y_pred_before = model_before.predict(X_test_scaled_original)
-    
-    # Calcular métricas
-    r2_before = r2_score(y_test, y_pred_before)
-    mae_before = mean_absolute_error(y_test, y_pred_before)
-    mse_before = mean_squared_error(y_test, y_pred_before)
-    
-    # Criar dicionário de resultados sem seleção
-    original_metrics = {
-        "Modelo": "LinearRegression",
-        "R²": r2_before,
-        "MAE": mae_before,
-        "MSE": mse_before,
-        "Best Parameters": {}
-    }
-    st.session_state['resultado_sem_selecao'] = original_metrics
     
     # Treinar com features selecionadas
     model_after = LinearRegression()
@@ -3112,6 +3074,80 @@ def evaluate_and_compare_models():
         "Best Parameters": {}
     }
     st.session_state['resultado_com_selecao'] = selected_metrics
+    
+    # Configurar o DataFrame de comparação usando as métricas originais e as novas métricas
+    def format_metric(value):
+        try:
+            return float(f"{float(value):.4f}")
+        except (ValueError, TypeError):
+            return None
+
+    comparison_df = pd.DataFrame({
+        'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
+        'R²': [
+            format_metric(original_metrics.get('R²', 'N/A')), 
+            format_metric(r2_after)
+        ],
+        'MAE': [
+            format_metric(original_metrics.get('MAE', 'N/A')), 
+            format_metric(mae_after)
+        ],
+        'MSE': [
+            format_metric(original_metrics.get('MSE', 'N/A')), 
+            format_metric(mse_after)
+        ],
+        'Best Parameters': [
+            original_metrics.get('Best Parameters', {}), 
+            {}
+        ]
+    })
+
+    # Exibir informações debug para entender as métricas
+    st.write("### Métricas Originais (Sem Seleção):")
+    st.write(original_metrics)
+    
+    st.write("### Métricas Com Seleção de Features:")
+    st.write(selected_metrics)
+    
+    # Exibir tabela de comparação
+    st.subheader("📈 Comparação dos Resultados:")
+    st.table(comparison_df.style.format({
+        'R²': '{:.4f}',
+        'MAE': '{:.4f}',
+        'MSE': '{:,.4f}'
+    }))
+
+    # Gráfico de comparação
+    r2_before = original_metrics.get('R²', 0)
+    r2_after = selected_metrics['R²']
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    x = ['Sem Seleção', 'Com Seleção']
+    y = [r2_before, r2_after]
+    
+    bars = ax.bar(x, y, width=0.6)
+    
+    # Adicionar rótulos de valor nas barras
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height:.4f}',
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 pontos de deslocamento vertical
+                    textcoords="offset points",
+                    ha='center', va='bottom',
+                    fontsize=12)
+    
+    # Estilização do gráfico
+    ax.set_title('Comparação do R² antes e depois da seleção de features', fontsize=14)
+    ax.set_ylabel('Valor de R²')
+    plt.ylim(0, max(y)*1.1)  # Ajuste para caber os rótulos
+    
+    st.pyplot(fig)
+    
+    # Botão para página final
+    if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
+        st.session_state.step = 'final_page'
+        st.rerun()
     
     # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
     total_samples = X_train_original.shape[0] + X_test_original.shape[0]
@@ -3184,7 +3220,6 @@ def evaluate_and_compare_models():
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
-
 
 # Função para gerar interpretação personalizada das métricas
 def generate_metrics_interpretation(metrics):
