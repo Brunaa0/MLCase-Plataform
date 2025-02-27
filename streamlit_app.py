@@ -1627,7 +1627,7 @@ def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_se
 
             # Configurar validação cruzada
             cv_strategy = get_cv_strategy(cv_choice, X_train, y_train)
-            scoring = 'mean_squared_error' if model_name == "Regressão por Vetores de Suporte (SVR)" else 'accuracy'
+            scoring = 'r2' if model_name == "Regressão por Vetores de Suporte (SVR)" else 'accuracy'
 
             # Treinar com GridSearch
             grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_strategy, scoring=scoring, n_jobs=-1)
