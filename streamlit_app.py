@@ -3327,256 +3327,151 @@ class CustomPDF(FPDF):
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
 
 
-def gerar_relatorio_pdf(comparison_df, best_model, st_session_state):
-    # Função auxiliar para criar gráficos e salvar como arquivos temporários
-    def criar_grafico(metric_name, values_sem, values_com):
-        plt.figure(figsize=(6, 4))
-        bars = plt.bar(['Sem Seleção', 'Com Seleção'], 
-                [values_sem, values_com])
-        
-        # Adicionar valores nas barras
-        for bar in bars:
-            height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width()/2., height + 0.01,
-                    f'{height:.4f}', ha='center', va='bottom', fontsize=10)
-        
-        plt.title(f"Comparação de {metric_name}")
-        plt.ylabel(metric_name)
-        plt.xticks(fontsize=10)
-        plt.yticks(fontsize=10)
-        plt.grid(False)
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+import matplotlib.pyplot as plt
+import io
 
-        # Salvar o gráfico em um arquivo temporário
-        temp_filename = f"temp_{metric_name}.png"
-        plt.savefig(temp_filename)
+class ImprovedModelReportGenerator:
+    def __init__(self, output_path='model_report.pdf'):
+        self.output_path = output_path
+        self.styles = getSampleStyleSheet()
+        
+        # Custom styles
+        self.styles.add(ParagraphStyle(
+            name='Title',
+            parent=self.styles['Title'],
+            fontSize=18,
+            textColor=colors.HexColor('#2C3E50'),
+            spaceAfter=12
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='Subtitle',
+            parent=self.styles['Heading2'],
+            fontSize=14,
+            textColor=colors.HexColor('#34495E'),
+            spaceAfter=6
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='Normal',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            textColor=colors.HexColor('#2C3E50'),
+            leading=14
+        ))
+    
+    def create_bar_chart(self, data, labels, title):
+        """Create a bar chart using matplotlib and return as an image"""
+        plt.figure(figsize=(6, 4), dpi=100)
+        plt.bar(labels, data, color=['#3498DB', '#2980B9'])
+        plt.title(title, fontsize=12, color='#2C3E50')
+        plt.ylabel('Value', color='#2C3E50')
+        plt.xticks(rotation=45, ha='right', color='#2C3E50')
+        plt.tight_layout()
+        
+        # Save to a bytes buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
         plt.close()
-        return temp_filename
-
-    # Função auxiliar para converter valores para float
-    def safe_float(value):
-        try:
-            return float(value)
-        except (ValueError, TypeError):
-            return 0.0
-
-    # Função auxiliar para formatar métricas com 4 casas decimais
-    def format_metric(value):
-        try:
-            return f"{float(value):.4f}"
-        except (ValueError, TypeError):
-            return "N/A"
-
-    # Função auxiliar para remover caracteres não suportados pelo 'latin-1'
-    def clean_text(text):
-        if not isinstance(text, str):
-            return text
-        return text.encode('latin-1', errors='ignore').decode('latin-1')
-
-    # Inicialização do PDF
-    pdf = CustomPDF(format='A4')
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-    pdf.set_font("Times", size=12)
-
-    # Título do Relatório
-    pdf.set_font("Times", style="B", size=16)
-    pdf.cell(0, 10, txt=clean_text("Relatório Final do Modelo Treinado"), ln=True, align="C")
-    pdf.ln(5)
-
-    # Informações Básicas
-    model_type = st_session_state.get("model_type", "N/A")
-    selected_model_name = st_session_state.get("selected_model_name", "N/A")
-
-    pdf.set_font("Times", size=11)
-
-    pdf.cell(50, 10, txt=clean_text("Tipo de Modelo:"), ln=0)
-    pdf.cell(0, 10, txt=clean_text(model_type), ln=1)
-
-    pdf.cell(50, 10, txt=clean_text("Modelo Selecionado:"), ln=0)
-    pdf.cell(0, 10, txt=clean_text(selected_model_name), ln=1)
-
-    pdf.cell(50, 10, txt=clean_text("Melhor Modelo Treinado:"), ln=0)
-    pdf.cell(0, 10, txt=clean_text(best_model), ln=1)
-
-    # Adicionar informações sobre os conjuntos de dados
-    if 'X_train' in st_session_state and 'X_train_selected' in st_session_state:
-        X_train = st_session_state.get('X_train')
-        X_test = st_session_state.get('X_test')
-        X_train_selected = st_session_state.get('X_train_selected')
         
-        total_samples = X_train.shape[0] + X_test.shape[0]
-        train_percent = (X_train.shape[0] / total_samples) * 100
-        test_percent = (X_test.shape[0] / total_samples) * 100
+        return buf
+    
+    def generate_report(self, model_data):
+        """Generate a comprehensive and visually appealing PDF report"""
+        doc = SimpleDocTemplate(self.output_path, pagesize=letter)
+        story = []
         
-        pdf.ln(5)
-        pdf.set_font("Times", style="B", size=11)
-        pdf.cell(0, 10, txt=clean_text("Informações dos Conjuntos de Dados"), ln=True)
-        pdf.set_font("Times", size=10)
+        # Title
+        story.append(Paragraph("Model Performance Report", self.styles['Title']))
+        story.append(Spacer(1, 12))
         
-        pdf.cell(0, 10, txt=clean_text(f"• Amostras de Treino: {X_train.shape[0]} ({train_percent:.1f}% do total)"), ln=True)
-        pdf.cell(0, 10, txt=clean_text(f"• Amostras de Teste: {X_test.shape[0]} ({test_percent:.1f}% do total)"), ln=True)
-        pdf.cell(0, 10, txt=clean_text(f"• Features Originais: {X_train.shape[1]}"), ln=True)
-        pdf.cell(0, 10, txt=clean_text(f"• Features Após Seleção: {X_train_selected.shape[1]}"), ln=True)
-    
-    # Adicionar features selecionadas
-    if 'selected_features' in st_session_state:
-        selected_features = st_session_state.get('selected_features')
+        # Model Overview
+        story.append(Paragraph("Model Overview", self.styles['Subtitle']))
+        overview_data = [
+            ["Model Type", model_data.get('model_type', 'N/A')],
+            ["Selected Model", model_data.get('selected_model', 'N/A')],
+            ["Best Performing Model", model_data.get('best_model', 'N/A')]
+        ]
+        overview_table = Table(overview_data, colWidths=[2*inch, 4*inch])
+        overview_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#3498DB')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 12),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+            ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ]))
+        story.append(overview_table)
+        story.append(Spacer(1, 12))
         
-        pdf.ln(5)
-        pdf.set_font("Times", style="B", size=11)
-        pdf.cell(0, 10, txt=clean_text("Features Selecionadas"), ln=True)
-        pdf.set_font("Times", size=10)
+        # Dataset Information
+        story.append(Paragraph("Dataset Information", self.styles['Subtitle']))
+        dataset_data = [
+            ["Total Samples", f"{model_data.get('total_samples', 0):,}"],
+            ["Training Samples", f"{model_data.get('train_samples', 0):,} ({model_data.get('train_percent', 0):.1f}%)"],
+            ["Test Samples", f"{model_data.get('test_samples', 0):,} ({model_data.get('test_percent', 0):.1f}%)"],
+            ["Original Features", model_data.get('original_features', 'N/A')],
+            ["Selected Features", model_data.get('selected_features', 'N/A')]
+        ]
+        dataset_table = Table(dataset_data, colWidths=[2*inch, 4*inch])
+        dataset_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2980B9')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 12),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.lightblue),
+            ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ]))
+        story.append(dataset_table)
+        story.append(Spacer(1, 12))
         
-        for i, feature in enumerate(selected_features):
-            pdf.cell(0, 10, txt=clean_text(f"• {feature}"), ln=True)
-    
-    pdf.ln(5)
-
-    # **Tabela de Métricas**
-    pdf.set_font("Times", style="B", size=11)
-    pdf.cell(0, 10, txt=clean_text("Tabela de Métricas Obtidas"), ln=True)
-    pdf.set_fill_color(200, 220, 255)
-    pdf.set_font("Times", size=10)
-
-    # Cabeçalho da tabela
-    pdf.cell(40, 10, clean_text("Modelo"), 1, 0, 'C', True)
-    if model_type == "Classificação":
-        pdf.cell(20, 10, clean_text("Accuracy"), 1, 0, 'C', True)
-        pdf.cell(20, 10, clean_text("Precision"), 1, 0, 'C', True)
-        pdf.cell(20, 10, clean_text("Recall"), 1, 0, 'C', True)
-        pdf.cell(20, 10, clean_text("F1-Score"), 1, 0, 'C', True)
-    elif model_type == "Regressão":
-        pdf.cell(20, 10, clean_text("R²"), 1, 0, 'C', True)
-        pdf.cell(20, 10, clean_text("MAE"), 1, 0, 'C', True)
-        pdf.cell(20, 10, clean_text("MSE"), 1, 0, 'C', True)
-
-    pdf.cell(70, 10, clean_text("Best Parameters"), 1, 1, 'C', True)
-
-    # Linhas da tabela
-    for _, row in comparison_df.iterrows():
-        pdf.cell(40, 10, clean_text(str(row['Modelo'])), 1)
-
-        if model_type == "Classificação":
-            pdf.cell(20, 10, clean_text(format_metric(row['Accuracy'])), 1)
-            pdf.cell(20, 10, clean_text(format_metric(row['Precision'])), 1)
-            pdf.cell(20, 10, clean_text(format_metric(row['Recall'])), 1)
-            pdf.cell(20, 10, clean_text(format_metric(row['F1-Score'])), 1)
-        elif model_type == "Regressão":
-            pdf.cell(20, 10, clean_text(format_metric(row['R²'])), 1)
-            pdf.cell(20, 10, clean_text(format_metric(row['MAE'])), 1)
-            pdf.cell(20, 10, clean_text(format_metric(row['MSE'])), 1)
-
-        parametros = row.get('Best Parameters', 'N/A')
-        if isinstance(parametros, dict):
-            parametros = ', '.join(f"{k}: {v}" for k, v in parametros.items())
-        else:
-            parametros = str(parametros)
-
-        pdf.cell(70, 10, clean_text(parametros), 1, 1)
-
-    # **Interpretação das Métricas**
-    pdf.set_font("Times", style="B", size=12)
-    pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True)
-    pdf.set_font("Times", size=10)
-
-    for _, row in comparison_df.iterrows():
-        model_name = row['Modelo']
-        pdf.cell(0, 10, txt=clean_text(f"Modelo: {model_name}"), ln=True)
-
-        metrics = row.to_dict()
-
-        if model_type == "Classificação":
-            interpretation = generate_metrics_interpretation(metrics)
-        elif model_type == "Regressão":
-            interpretation = generate_regression_interpretation(metrics)
-        else:
-            interpretation = "Tipo de modelo desconhecido."
-
-        pdf.multi_cell(0, 10, txt=clean_text(interpretation))
-        pdf.ln(5)
-
-    # **Gráficos**
-    pdf.set_font("Times", style="B", size=12)
-    pdf.cell(0, 10, txt=clean_text("Gráficos de Comparação"), ln=True)
-    pdf.ln(5)
-
-    metrics_to_plot = (
-        ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-        if model_type == "Classificação"
-        else ['R²', 'MAE', 'MSE']
-    )
-
-    # Configuração do layout dos gráficos (2x2)
-    cols, rows = 2, 2
-    graph_width, graph_height = 90, 65  # Tamanho de cada gráfico
-    spacing_x, spacing_y = 10, 10  # Espaçamento entre gráficos
-    start_x, start_y = 10, pdf.get_y()  # Posição inicial
-    x_pos, y_pos = start_x, start_y
-
-    # Iterar sobre as métricas para criar os gráficos
-    for i, metric in enumerate(metrics_to_plot):
-        if metric not in comparison_df.columns:
-            continue  # Pular métricas não presentes
-            
-        # Gerar os gráficos para cada métrica
-        values_sem = safe_float(comparison_df.iloc[0][metric])
-        values_com = safe_float(comparison_df.iloc[1][metric])
-        temp_filename = criar_grafico(metric, values_sem, values_com)
-
-        # Inserir o gráfico no PDF
-        pdf.image(temp_filename, x=x_pos, y=y_pos, w=graph_width, h=graph_height)
-
-        # Atualizar a posição para o próximo gráfico
-        if (i + 1) % cols == 0:  # Se completou uma linha, vá para a próxima
-            x_pos = start_x
-            y_pos += graph_height + spacing_y
-        else:  # Caso contrário, mova para a direita
-            x_pos += graph_width + spacing_x
-
-        # Remover o arquivo temporário
-        os.remove(temp_filename)
-
-        # Verificar se a posição ultrapassou o limite da página
-        if y_pos + graph_height > 280:  # Limite da página
-            pdf.add_page()
-            y_pos = 20  # Resetar a posição para a próxima página
-            x_pos = start_x
-
-    # Conclusão - Melhor Modelo
-    pdf.add_page()
-    pdf.set_font("Times", style="B", size=12)
-    pdf.cell(0, 10, txt=clean_text("Conclusão Final"), ln=True)
-    pdf.set_font("Times", size=11)
-    
-    # Determinar qual métrica foi usada para seleção
-    primary_metric = "R²" if model_type == "Regressão" else "F1-Score"
-    best_metric_value = comparison_df.loc[comparison_df['Modelo'] == best_model, primary_metric].values[0]
-    
-    pdf.multi_cell(0, 10, txt=clean_text(f"O melhor modelo identificado foi '{best_model}', com um valor de {primary_metric} de {format_metric(best_metric_value)}."))
-    
-    # Adicionar recomendações
-    pdf.ln(5)
-    pdf.set_font("Times", style="B", size=11)
-    pdf.cell(0, 10, txt=clean_text("Recomendações"), ln=True)
-    pdf.set_font("Times", size=10)
-    
-    if best_model == "Com Seleção de Features":
-        pdf.multi_cell(0, 10, txt=clean_text("• Recomenda-se utilizar o modelo com seleção de features, que apresentou melhor desempenho."))
-        pdf.multi_cell(0, 10, txt=clean_text("• As features selecionadas contêm a informação mais relevante para a predição do modelo."))
-    else:
-        pdf.multi_cell(0, 10, txt=clean_text("• Recomenda-se utilizar o modelo sem seleção de features, que apresentou melhor desempenho."))
-        pdf.multi_cell(0, 10, txt=clean_text("• A eliminação de features resultou em perda de informações importantes para a predição."))
-    
-    pdf.multi_cell(0, 10, txt=clean_text("• Sugere-se avaliar o modelo em dados adicionais para garantir a generalização dos resultados."))
-
-    # **Salvar o PDF no buffer**
-    pdf_buffer = BytesIO()
-    pdf_output = pdf.output(dest='S').encode('latin-1', errors='ignore')
-    pdf_buffer.write(pdf_output)
-    pdf_buffer.seek(0)
-
-    return pdf_buffer
-
+        # Performance Metrics
+        story.append(Paragraph("Performance Metrics", self.styles['Subtitle']))
+        
+        # Bar Charts for Key Metrics
+        metrics_to_plot = {
+            'R²': [model_data.get('r2_without_selection', 0), model_data.get('r2_with_selection', 0)],
+            'MAE': [model_data.get('mae_without_selection', 0), model_data.get('mae_with_selection', 0)],
+            'MSE': [model_data.get('mse_without_selection', 0), model_data.get('mse_with_selection', 0)]
+        }
+        
+        for metric_name, metric_values in metrics_to_plot.items():
+            chart_buf = self.create_bar_chart(metric_values, ['Without Selection', 'With Selection'], f'{metric_name} Comparison')
+            story.append(Paragraph(f"{metric_name} Comparison", self.styles['Normal']))
+            story.append(Image(chart_buf, width=5*inch, height=3*inch))
+            story.append(Spacer(1, 12))
+        
+        # Conclusion and Recommendations
+        story.append(Paragraph("Conclusion", self.styles['Subtitle']))
+        story.append(Paragraph(f"The best performing model is '{model_data.get('best_model', 'N/A')}' "
+                                f"with an R² value of {model_data.get('best_r2', 'N/A')}", self.styles['Normal']))
+        story.append(Spacer(1, 12))
+        
+        story.append(Paragraph("Recommendations", self.styles['Subtitle']))
+        recommendations = [
+            "Use the model without feature selection for better performance",
+            "Feature elimination resulted in loss of important predictive information",
+            "Evaluate the model on additional data to ensure generalizability"
+        ]
+        
+        for rec in recommendations:
+            story.append(Paragraph(f"• {rec}", self.styles['Normal']))
+        
+        # Build PDF
+        doc.build(story)
+        return self.output_path
 # Função para exibir a página final com o relatório
 def final_page():
     st.title("Resumo Final dos Modelos Treinados")
