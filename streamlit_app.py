@@ -3006,7 +3006,7 @@ def evaluate_and_compare_models():
     X_test = X_test_original.drop(columns=to_drop)
     
     # 2. TREINAR MODELO SEM SELEÇÃO DE FEATURES
-    st.subheader("=== Treino ANTES da Seleção de Features ===")
+
     
     # Normalizar com StandardScaler
     scaler = StandardScaler()
@@ -3035,7 +3035,6 @@ def evaluate_and_compare_models():
     
     # 3. OBTER FEATURES SELECIONADAS
     if st.session_state.get('feature_selection_done', False):
-        st.subheader("=== Treino APÓS a Seleção de Features ===")
         
         # Obter features selecionadas
         selected_features = st.session_state.get('selected_features', [])
@@ -3075,11 +3074,13 @@ def evaluate_and_compare_models():
         
         # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
         st.subheader("📊 Tamanho dos Conjuntos de Dados")
-        st.write(f"• Antes da Seleção: {X_train.shape[1]} features")
+        st.write(f"• Antes da Remoção de Correlação: {X_train_original.shape[1]} features")
+        st.write(f"• Features Altamente Correlacionadas Removidas: {len(to_drop)} features")
+        st.write(f"• Após Remoção de Correlação: {X_train.shape[1]} features")
         st.write(f"• Depois da Seleção: {X_train_selected.shape[1]} features")
         st.write(f"• Amostras de Treino: {X_train.shape[0]}")
         st.write(f"• Amostras de Teste: {X_test.shape[0]}")
-        
+                
         # 5. EXIBIR FEATURES SELECIONADAS
         st.subheader("✅ Features Selecionadas para o Novo Treino:")
         st.write(selected_features)
@@ -3133,12 +3134,6 @@ def evaluate_and_compare_models():
         plt.ylim(0, max(y)*1.1)  # Ajuste para caber os rótulos
         
         st.pyplot(fig)
-        
-        # 8. RESUMO R² E FEATURES
-        st.subheader("🔹 Métricas Resumidas:")
-        st.write(f"R² Antes: {r2_before:.4f} | R² Depois: {r2_after:.4f}")
-        st.write(f"🔍 Features utilizadas no treino:")
-        st.write(selected_features)
         
         # Botão para página final
         if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
