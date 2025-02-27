@@ -737,7 +737,11 @@ def outlier_detection():
         # Botão para aplicar tratamento
         if st.button(f"Aplicar tratamento em {col}"):
             apply_outlier_treatment(col, method, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"])
-            st.session_state.treated_columns.append(col)  # Marcar como tratado
+            
+            # Esta linha é crucial - ela marca a coluna como tratada
+            if col not in st.session_state.treated_columns:
+                st.session_state.treated_columns.append(col)
+                
             st.rerun()  # Atualizar a página após o tratamento
 
     # **Boxplot Final**
@@ -827,41 +831,21 @@ def apply_outlier_treatment(col, method, lower_bound, upper_bound):
     data = st.session_state.data
     
     if method == "Remover Outliers":
-        # Recalcular limites com base nos dados atuais
-        Q1 = st.session_state.data[col].quantile(0.25)
-        Q3 = st.session_state.data[col].quantile(0.75)
-        IQR = Q3 - Q1
-
-        # Limites expandidos para capturar TODOS os outliers
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
-
-        # Remover todos os valores FORA dos limites estritos (excluindo valores nos limites)
-        st.session_state.data = st.session_state.data[
-            (st.session_state.data[col] > lower_bound) &  # Alterado para >
-            (st.session_state.data[col] < upper_bound)    # Alterado para <
+        # Remover todos os outliers (valores além de 1.5 * IQR)
+        st.session_state.data = data[
+            (data[col] >= lower_bound) & (data[col] <= upper_bound)
         ]
-
-        # Recalcular limites após a remoção para verificar se ainda restam outliers
-        Q1_final = st.session_state.data[col].quantile(0.25)
-        Q3_final = st.session_state.data[col].quantile(0.75)
-        IQR_final = Q3_final - Q1_final
-        lower_bound_final = Q1_final - 1.5 * IQR_final
-        upper_bound_final = Q3_final + 1.5 * IQR_final
-
-        # Remover novamente para garantir que nada ficou nos limites
-        st.session_state.data = st.session_state.data[
-            (st.session_state.data[col] > lower_bound_final) &  # Alterado para >
-            (st.session_state.data[col] < upper_bound_final)    # Alterado para <
-        ]
-
-        st.success(f"Todos os outliers removidos (incluindo severos) na coluna '{col}'.")
+        st.success(f"Todos os outliers removidos na coluna '{col}'.")
 
     elif method == "Remover Outliers Severos":
         # Remover apenas outliers severos (>3xIQR)
-        iqr = upper_bound - lower_bound
-        severe_lower = lower_bound - 1.5 * iqr
-        severe_upper = upper_bound + 1.5 * iqr
+        Q1 = data[col].quantile(0.25)
+        Q3 = data[col].quantile(0.75)
+        IQR = Q3 - Q1
+        
+        # Definição correta de outliers severos (3 * IQR)
+        severe_lower = Q1 - 3.0 * IQR
+        severe_upper = Q3 + 3.0 * IQR
 
         st.session_state.data = data[
             (data[col] >= severe_lower) & (data[col] <= severe_upper)
@@ -876,17 +860,15 @@ def apply_outlier_treatment(col, method, lower_bound, upper_bound):
     elif method == "Substituir por Média":
         # Substituir valores fora dos limites pela média
         mean_value = data[col].mean()
-        st.session_state.data[col] = data[col].apply(
-            lambda x: mean_value if x < lower_bound or x > upper_bound else x
-        )
+        mask = (data[col] < lower_bound) | (data[col] > upper_bound)
+        st.session_state.data.loc[mask, col] = mean_value
         st.success(f"Valores substituídos pela média ({mean_value:.2f}) na coluna '{col}'.")
 
     elif method == "Substituir por Mediana":
         # Substituir valores fora dos limites pela mediana
         median_value = data[col].median()
-        st.session_state.data[col] = data[col].apply(
-            lambda x: median_value if x < lower_bound or x > upper_bound else x
-        )
+        mask = (data[col] < lower_bound) | (data[col] > upper_bound)
+        st.session_state.data.loc[mask, col] = median_value
         st.success(f"Valores substituídos pela mediana ({median_value:.2f}) na coluna '{col}'.")
 
 ##########################################################
@@ -1216,22 +1198,31 @@ def data_summary():
     # **Resumo de Outliers**
     st.subheader("Resumo de Outliers")
     numeric_data = dataset[selected_columns_to_display].select_dtypes(include=['number'])
+    
+    # Obter a lista de colunas já tratadas (se existir)
+    treated_columns = st.session_state.get('treated_columns', [])
+        
     if not numeric_data.empty:
         outlier_summary = []
         for column in numeric_data.columns:
+            # Se a coluna já foi tratada, pula a análise
+            if column in treated_columns:
+                continue
+                
+            # Análise normal para colunas não tratadas
             Q1 = numeric_data[column].quantile(0.25)
             Q3 = numeric_data[column].quantile(0.75)
             IQR = Q3 - Q1
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
-
+    
             outliers = numeric_data[(numeric_data[column] < lower_bound) | (numeric_data[column] > upper_bound)]
             if len(outliers) > 0:  # Adiciona apenas se houver outliers
                 outlier_summary.append({
                     "Variável": column,
                     "Total de Outliers": len(outliers)
                 })
-
+    
         # Verifica se há outliers detectados
         if outlier_summary:
             st.dataframe(pd.DataFrame(outlier_summary))
@@ -1239,7 +1230,6 @@ def data_summary():
             st.write("Não há outliers nas variáveis selecionadas.")  # Mensagem quando não há outliers
     else:
         st.write("Nenhuma variável numérica para análise de outliers.")
-
     # **Boxplot** - Gráfico
     st.subheader("Boxplot das Variáveis Numéricas")
     plt.figure(figsize=(10, 6))
