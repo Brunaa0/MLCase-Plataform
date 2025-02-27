@@ -3075,74 +3075,18 @@ def evaluate_and_compare_models():
     }
     st.session_state['resultado_com_selecao'] = selected_metrics
     
-    # Configurar o DataFrame de comparação usando as métricas originais e as novas métricas
+    # Recuperar métricas originais
+    r2_before = original_metrics.get('R²', 0)
+    mae_before = original_metrics.get('MAE', 0)
+    mse_before = original_metrics.get('MSE', 0)
+
+    # Função para formatar métricas
     def format_metric(value):
         try:
             return float(f"{float(value):.4f}")
         except (ValueError, TypeError):
             return None
 
-    comparison_df = pd.DataFrame({
-        'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
-        'R²': [
-            format_metric(original_metrics.get('R²', 'N/A')), 
-            format_metric(r2_after)
-        ],
-        'MAE': [
-            format_metric(original_metrics.get('MAE', 'N/A')), 
-            format_metric(mae_after)
-        ],
-        'MSE': [
-            format_metric(original_metrics.get('MSE', 'N/A')), 
-            format_metric(mse_after)
-        ],
-        'Best Parameters': [
-            original_metrics.get('Best Parameters', {}), 
-            {}
-        ]
-    })
-
-    
-    # Exibir tabela de comparação
-    st.subheader("📈 Comparação dos Resultados:")
-    st.table(comparison_df.style.format({
-        'R²': '{:.4f}',
-        'MAE': '{:.4f}',
-        'MSE': '{:,.4f}'
-    }))
-
-    # Gráfico de comparação
-    r2_before = original_metrics.get('R²', 0)
-    r2_after = selected_metrics['R²']
-    
-    fig, ax = plt.subplots(figsize=(10, 6))
-    x = ['Sem Seleção', 'Com Seleção']
-    y = [r2_before, r2_after]
-    
-    bars = ax.bar(x, y, width=0.6)
-    
-    # Adicionar rótulos de valor nas barras
-    for bar in bars:
-        height = bar.get_height()
-        ax.annotate(f'{height:.4f}',
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  # 3 pontos de deslocamento vertical
-                    textcoords="offset points",
-                    ha='center', va='bottom',
-                    fontsize=12)
-    
-    # Estilização do gráfico
-    ax.set_title('Comparação do R² antes e depois da seleção de features', fontsize=14)
-    ax.set_ylabel('Valor de R²')
-    plt.ylim(0, max(y)*1.1)  # Ajuste para caber os rótulos
-    
-    st.pyplot(fig)
-    
-    # Botão para página final
-    if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
-        st.session_state.step = 'final_page'
-        st.rerun()
-    
     # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
     total_samples = X_train_original.shape[0] + X_test_original.shape[0]
     train_percent = (X_train_original.shape[0] / total_samples) * 100
@@ -3160,33 +3104,27 @@ def evaluate_and_compare_models():
     st.subheader("✅ Features Selecionadas para o Novo Treino:")
     st.write(valid_features)
     
-    # 6. FORMATAR E EXIBIR MÉTRICAS PARA COMPARAÇÃO
-    def format_metric(value):
-        try:
-            return float(f"{float(value):.4f}")
-        except (ValueError, TypeError):
-            return None
-
     # Criar DataFrame de comparação
     comparison_df = pd.DataFrame({
         'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
         'R²': [format_metric(r2_before), format_metric(r2_after)],
         'MAE': [format_metric(mae_before), format_metric(mae_after)],
         'MSE': [format_metric(mse_before), format_metric(mse_after)],
-        'Best Parameters': [{}, {}]
+        'Best Parameters': [
+            original_metrics.get('Best Parameters', {}), 
+            {}
+        ]
     })
     
     # Exibir tabela de comparação
     st.subheader("📈 Comparação dos Resultados:")
-    
-    # Estilizar tabela - simplificado para uso com st.table
     st.table(comparison_df.style.format({
         'R²': '{:.4f}',
         'MAE': '{:.4f}',
         'MSE': '{:,.4f}'
     }))
     
-    # 7. GRÁFICO DE COMPARAÇÃO DO R²
+    # Gráfico de comparação do R²
     fig, ax = plt.subplots(figsize=(10, 6))
     x = ['Sem Seleção', 'Com Seleção']
     y = [r2_before, r2_after]
