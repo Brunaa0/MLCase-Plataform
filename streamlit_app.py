@@ -1627,7 +1627,7 @@ def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_se
 
             # Configurar validação cruzada
             cv_strategy = get_cv_strategy(cv_choice, X_train, y_train)
-            scoring = 'neg_mean_squared_error' if model_name == "Regressão por Vetores de Suporte (SVR)" else 'accuracy'
+            scoring = 'mean_squared_error' if model_name == "Regressão por Vetores de Suporte (SVR)" else 'accuracy'
 
             # Treinar com GridSearch
             grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_strategy, scoring=scoring, n_jobs=-1)
@@ -2553,7 +2553,7 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
 
             # Configurar GridSearchCV
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-            scoring = 'neg_mean_squared_error' if is_regression else 'accuracy'
+            scoring = 'mean_squared_error' if is_regression else 'accuracy'
 
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
@@ -2777,7 +2777,7 @@ def feature_selection():
     scoring_options = (
         ['Accuracy', 'Precision', 'Recall', 'F1-Score']
         if st.session_state.model_type == "Classificação"
-        else ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+        else ['r2', 'mean_squared_error', 'mean_absolute_error']
     )
     scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
 
@@ -3520,8 +3520,8 @@ def final_page():
             "recall": "Recall",
             "f1-score": "F1-Score",
             "r2": "R²",
-            "neg_mean_squared_error": "MSE",
-            "neg_mean_absolute_error": "MAE"
+            "mean_squared_error": "MSE",
+            "mean_absolute_error": "MAE"
         }
 
     # Obter o nome capitalizado da métrica com base no mapeamento
