@@ -8,5 +8,7 @@ scikit-learn
 fpdf
 mlxtend
 openpyxl
-
+reportlab
+matplotlib
+requests
 
