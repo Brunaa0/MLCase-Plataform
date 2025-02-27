@@ -2733,6 +2733,14 @@ def select_important_features(X, y, threshold=0.01, model_type=None):
 def feature_selection():
     st.header("Seleção de Features")
 
+    # Inicializar estados no primeiro carregamento
+    if 'method_confirmed' not in st.session_state:
+        st.session_state.method_confirmed = False
+    if 'method_selection' not in st.session_state:
+        st.session_state.method_selection = None
+    if 'scoring_confirmed' not in st.session_state:
+        st.session_state.scoring_confirmed = False
+
     # Seleção do método de scoring
     st.subheader("Escolha a Métrica de Scoring")
     scoring_options = {
@@ -2749,108 +2757,125 @@ def feature_selection():
         scoring_options.get(model_type, ['Accuracy', 'Precision', 'Recall', 'F1-Score'])
     )
     
-    # Salvar a métrica de scoring escolhida
-    st.session_state['selected_scoring'] = selected_scoring
+    # Botão para confirmar scoring
+    if st.button("Confirmar Scoring"):
+        st.session_state.selected_scoring = selected_scoring
+        st.session_state.scoring_confirmed = True
+        st.success(f"Métrica de scoring {selected_scoring} confirmada!")
 
-    # Método de seleção de features
-    st.subheader("Método de Seleção de Features")
-    selection_method = st.radio(
-        "Escolha o método de seleção de features:", 
-        ["Automático", "Manual"]
-    )
+    # Só continua se o scoring for confirmado
+    if st.session_state.scoring_confirmed:
+        # Método de seleção de features
+        st.subheader("Método de Seleção de Features")
+        
+        if not st.session_state.method_confirmed:
+            method_selection = st.radio(
+                "Escolha o método de seleção de features:", 
+                ["Automático", "Manual"]
+            )
 
-    # Variáveis de dados
-    X_train = st.session_state.X_train.copy()
-    X_test = st.session_state.X_test.copy()
-    y_train = st.session_state.y_train.copy()
-    y_test = st.session_state.y_test.copy()
+            # Botão para confirmar método de seleção
+            if st.button("Confirmar Método"):
+                st.session_state.method_selection = method_selection
+                st.session_state.method_confirmed = True
+                st.success(f"Método {method_selection} confirmado!")
 
-    if selection_method == "Automático":
-        # Seleção automática com RandomForest
-        st.write("### Seleção Automática de Features")
-        
-        # Calcular importância das features
-        if st.session_state.model_type == "Classificação":
-            feature_selector = RandomForestClassifier(n_estimators=100, random_state=42)
-        else:
-            feature_selector = RandomForestRegressor(n_estimators=100, random_state=42)
-        
-        # Treinar o modelo de seleção
-        feature_selector.fit(X_train, y_train)
-        
-        # Obter importâncias das features
-        importances = feature_selector.feature_importances_
-        feature_importances = pd.DataFrame({
-            'feature': X_train.columns,
-            'importance': importances
-        }).sort_values('importance', ascending=False)
-        
-        # Exibir tabela de importâncias
-        st.write("Importância das Features:")
-        st.dataframe(feature_importances)
-        
-        # Threshold padrão de 1%
-        threshold = 0.01
-        selected_features = feature_importances[feature_importances['importance'] > threshold]['feature'].tolist()
-        
-        # Selecionar features
-        X_train_selected = X_train[selected_features]
-        X_test_selected = X_test[selected_features]
+        # Etapa de seleção após confirmação do método
+        if st.session_state.method_confirmed:
+            # Variáveis de dados
+            X_train = st.session_state.X_train.copy()
+            X_test = st.session_state.X_test.copy()
+            y_train = st.session_state.y_train.copy()
+            y_test = st.session_state.y_test.copy()
 
-    else:
-        # Seleção manual de features
-        st.write("### Seleção Manual de Features")
-        
-        # Slider para número de features
-        num_features = st.slider(
-            "Número de Features a Selecionar", 
-            min_value=1, 
-            max_value=X_train.shape[1], 
-            value=min(5, X_train.shape[1])
-        )
-        
-        # Calcular importância das features
-        if st.session_state.model_type == "Classificação":
-            feature_selector = RandomForestClassifier(n_estimators=100, random_state=42)
-        else:
-            feature_selector = RandomForestRegressor(n_estimators=100, random_state=42)
-        
-        # Treinar o modelo de seleção
-        feature_selector.fit(X_train, y_train)
-        
-        # Obter importâncias das features
-        importances = feature_selector.feature_importances_
-        feature_importances = pd.DataFrame({
-            'feature': X_train.columns,
-            'importance': importances
-        }).sort_values('importance', ascending=False)
-        
-        # Selecionar as top N features
-        selected_features = feature_importances['feature'].head(num_features).tolist()
-        
-        # Selecionar features
-        X_train_selected = X_train[selected_features]
-        X_test_selected = X_test[selected_features]
+            if st.session_state.method_selection == "Automático":
+                st.write("### Seleção Automática de Features")
+                
+                # Calcular importância das features
+                if st.session_state.model_type == "Classificação":
+                    feature_selector = RandomForestClassifier(n_estimators=100, random_state=42)
+                else:
+                    feature_selector = RandomForestRegressor(n_estimators=100, random_state=42)
+                
+                # Treinar o modelo de seleção
+                feature_selector.fit(X_train, y_train)
+                
+                # Obter importâncias das features
+                importances = feature_selector.feature_importances_
+                feature_importances = pd.DataFrame({
+                    'feature': X_train.columns,
+                    'importance': importances
+                }).sort_values('importance', ascending=False)
+                
+                # Exibir tabela de importâncias
+                st.write("Importância das Features:")
+                st.dataframe(feature_importances)
+                
+                # Threshold padrão de 1%
+                threshold = 0.01
+                selected_features = feature_importances[feature_importances['importance'] > threshold]['feature'].tolist()
+                
+                # Selecionar features
+                X_train_selected = X_train[selected_features]
+                X_test_selected = X_test[selected_features]
 
-    # Exibir informações sobre a seleção
-    st.write(f"### Features Selecionadas ({len(selected_features)})")
-    st.write(selected_features)
-    
-    # Informações comparativas
-    st.write("### Comparação de Dimensões")
-    st.write(f"- Features Originais (Treino): {X_train.shape[1]}")
-    st.write(f"- Features Selecionadas (Treino): {X_train_selected.shape[1]}")
-    
-    # Salvar no estado da sessão
-    st.session_state.X_train_selected = X_train_selected
-    st.session_state.X_test_selected = X_test_selected
-    st.session_state.selected_features = selected_features
-    st.session_state.feature_selection_done = True
+            else:  # Seleção Manual
+                st.write("### Seleção Manual de Features")
+                
+                # Calcular importância das features para exibir
+                if st.session_state.model_type == "Classificação":
+                    feature_selector = RandomForestClassifier(n_estimators=100, random_state=42)
+                else:
+                    feature_selector = RandomForestRegressor(n_estimators=100, random_state=42)
+                
+                # Treinar o modelo de seleção
+                feature_selector.fit(X_train, y_train)
+                
+                # Obter importâncias das features
+                importances = feature_selector.feature_importances_
+                feature_importances = pd.DataFrame({
+                    'feature': X_train.columns,
+                    'importance': importances
+                }).sort_values('importance', ascending=False)
+                
+                # Exibir tabela de importâncias para guiar a seleção
+                st.write("Importância das Features (em ordem decrescente):")
+                st.dataframe(feature_importances)
 
-    # Botão para confirmar seleção
-    if st.button("Confirmar Seleção de Features"):
-        st.session_state.step = 'train_and_store_metrics'
-        st.rerun()
+                # Slider para número de features
+                num_features = st.slider(
+                    "Número de Features a Selecionar", 
+                    min_value=1, 
+                    max_value=X_train.shape[1], 
+                    value=min(5, X_train.shape[1])
+                )
+                
+                # Selecionar as top N features
+                selected_features = feature_importances['feature'].head(num_features).tolist()
+                
+                # Selecionar features
+                X_train_selected = X_train[selected_features]
+                X_test_selected = X_test[selected_features]
+
+            # Exibir informações sobre a seleção
+            st.write(f"### Features Selecionadas ({len(selected_features)})")
+            st.write(selected_features)
+            
+            # Informações comparativas
+            st.write("### Comparação de Dimensões")
+            st.write(f"- Features Originais (Treino): {X_train.shape[1]}")
+            st.write(f"- Features Selecionadas (Treino): {X_train_selected.shape[1]}")
+            
+            # Salvar no estado da sessão
+            st.session_state.X_train_selected = X_train_selected
+            st.session_state.X_test_selected = X_test_selected
+            st.session_state.selected_features = selected_features
+            st.session_state.feature_selection_done = True
+
+            # Botão para confirmar seleção e avançar
+            if st.button("Finalizar Seleção de Features"):
+                st.session_state.step = 'train_and_store_metrics'
+                st.rerun()
         
 #Função para Treinar e Armazenar as metricas
 import json
