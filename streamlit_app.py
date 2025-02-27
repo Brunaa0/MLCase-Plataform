@@ -2964,12 +2964,12 @@ import json
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 def evaluate_and_compare_models():
-    st.title("Comparação dos Resultados do Treino dos Modelos")
+    st.markdown("<h1 style='text-align:center; color:#3366ff; padding:10px;'>📊 Comparação dos Resultados</h1>", unsafe_allow_html=True)
 
-    # Identificar tipo de modelo - MANTIDO INTACTO
+    # Identificar tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido') 
 
-    # Mapeamento de nomes de modelos - MANTIDO INTACTO
+    # Mapeamento de nomes de modelos
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
@@ -2978,7 +2978,7 @@ def evaluate_and_compare_models():
         "SVR": "Regressão por Vetores de Suporte (SVR)"
     }
 
-    # Obter o modelo selecionado - MANTIDO INTACTO
+    # Obter o modelo selecionado
     original_model_name = st.session_state.get('selected_model_name', 'Não Selecionado')
     mapped_model_name = model_name_map.get(original_model_name, original_model_name)
 
@@ -2988,32 +2988,45 @@ def evaluate_and_compare_models():
         st.error(f"Modelo '{original_model_name}' ({mapped_model_name}) não encontrado.")
         return
 
-    # Obter dados - SIMILAR AO ORIGINAL
+    # Obter dados
     X_train_original = st.session_state.X_train.copy()
     X_test_original = st.session_state.X_test.copy()
     y_train = st.session_state.y_train.copy()
     y_test = st.session_state.y_test.copy()
     
-    # 1. REMOVER FEATURES CORRELACIONADAS (como em teste.py)
+    # 1. REMOVER FEATURES CORRELACIONADAS
     corr_matrix = X_train_original.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper.columns if any(upper[column] > 0.9)]
     
+    # Card para features removidas
     if to_drop:
-        st.write(f"⚠ Removendo features altamente correlacionadas: {to_drop}")
+        features_html = ''.join([f"<li><code style='background-color:#f8d7da; padding:3px 6px; border-radius:3px;'>{feature}</code></li>" for feature in to_drop])
+        st.markdown(f"""
+        <div style="background-color:#f8f9fa; border-radius:10px; padding:15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); margin-bottom:20px;">
+            <h4 style="color:#d9534f;"><i class="fas fa-exclamation-triangle"></i> Features Altamente Correlacionadas Removidas:</h4>
+            <ul style="list-style-type:none; padding-left:10px;">
+                {features_html}
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     X_train = X_train_original.drop(columns=to_drop)
     X_test = X_test_original.drop(columns=to_drop)
     
     # 2. TREINAR MODELO SEM SELEÇÃO DE FEATURES
-    st.write("=== Treinamento ANTES da Seleção de Features ===")
+    st.markdown("""
+    <div style="background-color:#e6f3ff; border-left:5px solid #0066cc; padding:15px; border-radius:5px; margin-bottom:20px;">
+        <h3 style="color:#0066cc;">Treinamento ANTES da Seleção de Features</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Normalizar com StandardScaler (como em teste.py)
+    # Normalizar com StandardScaler
     scaler = StandardScaler()
     X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
     X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
     
-    # Usar LinearRegression como no teste.py
+    # Usar LinearRegression
     model_before = LinearRegression()
     model_before.fit(X_train_scaled, y_train)
     y_pred_before = model_before.predict(X_test_scaled)
@@ -3035,11 +3048,16 @@ def evaluate_and_compare_models():
     
     # 3. OBTER FEATURES SELECIONADAS
     if st.session_state.get('feature_selection_done', False):
+        st.markdown("""
+        <div style="background-color:#e6fff2; border-left:5px solid #00994c; padding:15px; border-radius:5px; margin-bottom:20px;">
+            <h3 style="color:#00994c;">Treinamento APÓS a Seleção de Features</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Obter features selecionadas
         selected_features = st.session_state.get('selected_features', [])
         X_train_selected = X_train[selected_features]
         X_test_selected = X_test[selected_features]
-        
-        st.write("=== Treinamento APÓS a Seleção de Features ===")
         
         # Normalizar dados selecionados
         scaler_after = StandardScaler()
@@ -3072,16 +3090,42 @@ def evaluate_and_compare_models():
         }
         st.session_state['resultado_com_selecao'] = selected_metrics
         
-        # 4. EXIBIR DADOS PARA DEBUG E COMPARAÇÃO
-        st.write(f"📊 **Tamanho dos Conjuntos de Dados**")
-        st.write(f"- **Antes da Seleção:** {X_train.shape[1]} features")
-        st.write(f"- **Depois da Seleção:** {X_train_selected.shape[1]} features")
-        st.write(f"- **Amostras de Treino:** {X_train.shape[0]}")
-        st.write(f"- **Amostras de Teste:** {X_test.shape[0]}")
+        # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
+        st.markdown(f"""
+        <div style="background-color:#f0f4f8; border-radius:10px; padding:15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); margin-bottom:20px;">
+            <h4 style="color:#1565c0; margin-bottom:15px;">📊 Informações dos Conjuntos de Dados</h4>
+            <table style="width:100%; border-collapse:separate; border-spacing:5px;">
+                <tr>
+                    <td style="background-color:#bbdefb; border-radius:5px; padding:8px; width:40%;"><strong>Antes da Seleção:</strong></td>
+                    <td style="background-color:#e3f2fd; border-radius:5px; padding:8px;">{X_train.shape[1]} features</td>
+                </tr>
+                <tr>
+                    <td style="background-color:#bbdefb; border-radius:5px; padding:8px;"><strong>Depois da Seleção:</strong></td>
+                    <td style="background-color:#e3f2fd; border-radius:5px; padding:8px;">{X_train_selected.shape[1]} features</td>
+                </tr>
+                <tr>
+                    <td style="background-color:#bbdefb; border-radius:5px; padding:8px;"><strong>Amostras de Treino:</strong></td>
+                    <td style="background-color:#e3f2fd; border-radius:5px; padding:8px;">{X_train.shape[0]}</td>
+                </tr>
+                <tr>
+                    <td style="background-color:#bbdefb; border-radius:5px; padding:8px;"><strong>Amostras de Teste:</strong></td>
+                    <td style="background-color:#e3f2fd; border-radius:5px; padding:8px;">{X_test.shape[0]}</td>
+                </tr>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
         
         # 5. EXIBIR FEATURES SELECIONADAS
-        st.success(f"✅ Features Selecionadas para o Novo Treino ({len(selected_features)}):")
-        st.write(selected_features)
+        features_html = ''.join([f"<div style='background-color:#c8e6c9; border-radius:5px; padding:10px; text-align:center; margin:5px; flex:1; min-width:150px;'><code>{feature}</code></div>" for feature in selected_features])
+        
+        st.markdown(f"""
+        <div style="background-color:#e8f5e9; border-radius:10px; padding:20px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); margin-bottom:20px;">
+            <h4 style="color:#2e7d32; text-align:center; margin-bottom:15px;">✅ Features Selecionadas ({len(selected_features)})</h4>
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+                {features_html}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         # 6. FORMATAR E EXIBIR MÉTRICAS PARA COMPARAÇÃO
         def format_metric(value):
@@ -3090,6 +3134,7 @@ def evaluate_and_compare_models():
             except (ValueError, TypeError):
                 return None
 
+        # Criar DataFrame de comparação
         comparison_df = pd.DataFrame({
             'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
             'R²': [format_metric(r2_before), format_metric(r2_after)],
@@ -3098,20 +3143,71 @@ def evaluate_and_compare_models():
             'Best Parameters': [{}, {}]
         })
         
-        st.write(f"📊 Comparação dos Resultados:")
-        st.table(comparison_df)
+        # Exibir tabela de comparação
+        st.markdown("""
+        <h3 style="color:#333; text-align:center; margin:20px 0;">📈 Comparação dos Resultados</h3>
+        """, unsafe_allow_html=True)
         
-        # 7. EXIBIR COMPARAÇÃO DIRETA SIMILAR AO TESTE.PY
-        st.write("🔹 R² Antes: {:.4f} | Depois: {:.4f}".format(r2_before, r2_after))
-        st.write("🔍 Features utilizadas no treino:", selected_features)
+        # Estilizar tabela - simplificado para uso com st.table
+        st.table(comparison_df.style.format({
+            'R²': '{:.4f}',
+            'MAE': '{:.4f}',
+            'MSE': '{:,.4f}'
+        }))
         
-        # Botão para avançar
-        if st.button("Seguir para Resumo Final"):
+        # 7. GRÁFICO DE COMPARAÇÃO DO R²
+        fig, ax = plt.subplots(figsize=(10, 6))
+        x = ['Sem Seleção', 'Com Seleção']
+        y = [r2_before, r2_after]
+        
+        # Cores condicionais - verde se melhorou, vermelho se piorou
+        colors = ['#4CAF50', '#4CAF50'] if r2_after >= r2_before else ['#4CAF50', '#F44336']
+        
+        bars = ax.bar(x, y, color=colors, width=0.6)
+        
+        # Adicionar rótulos de valor nas barras
+        for bar in bars:
+            height = bar.get_height()
+            ax.annotate(f'{height:.4f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 pontos de deslocamento vertical
+                        textcoords="offset points",
+                        ha='center', va='bottom',
+                        fontsize=12)
+        
+        # Estilização do gráfico
+        ax.set_title('Comparação do R² antes e depois da seleção de features', fontsize=14)
+        ax.set_ylabel('Valor de R²')
+        plt.ylim(0, max(y)*1.1)  # Ajuste para caber os rótulos
+        
+        # Adicionar texto comparativo
+        diferenca = r2_before - r2_after
+        percentual = (diferenca / r2_before) * 100
+        
+        if diferenca > 0:
+            texto = f"Houve uma redução de {diferenca:.4f} ({percentual:.1f}%) no R² após a seleção de features."
+        else:
+            texto = f"Houve um aumento de {abs(diferenca):.4f} ({abs(percentual):.1f}%) no R² após a seleção de features."
+            
+        plt.figtext(0.5, 0.01, texto, ha='center', fontsize=12, bbox=dict(facecolor='#f0f0f0', edgecolor='#cccccc', boxstyle='round,pad=0.5'))
+        
+        st.pyplot(fig)
+        
+        # 8. RESUMO R² E FEATURES
+        st.markdown(f"""
+        <div style="background-color:#fffde7; border-radius:10px; padding:15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); margin:20px 0;">
+            <h4 style="color:#ff6f00; margin-bottom:10px;">🔹 Resumo Comparativo</h4>
+            <p style="font-size:16px;"><strong>R² Antes:</strong> {r2_before:.4f} | <strong>R² Depois:</strong> {r2_after:.4f}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Botão para página final
+        if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
             st.session_state.step = 'final_page'
             st.rerun()
+            
     else:
-        st.write("⚠ Seleção de features não realizada.")
-        
+        st.warning("⚠️ Seleção de features não realizada. Execute a seleção de features primeiro.")
 # Função para gerar interpretação personalizada das métricas
 def generate_metrics_interpretation(metrics):
     interpretacao = []
