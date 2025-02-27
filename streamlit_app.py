@@ -2728,38 +2728,6 @@ def select_important_features(X, y, threshold=0.01, model_type=None):
     
     return X[important_features]
 
-def feature_selection_process(df, target_column, model_type):
-    """
-    Processo completo de seleção de features.
-    
-    Parâmetros:
-    - df: DataFrame original
-    - target_column: Nome da coluna alvo
-    - model_type: Tipo de modelo (Classificação ou Regressão)
-    
-    Retorna:
-    - DataFrame com features selecionadas
-    """
-    # Separar features e target
-    X = df.drop(columns=[target_column])
-    y = df[target_column]
-    
-    # Tratamento de variáveis categóricas
-    X = pd.get_dummies(X)
-    
-    try:
-        # Remoção de features correlacionadas
-        X_uncorrelated = remove_highly_correlated_features(X)
-        
-        # Seleção de features importantes
-        X_selected = select_important_features(X_uncorrelated, y, model_type=model_type)
-        
-        return X_selected
-    
-    except Exception as e:
-        st.error(f"Erro na seleção de features: {e}")
-        return None
-
 
 # Função principal de seleção de features
 
@@ -3007,7 +2975,8 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
-
+    print("Colunas originais:", list(data.columns))
+    print("Colunas após get_dummies:", list(X.columns))
     # **Configurações Iniciais**
     # Identificar tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')  # Classificação ou Regressão
