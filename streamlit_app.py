@@ -1474,10 +1474,10 @@ def get_cv_strategy(cv_choice, X_train, y_train):
         return LeaveOneOut()
     elif cv_choice == "Divisão em Treino e Teste":
         # Exemplo de divisão simples em treino e teste
-        return train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+        return train_test_split(X_train, y_train, test_size=0.3, random_state=42)
     elif cv_choice == "Holdout":
         # Pode ser uma abordagem similar ao treino-teste com outro conjunto
-        return train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+        return train_test_split(X_train, y_train, test_size=0.3, random_state=42)
     else:
         return KFold(n_splits=5, shuffle=True, random_state=42)  # Default é K-Fold
 
