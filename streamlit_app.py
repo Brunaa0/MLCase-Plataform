@@ -3010,13 +3010,18 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
+import streamlit as st
+import pandas as pd
+import json
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
-    # **Configurações Iniciais**
-    # Identificar tipo de modelo
-    model_type = st.session_state.get('model_type', 'Indefinido')  # Classificação ou Regressão
 
-    # Mapeamento de nomes de modelos
+    # **Identificar tipo de modelo**
+    model_type = st.session_state.get('model_type', 'Indefinido')  # "Classificação" ou "Regressão"
+
+    # **Mapeamento de nomes de modelos**
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
@@ -3025,29 +3030,31 @@ def evaluate_and_compare_models():
         "SVR": "Regressão por Vetores de Suporte (SVR)"
     }
 
-    # Obter o modelo selecionado
+    # **Obter o modelo selecionado**
     original_model_name = st.session_state.get('selected_model_name', 'Não Selecionado')
     mapped_model_name = model_name_map.get(original_model_name, original_model_name)
 
-    # Obter o modelo do estado
+    # **Obter o modelo treinado**
     model = st.session_state.models.get(mapped_model_name)
     if model is None:
         st.error(f"Modelo '{original_model_name}' ({mapped_model_name}) não encontrado nos modelos disponíveis.")
         return
 
-    # Configurações do GridSearch e Parâmetros
+    # **Configurações do GridSearch e Hiperparâmetros**
     use_grid_search = st.session_state.get('use_grid_search', False)
     manual_params = st.session_state.get('best_params', {})
 
-    # Dados Treinados com ou Sem Seleção
+    # **Obter Conjuntos de Dados**
     X_train = st.session_state.get('X_train_selected', st.session_state.X_train)
     X_test = st.session_state.get('X_test_selected', st.session_state.X_test)
+    
+    # **Recuperar Features de Alta Correlação Removidas**
+    features_removidas = st.session_state.get('removed_correlated_features', [])
 
     # **Treino Inicial (Sem Seleção de Features)**
     original_metrics = st.session_state.get('resultado_sem_selecao', None)
 
     if not original_metrics:
-        # Treinar o modelo
         original_metrics = train_and_store_metrics(
             model, st.session_state.X_train, st.session_state.y_train,
             st.session_state.X_test, st.session_state.y_test,
@@ -3063,17 +3070,16 @@ def evaluate_and_compare_models():
     # **Treino Após Seleção de Features (Se Aplicável)**
     selected_metrics = None
     if st.session_state.get('feature_selection_done', False):
-        # Atualizar parâmetros após seleção
         manual_params_selected = st.session_state.get('best_params_selected', manual_params)
         model.set_params(**manual_params_selected)
 
-        # Re-inicializar o modelo para forçar re-treino
-        if st.session_state.model_type == "Classificação":
+        # Re-inicializar modelo para garantir re-treino correto
+        if model_type == "Classificação":
             model = RandomForestClassifier(n_estimators=100, random_state=42)
         else:
             model = RandomForestRegressor(n_estimators=100, random_state=42)
 
-        # Treinar com seleção de features
+        # **Treinar com seleção de features**
         selected_metrics = train_and_store_metrics(
             model, X_train, st.session_state.y_train,
             X_test, st.session_state.y_test,
@@ -3086,20 +3092,29 @@ def evaluate_and_compare_models():
             st.error("Erro ao calcular as métricas para o modelo com seleção de features.")
             return
 
-        # Validar redução de features
-        st.write(f"Features antes da seleção: {st.session_state.X_train.shape[1]}")
-        st.write(f"Features após a seleção: {X_train.shape[1]}")
-        for feature in X_train.columns:
-            st.write(f"- {feature}")
-    
-        # **Formatar Métricas com 4 Casas Decimais**
+        # **📌 Exibir Features Removidas**
+        if features_removidas:
+            st.warning(f"⚠ Features altamente correlacionadas removidas: {features_removidas}")
+
+        # **📌 Exibir Features Selecionadas**
+        selected_features = X_train.columns.tolist()
+        st.success(f"✅ Features Selecionadas para o Novo Treino ({len(selected_features)}):")
+        st.write(selected_features)
+
+        # **📌 Exibir Tamanho dos Conjuntos Antes e Depois**
+        st.write(f"📊 **Tamanho dos Conjuntos de Dados**")
+        st.write(f"- **Antes da Seleção:** {st.session_state.X_train.shape[1]} features")
+        st.write(f"- **Depois da Seleção:** {X_train.shape[1]} features")
+        st.write(f"- **Amostras de Treino:** {X_train.shape[0]}")
+        st.write(f"- **Amostras de Teste:** {X_test.shape[0]}")
+
+        # **📌 Comparação das Métricas**
         def format_metric(value):
             try:
                 return f"{float(value):.4f}"
             except (ValueError, TypeError):
                 return "N/A"
 
-        # **Comparação das Métricas**
         if model_type == "Classificação":
             comparison_df = pd.DataFrame({
                 'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
@@ -3145,17 +3160,16 @@ def evaluate_and_compare_models():
                 ]
             })
 
-        # Exibir Resultados
-        st.write(f"Comparação dos resultados para o modelo: {original_model_name}")
+        # **📌 Exibir Resultados**
+        st.write(f"📊 Comparação dos Resultados para o Modelo: {original_model_name}")
         st.table(comparison_df)
 
-        # Seguir para a Próxima Etapa
+        # **📌 Botão para Prosseguir**
         if st.button("Seguir para Resumo Final"):
             st.session_state.step = 'final_page'
             st.rerun()
-
     else:
-        st.write("Seleção de features não realizada.")
+        st.write("⚠ Seleção de features não realizada.")
 
 # Função para gerar interpretação personalizada das métricas
 def generate_metrics_interpretation(metrics):
