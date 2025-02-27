@@ -2741,6 +2741,17 @@ from sklearn.metrics import (
     r2_score, mean_squared_error, mean_absolute_error
 )
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    r2_score, mean_squared_error, mean_absolute_error
+)
+
 def feature_selection():
     # Verificar página e estado
     if st.session_state.get("page") == "final_page":
@@ -2752,7 +2763,7 @@ def feature_selection():
 
     st.header("Seleção de Features")
 
-    # Mapear os modelos disponíveis no sistema
+    # Mapeamento de modelos
     model_name_map = {
         "Support Vector Classification (SVC)": "SVC",
         "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",
@@ -2771,7 +2782,7 @@ def feature_selection():
     mapped_model_name = model_name_map.get(original_model_name, original_model_name)
     models = st.session_state.get("models", {})
 
-    # Verificar se o modelo está nos modelos carregados
+    # Verificar se o modelo existe
     model_key = reverse_model_name_map.get(mapped_model_name, mapped_model_name)
     if model_key not in models:
         st.error(f"Modelo {mapped_model_name} não encontrado.")
@@ -2783,22 +2794,24 @@ def feature_selection():
     y_train = st.session_state.y_train
     X_test = st.session_state.X_test
 
-    # Escolher o scoring correto baseado no tipo de problema
-    if st.session_state.model_type == "Classificação":
-        scoring_options = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-    else:
-        scoring_options = ['r2', 'mean_squared_error', 'mean_absolute_error']
-
+    # Escolher o scoring
+    scoring_options = (
+        ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+        if st.session_state.model_type == "Classificação"
+        else ['r2', 'mean_squared_error', 'mean_absolute_error']
+    )
     scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
-    st.session_state["selected_scoring"] = scoring  # Salvar scoring no estado global
 
-    # Escolha do método de seleção de features (Apenas exibe a escolha, ainda não aplica)
+    # Salvar o scoring no estado
+    st.session_state["selected_scoring"] = scoring
+
+    # Escolher o método de seleção (Apenas exibe a escolha, sem executar nada ainda)
     selection_method = st.radio(
         "Escolha o método de seleção de features:",
         ("Automático", "Manual"), index=0
     )
 
-    # Botão para confirmar a escolha do método
+    # Botão para confirmar o método de seleção
     if st.button("Confirmar Escolha do Método"):
         st.session_state["selection_method"] = selection_method  # Salvar no estado
         st.session_state["method_confirmed"] = True
@@ -2807,6 +2820,24 @@ def feature_selection():
     # Se o método ainda não foi confirmado, interrompe aqui
     if not st.session_state.get("method_confirmed", False):
         return
+
+    # Se for Manual, exibir o slider para escolher o número de features
+    if st.session_state["selection_method"] == "Manual":
+        max_features = X_train.shape[1]
+        k_features = st.slider(
+            "Escolha o número de features:",
+            1, max_features, value=min(5, max_features), step=1
+        )
+
+        # Botão para confirmar a escolha do número de features
+        if st.button("Confirmar Número de Features"):
+            st.session_state["num_features"] = k_features
+            st.session_state["features_confirmed"] = True
+            st.rerun()
+
+        # Se ainda não confirmou, interrompe aqui
+        if not st.session_state.get("features_confirmed", False):
+            return
 
     # Remover features altamente correlacionadas
     correlation_threshold = 0.9
@@ -2842,28 +2873,10 @@ def feature_selection():
             'Importance': importances
         }).sort_values(by='Importance', ascending=False)
 
-        # Se o usuário escolheu "Manual", exibir o slider para selecionar o número de features
+        # Aplicar seleção conforme o método escolhido
         if st.session_state["selection_method"] == "Manual":
-            max_features = X_train.shape[1]
-            k_features = st.slider(
-                "Escolha o número de features:", 1, max_features, value=min(5, max_features), step=1
-            )
-
-            # Botão para confirmar a escolha do número de features
-            if st.button("Confirmar Número de Features"):
-                st.session_state["num_features"] = k_features
-                st.session_state["features_confirmed"] = True
-                st.rerun()
-
-            # Se ainda não confirmou, interrompe aqui
-            if not st.session_state.get("features_confirmed", False):
-                return
-
-            # Selecionar as `num_features` mais importantes
             selected_features = importances_df['Feature'].iloc[:st.session_state["num_features"]].tolist()
-
         else:
-            # Método Automático: Manter todas as features com importância maior que 0.01
             selected_features = importances_df[importances_df['Importance'] > 0.01]['Feature'].tolist()
 
             if len(selected_features) == 0:
