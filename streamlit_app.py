@@ -3327,40 +3327,72 @@ class CustomPDF(FPDF):
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
 
 
+import io
+import tempfile
+import requests
+from datetime import datetime
+import matplotlib.pyplot as plt
+
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-import matplotlib.pyplot as plt
-import io
 
-class ImprovedModelReportGenerator:
-    def __init__(self, output_path='model_report.pdf'):
-        self.output_path = output_path
-        self.styles = getSampleStyleSheet()
+class MLCaseModelReportGenerator:
+    def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
+        """
+        Initialize the report generator
         
-        # Custom styles
+        :param output_path: Path to save the PDF
+        :param logo_url: Optional URL for organization logo
+        """
+        self.output_path = output_path
+        self.logo_url = logo_url or 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
+        
+        # Fetch logo
+        self.logo_path = self._fetch_logo()
+        
+        # Prepare styles
+        self.styles = getSampleStyleSheet()
+        self._create_custom_styles()
+    
+    def _fetch_logo(self):
+        """Fetch and save logo image"""
+        try:
+            response = requests.get(self.logo_url)
+            if response.status_code == 200:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
+                    tmpfile.write(response.content)
+                    return tmpfile.name
+            return None
+        except Exception:
+            return None
+    
+    def _create_custom_styles(self):
+        """Create custom paragraph styles"""
+        # Title style
         self.styles.add(ParagraphStyle(
-            name='Title',
+            name='MLCaseTitle',
             parent=self.styles['Title'],
             fontSize=18,
             textColor=colors.HexColor('#2C3E50'),
+            alignment=1,  # Center alignment
             spaceAfter=12
         ))
         
+        # Subtitle style
         self.styles.add(ParagraphStyle(
-            name='Subtitle',
+            name='MLCaseSubtitle',
             parent=self.styles['Heading2'],
             fontSize=14,
             textColor=colors.HexColor('#34495E'),
             spaceAfter=6
         ))
         
+        # Normal text style
         self.styles.add(ParagraphStyle(
-            name='Normal',
+            name='MLCaseNormal',
             parent=self.styles['Normal'],
             fontSize=10,
             textColor=colors.HexColor('#2C3E50'),
@@ -3368,7 +3400,7 @@ class ImprovedModelReportGenerator:
         ))
     
     def create_bar_chart(self, data, labels, title):
-        """Create a bar chart using matplotlib and return as an image"""
+        """Create a bar chart using matplotlib and return as an image buffer"""
         plt.figure(figsize=(6, 4), dpi=100)
         plt.bar(labels, data, color=['#3498DB', '#2980B9'])
         plt.title(title, fontsize=12, color='#2C3E50')
@@ -3385,16 +3417,28 @@ class ImprovedModelReportGenerator:
         return buf
     
     def generate_report(self, model_data):
-        """Generate a comprehensive and visually appealing PDF report"""
+        """
+        Generate a comprehensive and visually appealing PDF report
+        
+        :param model_data: Dictionary containing model performance data
+        """
         doc = SimpleDocTemplate(self.output_path, pagesize=letter)
         story = []
         
+        # Add header with logo
+        if self.logo_path:
+            story.append(Image(self.logo_path, width=1*inch, height=1*inch, hAlign='CENTER'))
+        
+        # Platform Title
+        story.append(Paragraph("MLCase - Machine Learning Platform", self.styles['MLCaseTitle']))
+        story.append(Spacer(1, 12))
+        
         # Title
-        story.append(Paragraph("Model Performance Report", self.styles['Title']))
+        story.append(Paragraph("Model Performance Report", self.styles['MLCaseTitle']))
         story.append(Spacer(1, 12))
         
         # Model Overview
-        story.append(Paragraph("Model Overview", self.styles['Subtitle']))
+        story.append(Paragraph("Model Overview", self.styles['MLCaseSubtitle']))
         overview_data = [
             ["Model Type", model_data.get('model_type', 'N/A')],
             ["Selected Model", model_data.get('selected_model', 'N/A')],
@@ -3415,7 +3459,7 @@ class ImprovedModelReportGenerator:
         story.append(Spacer(1, 12))
         
         # Dataset Information
-        story.append(Paragraph("Dataset Information", self.styles['Subtitle']))
+        story.append(Paragraph("Dataset Information", self.styles['MLCaseSubtitle']))
         dataset_data = [
             ["Total Samples", f"{model_data.get('total_samples', 0):,}"],
             ["Training Samples", f"{model_data.get('train_samples', 0):,} ({model_data.get('train_percent', 0):.1f}%)"],
@@ -3437,8 +3481,43 @@ class ImprovedModelReportGenerator:
         story.append(dataset_table)
         story.append(Spacer(1, 12))
         
+        # Selected Features
+        if model_data.get('selected_features_list'):
+            story.append(Paragraph("Selected Features", self.styles['MLCaseSubtitle']))
+            features_text = ", ".join(model_data['selected_features_list'])
+            story.append(Paragraph(features_text, self.styles['MLCaseNormal']))
+            story.append(Spacer(1, 12))
+        
         # Performance Metrics
-        story.append(Paragraph("Performance Metrics", self.styles['Subtitle']))
+        story.append(Paragraph("Performance Metrics", self.styles['MLCaseSubtitle']))
+        
+        # Metrics Table
+        metrics_headers = ['Metric', 'Without Feature Selection', 'With Feature Selection']
+        metrics_data = [
+            ['R²', 
+             f"{model_data.get('r2_without_selection', 'N/A'):.4f}", 
+             f"{model_data.get('r2_with_selection', 'N/A'):.4f}"],
+            ['MAE', 
+             f"{model_data.get('mae_without_selection', 'N/A'):.4f}", 
+             f"{model_data.get('mae_with_selection', 'N/A'):.4f}"],
+            ['MSE', 
+             f"{model_data.get('mse_without_selection', 'N/A'):.4f}", 
+             f"{model_data.get('mse_with_selection', 'N/A'):.4f}"]
+        ]
+        
+        metrics_table = Table([metrics_headers] + metrics_data, colWidths=[2*inch, 2*inch, 2*inch])
+        metrics_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#3498DB')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 12),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+            ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ]))
+        story.append(metrics_table)
+        story.append(Spacer(1, 12))
         
         # Bar Charts for Key Metrics
         metrics_to_plot = {
@@ -3449,29 +3528,36 @@ class ImprovedModelReportGenerator:
         
         for metric_name, metric_values in metrics_to_plot.items():
             chart_buf = self.create_bar_chart(metric_values, ['Without Selection', 'With Selection'], f'{metric_name} Comparison')
-            story.append(Paragraph(f"{metric_name} Comparison", self.styles['Normal']))
+            story.append(Paragraph(f"{metric_name} Comparison", self.styles['MLCaseNormal']))
             story.append(Image(chart_buf, width=5*inch, height=3*inch))
             story.append(Spacer(1, 12))
         
         # Conclusion and Recommendations
-        story.append(Paragraph("Conclusion", self.styles['Subtitle']))
+        story.append(Paragraph("Conclusion", self.styles['MLCaseSubtitle']))
         story.append(Paragraph(f"The best performing model is '{model_data.get('best_model', 'N/A')}' "
-                                f"with an R² value of {model_data.get('best_r2', 'N/A')}", self.styles['Normal']))
+                                f"with an R² value of {model_data.get('best_r2', 'N/A'):.4f}", self.styles['MLCaseNormal']))
         story.append(Spacer(1, 12))
         
-        story.append(Paragraph("Recommendations", self.styles['Subtitle']))
-        recommendations = [
+        story.append(Paragraph("Recommendations", self.styles['MLCaseSubtitle']))
+        recommendations = model_data.get('recommendations', [
             "Use the model without feature selection for better performance",
             "Feature elimination resulted in loss of important predictive information",
             "Evaluate the model on additional data to ensure generalizability"
-        ]
+        ])
         
         for rec in recommendations:
-            story.append(Paragraph(f"• {rec}", self.styles['Normal']))
+            story.append(Paragraph(f"• {rec}", self.styles['MLCaseNormal']))
+        
+        # Footer with current date
+        story.append(Spacer(1, 12))
+        current_date = datetime.now().strftime('%d/%m/%Y')
+        story.append(Paragraph(f"Report generated on {current_date} | MLCase Platform by Bruna Sousa", 
+                               self.styles['MLCaseNormal']))
         
         # Build PDF
         doc.build(story)
         return self.output_path
+
 # Função para exibir a página final com o relatório
 def final_page():
     st.title("Resumo Final dos Modelos Treinados")
