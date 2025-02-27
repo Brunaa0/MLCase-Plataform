@@ -3073,9 +3073,14 @@ def evaluate_and_compare_models():
         st.session_state['resultado_com_selecao'] = selected_metrics
         
         # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
+        # Calcular percentuais de treino e teste
+        total_samples = X_train.shape[0] + X_test.shape[0]
+        train_percent = (X_train.shape[0] / total_samples) * 100
+        test_percent = (X_test.shape[0] / total_samples) * 100
+        
         st.subheader("📊 Tamanho dos Conjuntos de Dados")
-        st.write(f"• Amostras de Treino: {X_train.shape[0]} (constante em todo o processo)")
-        st.write(f"• Amostras de Teste: {X_test.shape[0]} (constante em todo o processo)")
+        st.write(f"• Amostras de Treino: {X_train.shape[0]} ({train_percent:.1f}% do total)")
+        st.write(f"• Amostras de Teste: {X_test.shape[0]} ({test_percent:.1f}% do total)")
         st.write(f"• Features Originais: {X_train_original.shape[1]}")
         st.write(f"• Features Removidas por Correlação: {len(to_drop)}")
         st.write(f"• Features Após Remoção de Correlação: {X_train.shape[1]}")
