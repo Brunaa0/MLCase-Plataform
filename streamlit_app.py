@@ -2553,7 +2553,7 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
 
             # Configurar GridSearchCV
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-            scoring = 'mean_squared_error' if is_regression else 'accuracy'
+            scoring = 'r2' if is_regression else 'accuracy'
 
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
