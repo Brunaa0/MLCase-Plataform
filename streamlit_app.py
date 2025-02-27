@@ -2737,163 +2737,98 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
 def feature_selection():
-    # Verificar página e estado
-    if st.session_state.get("page") == "final_page":
-        final_page()
-        return
-
+    st.header("Seleção de Features")
+    
+    # Garantir que estamos na etapa correta
     if st.session_state.step != 'feature_selection':
         return
-
-    st.header("Seleção de Features")
-
-    # Mapeamento de modelos
-    model_name_map = {
-        "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",
-        "Random Forest": "RandomForestClassifier",
-        "Regressão Linear Simples (RLS)": "LinearRegression",
-        "Regressão por Vetores de Suporte (SVR)": "SVR"
-    }
-    reverse_model_name_map = {v: k for k, v in model_name_map.items()}
-
-    # Obter modelo selecionado
-    original_model_name = st.session_state.get("selected_model_name", None)
-    if not original_model_name:
-        st.error("Nenhum modelo foi selecionado para a seleção de features.")
-        return
-
-    mapped_model_name = model_name_map.get(original_model_name, original_model_name)
-    models = st.session_state.get("models", {})
-
-    # Verificar se o modelo existe
-    model_key = reverse_model_name_map.get(mapped_model_name, mapped_model_name)
-    if model_key not in models:
-        st.error(f"Modelo {mapped_model_name} não encontrado.")
-        return
-
-    # Obter modelo e dados
-    model = models[model_key]
-    X_train = st.session_state.X_train
-    y_train = st.session_state.y_train
-    X_test = st.session_state.X_test
-
-    # Escolher o scoring
-    scoring_options = (
-        ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-        if st.session_state.model_type == "Classificação"
-        else ['r2', 'mean_squared_error', 'mean_absolute_error']
-    )
-    scoring = st.selectbox("Escolha o scoring:", scoring_options, index=0)
-    st.session_state["selected_scoring"] = scoring
-
-    # Escolher o método de seleção (Apenas exibe a escolha, sem executar nada ainda)
-    selection_method = st.radio(
-        "Escolha o método de seleção de features:",
-        ("Automático", "Manual"), index=0
-    )
-
-    # Botão para confirmar o método de seleção
-    if st.button("Confirmar Escolha do Método"):
-        st.session_state["selection_method"] = selection_method  # Salvar no estado
-        st.session_state["method_confirmed"] = True
-        st.rerun()
-
-    # Se o método ainda não foi confirmado, interrompe aqui
-    if not st.session_state.get("method_confirmed", False):
-        return
-
-    # Se for Manual, exibir o slider para escolher o número de features
-    if st.session_state["selection_method"] == "Manual":
-        max_features = X_train.shape[1]
         
-        # Apenas exibir o slider após o usuário confirmar a escolha do método
-        if "num_features" not in st.session_state:
-            st.session_state["num_features"] = min(5, max_features)
-
-        k_features = st.slider(
-            "Escolha o número de features:",
-            1, max_features, value=st.session_state["num_features"], step=1
-        )
-
-        # Botão para confirmar a escolha do número de features
-        if st.button("Confirmar Número de Features"):
-            st.session_state["num_features"] = k_features
-            st.session_state["features_confirmed"] = True
-            st.rerun()
-
-        # Se ainda não confirmou, interrompe aqui
-        if not st.session_state.get("features_confirmed", False):
-            return
-
-    # Remover features altamente correlacionadas
-    correlation_threshold = 0.9
+    # Obter o modelo e os dados
+    model_name = st.session_state.selected_model_name
+    model = st.session_state.models.get(model_name)
+    
+    if model is None:
+        st.error(f"Modelo {model_name} não encontrado.")
+        return
+        
+    # Obter dados
+    X_train = st.session_state.X_train.copy()
+    X_test = st.session_state.X_test.copy()
+    y_train = st.session_state.y_train.copy()
+    y_test = st.session_state.y_test.copy()
+    
+    # Exibir dimensões iniciais
+    st.write(f"Dimensões originais: X_train {X_train.shape}, X_test {X_test.shape}")
+    
+    # **1. Remover features altamente correlacionadas**
+    st.write("### Remoção de features altamente correlacionadas")
+    threshold = 0.9
     corr_matrix = X_train.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    to_drop = [column for column in upper.columns if any(upper[column] > correlation_threshold)]
-
+    to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
+    
     if to_drop:
-        st.warning(f"Removendo features altamente correlacionadas: {to_drop}")
-
-    X_train = X_train.drop(to_drop, axis=1)
-    X_test = X_test.drop(to_drop, axis=1)
-
-    # Garantir que restam features
-    if X_train.shape[1] == 0:
-        st.error("Nenhuma feature disponível após remoção por correlação.")
-        return
-
-    # Selecionar modelo para importância das features
-    try:
-        if st.session_state.model_type == "Classificação":
-            importance_model = RandomForestClassifier(n_estimators=100, random_state=42)
-        else:
-            importance_model = RandomForestRegressor(n_estimators=100, random_state=42)
-
-        # Treinar o modelo para calcular importâncias das features
-        importance_model.fit(X_train, y_train)
-
-        # Calcular importâncias
-        importances = importance_model.feature_importances_
-        importances_df = pd.DataFrame({
-            'Feature': X_train.columns,
-            'Importance': importances
-        }).sort_values(by='Importance', ascending=False)
-
-        # Aplicar seleção conforme o método escolhido
-        if st.session_state["selection_method"] == "Manual":
-            selected_features = importances_df['Feature'].iloc[:st.session_state["num_features"]].tolist()
-        else:
-            selected_features = importances_df[importances_df['Importance'] > 0.01]['Feature'].tolist()
-
-            if len(selected_features) == 0:
-                st.warning("Nenhuma feature passou pelo filtro de importância. Mantendo todas as features disponíveis.")
-                selected_features = importances_df['Feature'].tolist()
-
-        # Atualizar os conjuntos de treino e teste para incluir apenas as features selecionadas
-        X_train = X_train[selected_features]
-        X_test = X_test[selected_features]
-
-        # Exibir as features selecionadas
-        st.success("🔍 Features Selecionadas para o Novo Treino:")
-        st.write(selected_features)
-
-        # Atualizar estado global com as novas features
-        st.session_state.X_train_selected = X_train
-        st.session_state.X_test_selected = X_test
-        st.session_state.feature_selection_done = True
-
-    except Exception as e:
-        st.error(f"Erro ao calcular importâncias das features: {str(e)}")
-        return
-
-    # Botão para avançar para o próximo passo
+        st.warning(f"⚠ Removendo features altamente correlacionadas: {to_drop}")
+        X_train = X_train.drop(columns=to_drop)
+        X_test = X_test.drop(columns=to_drop)
+    
+    # Exibir dimensões após remoção de correlação
+    st.write(f"Após remoção de correlação: X_train {X_train.shape}, X_test {X_test.shape}")
+    
+    # **2. Definir número de features**
+    N_FEATURES = 5  # Fixo, como no teste.py
+    st.write(f"Número de features a selecionar: {N_FEATURES}")
+    
+    # **3. Criar e treinar modelo para seleção de features**
+    st.write("### Seleção de Features com RandomForest")
+    if st.session_state.model_type == "Classificação":
+        importance_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    else:  # Regressão
+        importance_model = RandomForestRegressor(n_estimators=100, random_state=42)
+    
+    # Tratar valores ausentes, se houver
+    imputer = SimpleImputer(strategy="mean")
+    X_train_imputed = pd.DataFrame(
+        imputer.fit_transform(X_train),
+        columns=X_train.columns
+    )
+    
+    # Treinar o modelo
+    importance_model.fit(X_train_imputed, y_train)
+    
+    # **4. Calcular importâncias e selecionar top features**
+    feature_importance = pd.DataFrame({
+        'Feature': X_train.columns,
+        'Importance': importance_model.feature_importances_
+    }).sort_values(by='Importance', ascending=False)
+    
+    # Exibir todas as features e suas importâncias
+    st.write("Importância de todas as features:")
+    st.dataframe(feature_importance)
+    
+    # Selecionar as top N features
+    selected_features = feature_importance['Feature'].iloc[:N_FEATURES].tolist()
+    
+    # **5. Criar conjuntos finais com features selecionadas**
+    X_train_selected = X_train[selected_features]
+    X_test_selected = X_test[selected_features]
+    
+    # Atualizar estado com as features selecionadas
+    st.session_state.X_train_selected = X_train_selected
+    st.session_state.X_test_selected = X_test_selected
+    st.session_state.selected_features = selected_features
+    st.session_state.feature_selection_done = True
+    
+    # Exibir resumo
+    st.success(f"✅ Features Selecionadas ({len(selected_features)}):")
+    st.write(selected_features)
+    st.write(f"Dimensões finais: X_train {X_train_selected.shape}, X_test {X_test_selected.shape}")
+    
+    # Botão para avançar
     if st.button("Confirmar Seleção de Features"):
         st.session_state.step = 'train_and_store_metrics'
         st.rerun()
-
-
-
+        
 #Função para Treinar e Armazenar as metricas
 import json
 
