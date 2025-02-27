@@ -782,6 +782,17 @@ def outlier_detection():
             })
         return pd.DataFrame(outlier_summary)
 
+    # Calcular e exibir a tabela
+    numeric_columns = st.session_state.data.select_dtypes(include=[np.number]).columns
+    remaining_outliers = calculate_remaining_outliers(st.session_state.data, numeric_columns)
+    st.write(remaining_outliers)
+
+    
+    # **Botão para próxima etapa sempre visível**
+    if st.button("Próxima etapa"):
+        st.session_state.step = 'data_summary'
+        st.rerun()
+
 # Função de sugestão automática corrigida
 def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
     """Função para sugerir tratamento de outliers com base nos dados"""
