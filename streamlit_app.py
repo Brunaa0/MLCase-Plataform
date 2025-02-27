@@ -3102,12 +3102,6 @@ def evaluate_and_compare_models():
         ]
     })
 
-    # Exibir informações debug para entender as métricas
-    st.write("### Métricas Originais (Sem Seleção):")
-    st.write(original_metrics)
-    
-    st.write("### Métricas Com Seleção de Features:")
-    st.write(selected_metrics)
     
     # Exibir tabela de comparação
     st.subheader("📈 Comparação dos Resultados:")
