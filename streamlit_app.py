@@ -3074,13 +3074,13 @@ def evaluate_and_compare_models():
         
         # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
         st.subheader("📊 Tamanho dos Conjuntos de Dados")
-        st.write(f"• Antes da Remoção de Correlação: {X_train_original.shape[1]} features")
-        st.write(f"• Features Altamente Correlacionadas Removidas: {len(to_drop)} features")
-        st.write(f"• Após Remoção de Correlação: {X_train.shape[1]} features")
-        st.write(f"• Depois da Seleção: {X_train_selected.shape[1]} features")
-        st.write(f"• Amostras de Treino: {X_train.shape[0]}")
-        st.write(f"• Amostras de Teste: {X_test.shape[0]}")
-                
+        st.write(f"• Amostras de Treino: {X_train.shape[0]} (constante em todo o processo)")
+        st.write(f"• Amostras de Teste: {X_test.shape[0]} (constante em todo o processo)")
+        st.write(f"• Features Originais: {X_train_original.shape[1]}")
+        st.write(f"• Features Removidas por Correlação: {len(to_drop)}")
+        st.write(f"• Features Após Remoção de Correlação: {X_train.shape[1]}")
+        st.write(f"• Features Após Seleção Final: {X_train_selected.shape[1]}")
+
         # 5. EXIBIR FEATURES SELECIONADAS
         st.subheader("✅ Features Selecionadas para o Novo Treino:")
         st.write(selected_features)
