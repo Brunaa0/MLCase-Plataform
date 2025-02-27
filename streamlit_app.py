@@ -2975,8 +2975,6 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
-    print("Colunas originais:", list(data.columns))
-    print("Colunas após get_dummies:", list(X.columns))
     # **Configurações Iniciais**
     # Identificar tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')  # Classificação ou Regressão
