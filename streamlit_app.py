@@ -751,37 +751,36 @@ def outlier_detection():
     st.write("### Resumo Final de Outliers")
 
     # Função para calcular outliers restantes
-    def calculate_remaining_outliers(data, numeric_columns):
+   def calculate_remaining_outliers(data, numeric_columns):
         outlier_summary = []
         for col in numeric_columns:
+            # Se esta coluna foi tratada, não deve ter mais outliers
+            if col in st.session_state.treated_columns:
+                outlier_summary.append({
+                    "Coluna": col,
+                    "Outliers Restantes": 0,
+                    "Percentagem (%)": 0.00
+                })
+                continue
+                
+            # Para colunas não tratadas, calcular normalmente
             Q1 = data[col].quantile(0.25)
             Q3 = data[col].quantile(0.75)
             IQR = Q3 - Q1
-
+    
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
-
+    
             # Contar os outliers restantes
             num_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
             percentage_outliers = (num_outliers / len(data)) * 100
-
+    
             outlier_summary.append({
                 "Coluna": col,
                 "Outliers Restantes": num_outliers,
                 "Percentagem (%)": round(percentage_outliers, 2)
             })
         return pd.DataFrame(outlier_summary)
-
-    # Calcular e exibir a tabela
-    numeric_columns = st.session_state.data.select_dtypes(include=[np.number]).columns
-    remaining_outliers = calculate_remaining_outliers(st.session_state.data, numeric_columns)
-    st.write(remaining_outliers)
-
-    
-    # **Botão para próxima etapa sempre visível**
-    if st.button("Próxima etapa"):
-        st.session_state.step = 'data_summary'
-        st.rerun()
 
 # Função de sugestão automática corrigida
 def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
