@@ -1362,7 +1362,7 @@ def get_default_param_grid(model_name):
             'epsilon': [0.1, 0.2, 0.5],
             'kernel': ['linear', 'rbf']
         }
-    elif model_name in ["Regressão Linear Simples (RLS)", "Regressão Linear Múltipla (RLM)"]:
+    elif model_name in ["Regressão Linear Simples (RLS)"]:
         return {}  # Regressão Linear geralmente não tem hiperparâmetros ajustáveis
     else:
         return {}
@@ -4051,7 +4051,6 @@ def initialize_session_state():
             "KMeans": KMeans(),
             "Clustering Hierárquico": AgglomerativeClustering(),
             "Regressão Linear Simples (RLS)": LinearRegression(),
-            "Regressão Linear Múltipla (RLM)": LinearRegression(),
             "Regressão por Vetores de Suporte (SVR)": SVR(),
         },
         'model_trained': False,
