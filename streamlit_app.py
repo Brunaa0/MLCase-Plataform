@@ -751,7 +751,7 @@ def outlier_detection():
     st.write("### Resumo Final de Outliers")
 
     # Função para calcular outliers restantes
-   def calculate_remaining_outliers(data, numeric_columns):
+    def calculate_remaining_outliers(data, numeric_columns):
         outlier_summary = []
         for col in numeric_columns:
             # Se esta coluna foi tratada, não deve ter mais outliers
