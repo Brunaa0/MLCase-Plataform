@@ -3528,6 +3528,27 @@ def final_page():
     original_metrics = st.session_state.get('resultado_sem_selecao', {})
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
+    # Exibir estatísticas sobre os conjuntos de dados
+    if 'X_train' in st.session_state and 'X_train_selected' in st.session_state:
+        X_train_original = st.session_state.X_train
+        X_train_selected = st.session_state.X_train_selected
+        
+        # Calcular percentuais
+        total_samples = X_train_original.shape[0] + st.session_state.X_test.shape[0]
+        train_percent = (X_train_original.shape[0] / total_samples) * 100
+        test_percent = (st.session_state.X_test.shape[0] / total_samples) * 100
+        
+        st.subheader("📊 Informações dos Conjuntos de Dados")
+        st.write(f"• Amostras de Treino: {X_train_original.shape[0]} ({train_percent:.1f}% do total)")
+        st.write(f"• Amostras de Teste: {st.session_state.X_test.shape[0]} ({test_percent:.1f}% do total)")
+        st.write(f"• Features Originais: {st.session_state.X_train_original.shape[1] if 'X_train_original' in st.session_state else X_train_original.shape[1]}")
+        st.write(f"• Features Após Seleção: {X_train_selected.shape[1]}")
+
+    # Recuperar features selecionadas
+    if 'selected_features' in st.session_state:
+        st.subheader("✅ Features Selecionadas")
+        st.write(st.session_state.selected_features)
+
     # Recupera a métrica escolhida para seleção de features
     scoring_metric = st.session_state.get("selected_scoring", None)
 
@@ -3613,7 +3634,15 @@ def final_page():
         return
 
     # Exibir tabela de métricas
-    st.table(comparison_df)
+    st.table(comparison_df.style.format({
+        'R²': '{:.4f}' if 'R²' in comparison_df.columns else None,
+        'MAE': '{:.4f}' if 'MAE' in comparison_df.columns else None,
+        'MSE': '{:,.4f}' if 'MSE' in comparison_df.columns else None,
+        'Accuracy': '{:.4f}' if 'Accuracy' in comparison_df.columns else None,
+        'Precision': '{:.4f}' if 'Precision' in comparison_df.columns else None,
+        'Recall': '{:.4f}' if 'Recall' in comparison_df.columns else None,
+        'F1-Score': '{:.4f}' if 'F1-Score' in comparison_df.columns else None
+    }))
 
     # Verificar se a métrica escolhida existe no DataFrame
     if scoring_metric_capitalized not in comparison_df.columns:
@@ -3641,21 +3670,31 @@ def final_page():
 
     # Criar o gráfico apenas para a métrica selecionada
     if selected_metric in comparison_df.columns:
-        fig, ax = plt.subplots()
-        ax.bar(
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Dados para o gráfico
+        bars = ax.bar(
             comparison_df['Modelo'],
-            comparison_df[selected_metric],
-            color=['#a8ddb5', '#005a32'],  # Verde claro e verde escuro
-            edgecolor='black',
+            comparison_df[selected_metric]
         )
-        ax.set_title(f"Comparação de {selected_metric}", fontsize=14, fontweight='bold')
+        
+        # Adicionar valores nas barras
+        for bar in bars:
+            height = bar.get_height()
+            ax.annotate(f'{height:.4f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom',
+                        fontsize=12)
+        
+        ax.set_title(f"Comparação de {selected_metric}", fontsize=14)
         ax.set_ylabel(selected_metric, fontsize=12)
         ax.set_xlabel("Modelo", fontsize=12)
-        ax.tick_params(axis='both', which='major', labelsize=10)
-
-        # Remover linhas de grade
-        ax.grid(False)
-
+        
+        # Ajustar altura para caber os valores
+        plt.ylim(0, max(comparison_df[selected_metric]) * 1.1)
+        
         # Exibir gráfico no Streamlit
         st.pyplot(fig)
     else:
@@ -3691,18 +3730,16 @@ def final_page():
     # Exibir mensagem com o melhor modelo
     st.success(f"🎉 **O melhor modelo é:** {best_model} com base na métrica: {scoring_metric_capitalized} ({best_score:.4f})")
 
-
     # **INTERPRETAÇÃO DAS MÉTRICAS**
-
     st.subheader("Interpretação das Métricas")
     try:
         # Gerar interpretação para cada modelo
         if model_type == "Classificação":
-            interpretation_without = generate_metrics_interpretation(original_metrics)  # Apenas 1 argumento
-            interpretation_with = generate_metrics_interpretation(selected_metrics)    # Apenas 1 argumento
+            interpretation_without = generate_metrics_interpretation(original_metrics)
+            interpretation_with = generate_metrics_interpretation(selected_metrics)
         elif model_type == "Regressão":
-            interpretation_without = generate_regression_interpretation(original_metrics)  # Apenas 1 argumento
-            interpretation_with = generate_regression_interpretation(selected_metrics)    # Apenas 1 argumento
+            interpretation_without = generate_regression_interpretation(original_metrics)
+            interpretation_with = generate_regression_interpretation(selected_metrics)
         else:
             raise ValueError("Tipo de modelo desconhecido para interpretação.")
 
@@ -3753,7 +3790,6 @@ def final_page():
     if st.button("Concluir"):
         st.session_state.clear()  # Limpa o cache do Streamlit
         st.rerun()
-
 ############ Relatório Final para Clustering ###################
 # Classe personalizada para PDF
 class CustomPDF(FPDF):
