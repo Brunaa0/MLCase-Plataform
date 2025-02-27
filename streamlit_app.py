@@ -2655,34 +2655,111 @@ def select_scoring():
 
 # Função para remover features correlacionadas
 def remove_highly_correlated_features(df, threshold=0.9):
+    """
+    Remove features altamente correlacionadas.
+    
+    Parâmetros:
+    - df: DataFrame de entrada
+    - threshold: Limiar de correlação (padrão 0.9)
+    
+    Retorna:
+    - DataFrame com features não correlacionadas
+    """
+    # Calcular matriz de correlação absoluta
     corr_matrix = df.corr().abs()
+    
+    # Obter a matriz triangular superior
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    
+    # Identificar colunas a serem removidas
     to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
-    #st.write(f"Features removidas por alta correlação: {to_drop}")
+    
+    # Informar quais features serão removidas (opcional)
+    if to_drop:
+        st.info(f"Features removidas por alta correlação: {to_drop}")
+    
+    # Retornar DataFrame sem as features correlacionadas
     return df.drop(columns=to_drop)
 
 
 # Função para selecionar features importantes com RandomForest
-def select_important_features(X, y, threshold=0.01):
-    # Escolher o modelo apropriado com base no tipo de problema
-    if st.session_state.model_type == "Classificação":
-        model = RandomForestClassifier(n_estimators=50, random_state=42)
-    elif st.session_state.model_type == "Regressão":
-        # Mesmo para SVR, usamos RandomForestRegressor para calcular importâncias
-        model = RandomForestRegressor(n_estimators=50, random_state=42)
+def select_important_features(X, y, threshold=0.01, model_type=None):
+    """
+    Seleciona features importantes usando RandomForest.
+    
+    Parâmetros:
+    - X: Matriz de features
+    - y: Vetor de rótulos
+    - threshold: Limiar de importância (padrão 0.01)
+    - model_type: Tipo de modelo (Classificação ou Regressão)
+    
+    Retorna:
+    - DataFrame com features importantes
+    """
+    # Definir o modelo baseado no tipo de problema
+    if model_type == "Classificação":
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+    elif model_type == "Regressão":
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
     else:
-        raise ValueError("Tipo de problema desconhecido. Verifique se 'model_type' está definido corretamente.")
+        raise ValueError("Tipo de modelo deve ser 'Classificação' ou 'Regressão'")
     
-    # Ajustar o modelo
-    model.fit(X, y)
+    # Usar SimpleImputer para lidar com valores ausentes
+    imputer = SimpleImputer(strategy='mean')
+    X_imputed = imputer.fit_transform(X)
     
-    # Obter as importâncias das features
-    feature_importances = model.feature_importances_
+    # Treinar o modelo
+    model.fit(X_imputed, y)
     
-    # Selecionar features importantes com base no threshold
-    important_features = X.columns[feature_importances > threshold]
+    # Calcular importância das features
+    importances = model.feature_importances_
+    
+    # Criar DataFrame de importância das features
+    feature_importance = pd.DataFrame({
+        'feature': X.columns,
+        'importance': importances
+    }).sort_values('importance', ascending=False)
+    
+    # Selecionar features com importância acima do threshold
+    important_features = feature_importance[feature_importance['importance'] > threshold]['feature']
+    
+    # Informar quais features foram selecionadas
+    st.info(f"Features selecionadas: {list(important_features)}")
     
     return X[important_features]
+
+def feature_selection_process(df, target_column, model_type):
+    """
+    Processo completo de seleção de features.
+    
+    Parâmetros:
+    - df: DataFrame original
+    - target_column: Nome da coluna alvo
+    - model_type: Tipo de modelo (Classificação ou Regressão)
+    
+    Retorna:
+    - DataFrame com features selecionadas
+    """
+    # Separar features e target
+    X = df.drop(columns=[target_column])
+    y = df[target_column]
+    
+    # Tratamento de variáveis categóricas
+    X = pd.get_dummies(X)
+    
+    try:
+        # Remoção de features correlacionadas
+        X_uncorrelated = remove_highly_correlated_features(X)
+        
+        # Seleção de features importantes
+        X_selected = select_important_features(X_uncorrelated, y, model_type=model_type)
+        
+        return X_selected
+    
+    except Exception as e:
+        st.error(f"Erro na seleção de features: {e}")
+        return None
+
 
 # Função principal de seleção de features
 
