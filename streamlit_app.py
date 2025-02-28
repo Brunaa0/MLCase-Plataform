@@ -3047,28 +3047,54 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
-    # Verificar se há features selecionadas
+    # Verificações preliminares
     if 'selected_features' not in st.session_state:
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
         return
 
+    # Verificar se os modelos estão definidos
+    if 'models' not in st.session_state or not st.session_state.models:
+        st.error("Configuração de modelos não encontrada. Por favor, reinicie o processo de seleção de modelos.")
+        return
+
     # Recuperar o tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')
+    
+    # Verificar o nome do modelo selecionado
+    model_name = st.session_state.get('selected_model_name')
+    if not model_name:
+        st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
+        return
+
+    # Debug: Imprimir informações do modelo
+    st.write("Informações de Depuração:")
+    st.write(f"Modelo Selecionado: {model_name}")
+    st.write("Modelos Disponíveis:", list(st.session_state.models.keys()))
+
+    # Verificar se o modelo existe na lista de modelos
+    if model_name not in st.session_state.models:
+        st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
+        st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
+        return
 
     # Recuperar métricas originais e com seleção de features
     original_metrics = st.session_state.get('resultado_sem_selecao', {})
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
     # Verificar se as métricas existem
-    if not original_metrics or not selected_metrics:
-        st.error("Não foi possível encontrar as métricas. Por favor, refaça o treinamento.")
+    if not original_metrics:
+        st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento.")
         return
 
     # Obter dados originais
-    X_train_original = st.session_state.X_train.copy()
-    X_test_original = st.session_state.X_test.copy()
-    y_train = st.session_state.y_train.copy()
-    y_test = st.session_state.y_test.copy()
+    try:
+        X_train_original = st.session_state.X_train.copy()
+        X_test_original = st.session_state.X_test.copy()
+        y_train = st.session_state.y_train.copy()
+        y_test = st.session_state.y_test.copy()
+    except AttributeError:
+        st.error("Dados de treino e teste não encontrados. Por favor, volte à etapa de preparação dos dados.")
+        return
     
     # 1. Remover features correlacionadas
     corr_matrix = X_train_original.corr().abs()
@@ -3107,9 +3133,13 @@ def evaluate_and_compare_models():
         index=X_test_selected.index
     )
     
-    # Treinar o modelo original com features selecionadas
-    model_name = st.session_state.selected_model_name
-    model = st.session_state.models[model_name]
+    # Tentar obter o modelo com tratamento de erro
+    try:
+        model = st.session_state.models[model_name]
+    except KeyError:
+        st.error(f"Modelo {model_name} não encontrado na lista de modelos.")
+        st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
+        return
     
     # Treinar modelo com features selecionadas
     model.fit(X_train_scaled_selected, y_train)
@@ -3153,6 +3183,10 @@ def evaluate_and_compare_models():
             'MAE': [original_metrics.get('MAE', 0), selected_metrics.get('MAE', 0)],
             'MSE': [original_metrics.get('MSE', 0), selected_metrics.get('MSE', 0)],
         })
+    
+    # Adicionar mais logs de depuração
+    st.write("Métricas Originais:", original_metrics)
+    st.write("Métricas Com Seleção:", selected_metrics)
     
     # Exibir informações dos conjuntos de dados
     total_samples = X_train_original.shape[0] + X_test_original.shape[0]
