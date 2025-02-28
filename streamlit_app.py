@@ -3804,7 +3804,8 @@ def get_metric_mapping(metric):
         "r2score": "R²",
         "rsquared": "R²",
         "determinacao": "R²",
-        "coeficienteajuste": "R²"
+        "coeficienteajuste": "R²",
+        "MAE":"MAE"
     }
     
     # Tentar mapear
