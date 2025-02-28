@@ -3710,7 +3710,6 @@ def final_page():
         # Adicione um diagnóstico adicional
         st.write("Métricas disponíveis:", list(METRIC_MAPPING.keys()))
         st.write("Scoring metric bruto:", scoring_metric)
-        st.write("Todo o estado de session_state:", dict(st.session_state))
         
         return
     # **COMPARAÇÃO DE MÉTRICAS**
