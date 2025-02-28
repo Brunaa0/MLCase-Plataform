@@ -3598,8 +3598,6 @@ def get_metric_mapping(metric):
     import unidecode
     metric_clean = unidecode.unidecode(metric.lower().replace(' ', '').replace('-', '').replace('_', ''))
     
-    st.write(f"Metric original: {metric}")
-    st.write(f"Metric limpa: {metric_clean}")
     
     # Dicionário expandido de mapeamentos
     extended_mapping = {
@@ -3613,7 +3611,6 @@ def get_metric_mapping(metric):
     # Tentar mapear
     mapped_metric = extended_mapping.get(metric_clean)
     
-    st.write(f"Metric mapeada: {mapped_metric}")
     
     return mapped_metric
     
