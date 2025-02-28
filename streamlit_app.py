@@ -3044,13 +3044,13 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
-    # Recuperar o nome do modelo selecionado
-    model_name = st.session_state.get('selected_model_name')
-    if not model_name:
-        st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
-        return
+# Recuperar o nome do modelo selecionado
+model_name = st.session_state.get('selected_model_name')
+if not model_name:
+    st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
+    return
 
-# Encontrar o modelo de forma mais flexível
+# Encontrar o modelo no dicionário (versão flexível)
 def find_model_in_dict(models_dict, model_name):
     # Primeiro, tentar correspondência exata
     if model_name in models_dict:
@@ -3076,6 +3076,9 @@ matched_model_name = next(
      if model_name.lower() in key.lower() or key.lower() in model_name.lower()), 
     model_name
 )
+
+# Mapear o nome do modelo para sua versão curta
+mapped_model_name = model_name_map.get(matched_model_name, matched_model_name)
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
