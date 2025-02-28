@@ -3082,6 +3082,16 @@ def find_model_by_name(models_dict, model_name):
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
+    # Mapeamento de modelos
+    model_name_map = {
+        "Support Vector Classification (SVC)": "SVC",
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",
+        "Random Forest": "RandomForestClassifier",
+        "Regressão Linear Simples (RLS)": "LinearRegression",
+        "Regressão por Vetores de Suporte (SVR)": "SVR"
+    }
+    reverse_model_name_map = {v: k for k, v in model_name_map.items()}
+
     # Verificações preliminares
     if 'selected_features' not in st.session_state:
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
@@ -3101,32 +3111,15 @@ def evaluate_and_compare_models():
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Encontrar o modelo de forma flexível
-    def find_model_by_name(models_dict, model_name):
-        def normalize_name(name):
-            return name.lower().replace(' ', '').replace('(', '').replace(')', '')
-        
-        normalized_input = normalize_name(model_name)
-        
-        for key, model in models_dict.items():
-            if normalize_name(key) == normalized_input:
-                return model, key
-        
-        for key, model in models_dict.items():
-            if normalized_input in normalize_name(key):
-                return model, key
-        
-        return None, None
+    # Mapear o nome do modelo para sua versão curta
+    mapped_model_name = model_name_map.get(model_name, model_name)
 
-    model, matched_model_name = find_model_by_name(st.session_state.models, model_name)
-    
+    # Encontrar o modelo no dicionário
+    model = st.session_state.models.get(model_name)
     if model is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
-
-    # Atualizar o nome do modelo para o nome completo correspondente
-    model_name = matched_model_name
 
     # Recuperar métricas originais e com seleção de features
     original_metrics = st.session_state.get('resultado_sem_selecao', {})
@@ -3195,7 +3188,7 @@ def evaluate_and_compare_models():
     # Calcular métricas para o modelo com features selecionadas
     if model_type == "Classificação":
         selected_metrics = {
-            "Modelo": model_name if len(model_name) < len(matched_model_name) else matched_model_name,
+            "Modelo": mapped_model_name,
             "Accuracy": accuracy_score(y_test, y_pred_selected),
             "Precision": precision_score(y_test, y_pred_selected, average='weighted'),
             "Recall": recall_score(y_test, y_pred_selected, average='weighted'),
@@ -3204,7 +3197,7 @@ def evaluate_and_compare_models():
         }
     elif model_type == "Regressão":
         selected_metrics = {
-            "Modelo": model_name if len(model_name) < len(matched_model_name) else matched_model_name,
+            "Modelo": mapped_model_name,
             "R²": r2_score(y_test, y_pred_selected),
             "MAE": mean_absolute_error(y_test, y_pred_selected),
             "MSE": mean_squared_error(y_test, y_pred_selected),
@@ -3244,9 +3237,6 @@ def evaluate_and_compare_models():
         'MAE': '{:.4f}',
         'MSE': '{:,.4f}'
     })))
-    
-    # Restante do código permanece o mesmo...
-    # (gráficos, botões, etc.)
     
     # Gráfico de comparação
     metric_to_plot = 'F1-Score' if model_type == 'Classificação' else 'R²'
