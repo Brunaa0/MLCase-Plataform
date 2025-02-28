@@ -3597,7 +3597,7 @@ def get_metric_mapping(metric):
     if not isinstance(metric, str):
         return None
     
-    # Converter para minúsculas e remover espaços, acentos, etc.
+    # Converter para minúsculas, remover espaços, acentos
     import unidecode
     metric_clean = unidecode.unidecode(metric.lower().replace(' ', '').replace('-', '').replace('_', ''))
     
@@ -3610,14 +3610,12 @@ def get_metric_mapping(metric):
         "coeficienteajuste": "R²"
     }
     
-    # Tentar mapear diretamente
+    # Tentar mapear
     mapped_metric = extended_mapping.get(metric_clean)
     
-    return mapped_metric# Mapeamento de nomes de métricas para as colunas do DataFrame
-import streamlit as st
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+    return mapped_metric
+    
+
 
 # Mapeamento de nomes de métricas para as colunas do DataFrame
 METRIC_MAPPING = {
