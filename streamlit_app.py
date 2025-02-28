@@ -3044,11 +3044,7 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
-# Recuperar o nome do modelo selecionado
-model_name = st.session_state.get('selected_model_name')
-if not model_name:
-    st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
-    return
+
 
 # Encontrar o modelo no dicionário (versão flexível)
 def find_model_in_dict(models_dict, model_name):
