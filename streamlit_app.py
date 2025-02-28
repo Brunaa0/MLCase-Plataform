@@ -3044,6 +3044,34 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
+def find_model_by_name(models_dict, model_name):
+    """
+    Tenta encontrar um modelo correspondente de forma flexível.
+    
+    Args:
+        models_dict (dict): Dicionário de modelos
+        model_name (str): Nome do modelo a ser encontrado
+    
+    Returns:
+        A matching model or None
+    """
+    # Lista de correspondências flexíveis
+    def normalize_name(name):
+        return name.lower().replace(' ', '').replace('(', '').replace(')', '')
+    
+    normalized_input = normalize_name(model_name)
+    
+    for key, model in models_dict.items():
+        if normalize_name(key) == normalized_input:
+            return model, key
+    
+    # Se nenhuma correspondência exata for encontrada, tentar correspondência parcial
+    for key, model in models_dict.items():
+        if normalized_input in normalize_name(key):
+            return model, key
+    
+    return None, None
+
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
@@ -3060,7 +3088,7 @@ def evaluate_and_compare_models():
     # Recuperar o tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')
     
-    # Verificar o nome do modelo selecionado
+    # Recuperar o nome do modelo selecionado
     model_name = st.session_state.get('selected_model_name')
     if not model_name:
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
@@ -3071,11 +3099,16 @@ def evaluate_and_compare_models():
     st.write(f"Modelo Selecionado: {model_name}")
     st.write("Modelos Disponíveis:", list(st.session_state.models.keys()))
 
-    # Verificar se o modelo existe na lista de modelos
-    if model_name not in st.session_state.models:
+    # Encontrar o modelo de forma flexível
+    model, matched_model_name = find_model_by_name(st.session_state.models, model_name)
+    
+    if model is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
+
+    # Atualizar o nome do modelo para o nome completo correspondente
+    model_name = matched_model_name
 
     # Recuperar métricas originais e com seleção de features
     original_metrics = st.session_state.get('resultado_sem_selecao', {})
@@ -3132,14 +3165,6 @@ def evaluate_and_compare_models():
         columns=valid_features, 
         index=X_test_selected.index
     )
-    
-    # Tentar obter o modelo com tratamento de erro
-    try:
-        model = st.session_state.models[model_name]
-    except KeyError:
-        st.error(f"Modelo {model_name} não encontrado na lista de modelos.")
-        st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
-        return
     
     # Treinar modelo com features selecionadas
     model.fit(X_train_scaled_selected, y_train)
