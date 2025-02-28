@@ -3044,41 +3044,39 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
-def find_model_by_name(models_dict, model_name):
-    """
-    Tenta encontrar um modelo correspondente de forma flexível.
+# Recuperar o nome do modelo selecionado
+model_name = st.session_state.get('selected_model_name')
+if not model_name:
+    st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
+    return
+
+# Encontrar o modelo de forma mais flexível
+def find_model_in_dict(models_dict, model_name):
+    # Primeiro, tentar correspondência exata
+    if model_name in models_dict:
+        return models_dict[model_name]
     
-    Args:
-        models_dict (dict): Dicionário de modelos
-        model_name (str): Nome do modelo a ser encontrado
+    # Se não encontrar, tentar correspondência parcial
+    for key in models_dict.keys():
+        if model_name.lower() in key.lower() or key.lower() in model_name.lower():
+            return models_dict[key]
     
-    Returns:
-        A matching model or None
-    """
-    def normalize_name(name):
-        # Converte para minúsculas
-        # Remove espaços, parênteses, hífens, underscores
-        # Remove palavras como "Regressão", "Classification", etc.
-        name = name.lower()
-        name = name.replace('regressão', '').replace('regression', '')
-        name = name.replace('classification', '').replace('vetores', '')
-        name = name.replace('suporte', '').replace('support', '')
-        return ''.join(char for char in name if char.isalnum())
-    
-    normalized_input = normalize_name(model_name)
-    
-    # Primeiro, tenta correspondência exata
-    for key, model in models_dict.items():
-        if normalize_name(key) == normalized_input:
-            return model, key
-    
-    # Se não encontrar, tenta correspondência parcial
-    for key, model in models_dict.items():
-        normalized_key = normalize_name(key)
-        if normalized_input in normalized_key or normalized_key in normalized_input:
-            return model, key
-    
-    return None, None
+    return None
+
+# Encontrar o modelo
+model = find_model_in_dict(st.session_state.models, model_name)
+if model is None:
+    st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
+    st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
+    return
+
+# Encontrar o nome completo do modelo
+matched_model_name = next(
+    (key for key in st.session_state.models.keys() 
+     if model_name.lower() in key.lower() or key.lower() in model_name.lower()), 
+    model_name
+)
+
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
