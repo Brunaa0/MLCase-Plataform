@@ -3764,6 +3764,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
 # Função para exibir a página final com o relatório
 
 # Mapeamento de nomes de métricas para as colunas do DataFrame
+# Atualizar o dicionário METRIC_MAPPING para garantir que MAE seja reconhecido
 METRIC_MAPPING = {
     "accuracy": "Accuracy",
     "precision": "Precision", 
@@ -3774,8 +3775,9 @@ METRIC_MAPPING = {
     "r-squared": "R²",
     "coefficient_of_determination": "R²",
     "mean_squared_error": "MSE",
+    "mse": "MSE",  # Adicionar versão minúscula de MSE
     "mean_absolute_error": "MAE",
-     "MAE": "mean_absolute_error"
+    "mae": "MAE"  # Adicionar versão minúscula de MAE
 }
 
 def get_metric_mapping(metric):
@@ -3797,6 +3799,9 @@ def get_metric_mapping(metric):
     import unidecode
     metric_clean = unidecode.unidecode(metric.lower().replace(' ', '').replace('-', '').replace('_', ''))
     
+    # Verificar se a métrica já está diretamente no formato esperado
+    if metric in METRIC_MAPPING.values():
+        return metric
     
     # Dicionário expandido de mapeamentos
     extended_mapping = {
@@ -3805,12 +3810,25 @@ def get_metric_mapping(metric):
         "rsquared": "R²",
         "determinacao": "R²",
         "coeficienteajuste": "R²",
-        "MAE":"MAE"
+        "mae": "MAE",
+        "erro_absoluto_medio": "MAE",
+        "mean_absolute_error": "MAE",
+        "erro_absoluto": "MAE",
+        "mse": "MSE",
+        "erro_quadratico_medio": "MSE",
+        "mean_squared_error": "MSE",
+        "erro_quadratico": "MSE"
     }
     
     # Tentar mapear
     mapped_metric = extended_mapping.get(metric_clean)
     
+    # Se não encontrou, verificar diretamente nas chaves do METRIC_MAPPING
+    if mapped_metric is None and metric in METRIC_MAPPING:
+        mapped_metric = METRIC_MAPPING[metric]
+        
+    # Adicionar debug
+    print(f"Métrica original: {metric}, limpa: {metric_clean}, mapeada: {mapped_metric}")
     
     return mapped_metric
     
