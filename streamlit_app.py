@@ -3706,8 +3706,13 @@ def final_page():
     scoring_metric_capitalized = get_metric_mapping(scoring_metric)
     if not scoring_metric_capitalized:
         st.error(f"A métrica '{scoring_metric}' não é válida ou não está disponível.")
+        
+        # Adicione um diagnóstico adicional
+        st.write("Métricas disponíveis:", list(METRIC_MAPPING.keys()))
+        st.write("Scoring metric bruto:", scoring_metric)
+        st.write("Todo o estado de session_state:", dict(st.session_state))
+        
         return
-
     # **COMPARAÇÃO DE MÉTRICAS**
     st.subheader("Comparação de Métricas")
 
