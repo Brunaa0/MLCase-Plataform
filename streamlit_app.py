@@ -3597,6 +3597,56 @@ def get_metric_mapping(metric):
     if not isinstance(metric, str):
         return None
     
+    # Converter para minúsculas e remover espaços, acentos, etc.
+    import unidecode
+    metric_clean = unidecode.unidecode(metric.lower().replace(' ', '').replace('-', '').replace('_', ''))
+    
+    # Dicionário expandido de mapeamentos
+    extended_mapping = {
+        **METRIC_MAPPING,
+        "r2score": "R²",
+        "rsquared": "R²",
+        "determinacao": "R²",
+        "coeficienteajuste": "R²"
+    }
+    
+    # Tentar mapear diretamente
+    mapped_metric = extended_mapping.get(metric_clean)
+    
+    return mapped_metric# Mapeamento de nomes de métricas para as colunas do DataFrame
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Mapeamento de nomes de métricas para as colunas do DataFrame
+METRIC_MAPPING = {
+    "accuracy": "Accuracy",
+    "precision": "Precision", 
+    "recall": "Recall",
+    "f1-score": "F1-Score",
+    "r2": "R²",
+    "R²": "R²",  # Adicionar mapeamento direto para R²
+    "r-squared": "R²",
+    "coefficient_of_determination": "R²",
+    "mean_squared_error": "MSE",
+    "mean_absolute_error": "MAE"
+}
+
+def get_metric_mapping(metric):
+    """
+    Função para obter o nome da métrica de forma mais flexível
+    
+    Args:
+        metric (str): Nome da métrica a ser mapeada
+    
+    Returns:
+        str: Nome da métrica mapeado ou None se não encontrado
+    """
+    # Garantir que seja uma string
+    if not isinstance(metric, str):
+        return None
+    
     # Converter para minúsculas e remover espaços
     metric_lower = metric.lower().replace(' ', '')
     
@@ -3874,6 +3924,7 @@ def final_page():
     if st.button("Concluir"):
         st.session_state.clear()  # Limpa o cache do Streamlit
         st.rerun()
+        
 ############ Relatório Final para Clustering ###################
 # Classe personalizada para PDF
 class CustomPDF(FPDF):
