@@ -3775,7 +3775,7 @@ METRIC_MAPPING = {
     "coefficient_of_determination": "R²",
     "mean_squared_error": "MSE",
     "mean_absolute_error": "MAE",
-     "MAE": "MAE"
+     "MAE": "mean_absolute_error"
 }
 
 def get_metric_mapping(metric):
