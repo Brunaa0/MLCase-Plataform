@@ -11,4 +11,4 @@ openpyxl
 reportlab
 matplotlib
 requests
-
+unidecode
