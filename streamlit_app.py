@@ -3563,6 +3563,48 @@ class MLCaseModelReportGenerator:
         return self.output_path
 
 # Função para exibir a página final com o relatório
+# Mapeamento de nomes de métricas para as colunas do DataFrame
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Mapeamento de nomes de métricas para as colunas do DataFrame
+METRIC_MAPPING = {
+    "accuracy": "Accuracy",
+    "precision": "Precision", 
+    "recall": "Recall",
+    "f1-score": "F1-Score",
+    "r2": "R²",
+    "R²": "R²",  # Adicionar mapeamento direto para R²
+    "r-squared": "R²",
+    "coefficient_of_determination": "R²",
+    "mean_squared_error": "MSE",
+    "mean_absolute_error": "MAE"
+}
+
+def get_metric_mapping(metric):
+    """
+    Função para obter o nome da métrica de forma mais flexível
+    
+    Args:
+        metric (str): Nome da métrica a ser mapeada
+    
+    Returns:
+        str: Nome da métrica mapeado ou None se não encontrado
+    """
+    # Garantir que seja uma string
+    if not isinstance(metric, str):
+        return None
+    
+    # Converter para minúsculas e remover espaços
+    metric_lower = metric.lower().replace(' ', '')
+    
+    # Tentar mapear diretamente
+    mapped_metric = METRIC_MAPPING.get(metric_lower)
+    
+    return mapped_metric
+
 def final_page():
     st.title("Resumo Final dos Modelos Treinados")
 
@@ -3610,19 +3652,8 @@ def final_page():
         st.error("Nenhuma métrica foi selecionada. Volte para a etapa de Seleção de Features.")
         return
 
-    # Mapeamento de nomes de métricas para as colunas do DataFrame
-    metric_mapping = {
-            "accuracy": "Accuracy",
-            "precision": "Precision",
-            "recall": "Recall",
-            "f1-score": "F1-Score",
-            "r2": "R²",
-            "mean_squared_error": "MSE",
-            "mean_absolute_error": "MAE"
-        }
-
     # Obter o nome capitalizado da métrica com base no mapeamento
-    scoring_metric_capitalized = metric_mapping.get(scoring_metric.lower(), None)
+    scoring_metric_capitalized = get_metric_mapping(scoring_metric)
     if not scoring_metric_capitalized:
         st.error(f"A métrica '{scoring_metric}' não é válida ou não está disponível.")
         return
