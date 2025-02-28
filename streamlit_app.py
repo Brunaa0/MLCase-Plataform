@@ -3055,23 +3055,30 @@ def find_model_by_name(models_dict, model_name):
     Returns:
         A matching model or None
     """
-    # Lista de correspondências flexíveis
     def normalize_name(name):
-        return name.lower().replace(' ', '').replace('(', '').replace(')', '')
+        # Converte para minúsculas
+        # Remove espaços, parênteses, hífens, underscores
+        # Remove palavras como "Regressão", "Classification", etc.
+        name = name.lower()
+        name = name.replace('regressão', '').replace('regression', '')
+        name = name.replace('classification', '').replace('vetores', '')
+        name = name.replace('suporte', '').replace('support', '')
+        return ''.join(char for char in name if char.isalnum())
     
     normalized_input = normalize_name(model_name)
     
+    # Primeiro, tenta correspondência exata
     for key, model in models_dict.items():
         if normalize_name(key) == normalized_input:
             return model, key
     
-    # Se nenhuma correspondência exata for encontrada, tentar correspondência parcial
+    # Se não encontrar, tenta correspondência parcial
     for key, model in models_dict.items():
-        if normalized_input in normalize_name(key):
+        normalized_key = normalize_name(key)
+        if normalized_input in normalized_key or normalized_key in normalized_input:
             return model, key
     
     return None, None
-
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
