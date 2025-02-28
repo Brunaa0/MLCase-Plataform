@@ -3059,22 +3059,22 @@ def find_model_in_dict(models_dict, model_name):
     
     return None
 
-# Encontrar o modelo
-model = find_model_in_dict(st.session_state.models, model_name)
-if model is None:
-    st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
-    st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
-    return
-
-# Encontrar o nome completo do modelo
-matched_model_name = next(
-    (key for key in st.session_state.models.keys() 
-     if model_name.lower() in key.lower() or key.lower() in model_name.lower()), 
-    model_name
-)
-
-# Mapear o nome do modelo para sua versão curta
-mapped_model_name = model_name_map.get(matched_model_name, matched_model_name)
+    # Encontrar o modelo
+    model = find_model_in_dict(st.session_state.models, model_name)
+    if model is None:
+        st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
+        st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
+        return
+    
+    # Encontrar o nome completo do modelo
+    matched_model_name = next(
+        (key for key in st.session_state.models.keys() 
+         if model_name.lower() in key.lower() or key.lower() in model_name.lower()), 
+        model_name
+    )
+    
+    # Mapear o nome do modelo para sua versão curta
+    mapped_model_name = model_name_map.get(matched_model_name, matched_model_name)
 
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
