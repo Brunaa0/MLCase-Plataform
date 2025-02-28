@@ -3195,7 +3195,7 @@ def evaluate_and_compare_models():
     # Calcular métricas para o modelo com features selecionadas
     if model_type == "Classificação":
         selected_metrics = {
-            "Modelo": matched_model_name,
+            "Modelo": model_name if len(model_name) < len(matched_model_name) else matched_model_name,
             "Accuracy": accuracy_score(y_test, y_pred_selected),
             "Precision": precision_score(y_test, y_pred_selected, average='weighted'),
             "Recall": recall_score(y_test, y_pred_selected, average='weighted'),
@@ -3204,7 +3204,7 @@ def evaluate_and_compare_models():
         }
     elif model_type == "Regressão":
         selected_metrics = {
-            "Modelo": matched_model_name,
+            "Modelo": model_name if len(model_name) < len(matched_model_name) else matched_model_name,
             "R²": r2_score(y_test, y_pred_selected),
             "MAE": mean_absolute_error(y_test, y_pred_selected),
             "MSE": mean_squared_error(y_test, y_pred_selected),
