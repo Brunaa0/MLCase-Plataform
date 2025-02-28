@@ -3774,7 +3774,8 @@ METRIC_MAPPING = {
     "r-squared": "R²",
     "coefficient_of_determination": "R²",
     "mean_squared_error": "MSE",
-    "mean_absolute_error": "MAE"
+    "mean_absolute_error": "MAE",
+     "MAE": "MAE"
 }
 
 def get_metric_mapping(metric):
@@ -3864,9 +3865,6 @@ def final_page():
     if not scoring_metric_capitalized:
         st.error(f"A métrica '{scoring_metric}' não é válida ou não está disponível.")
         
-        # Adicione um diagnóstico adicional
-        st.write("Métricas disponíveis:", list(METRIC_MAPPING.keys()))
-        st.write("Scoring metric bruto:", scoring_metric)
         
         return
     # **COMPARAÇÃO DE MÉTRICAS**
