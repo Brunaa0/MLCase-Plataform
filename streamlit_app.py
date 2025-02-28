@@ -3094,12 +3094,23 @@ def evaluate_and_compare_models():
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Debug: Imprimir informações do modelo
-    st.write("Informações de Depuração:")
-    st.write(f"Modelo Selecionado: {model_name}")
-    st.write("Modelos Disponíveis:", list(st.session_state.models.keys()))
-
     # Encontrar o modelo de forma flexível
+    def find_model_by_name(models_dict, model_name):
+        def normalize_name(name):
+            return name.lower().replace(' ', '').replace('(', '').replace(')', '')
+        
+        normalized_input = normalize_name(model_name)
+        
+        for key, model in models_dict.items():
+            if normalize_name(key) == normalized_input:
+                return model, key
+        
+        for key, model in models_dict.items():
+            if normalized_input in normalize_name(key):
+                return model, key
+        
+        return None, None
+
     model, matched_model_name = find_model_by_name(st.session_state.models, model_name)
     
     if model is None:
@@ -3170,23 +3181,27 @@ def evaluate_and_compare_models():
     model.fit(X_train_scaled_selected, y_train)
     y_pred_selected = model.predict(X_test_scaled_selected)
     
+    # Recuperar parâmetros do modelo original e com seleção
+    original_params = st.session_state.get('best_params', {})
+    selected_params = st.session_state.get('best_params_selected', {})
+    
     # Calcular métricas para o modelo com features selecionadas
     if model_type == "Classificação":
         selected_metrics = {
-            "Modelo": f"{model_name} Com Seleção",
+            "Modelo": model_name,
             "Accuracy": accuracy_score(y_test, y_pred_selected),
             "Precision": precision_score(y_test, y_pred_selected, average='weighted'),
             "Recall": recall_score(y_test, y_pred_selected, average='weighted'),
             "F1-Score": f1_score(y_test, y_pred_selected, average='weighted'),
-            "Best Parameters": st.session_state.get('best_params_selected', {})
+            "Best Parameters": selected_params
         }
     elif model_type == "Regressão":
         selected_metrics = {
-            "Modelo": f"{model_name} Com Seleção",
+            "Modelo": model_name,
             "R²": r2_score(y_test, y_pred_selected),
             "MAE": mean_absolute_error(y_test, y_pred_selected),
             "MSE": mean_squared_error(y_test, y_pred_selected),
-            "Best Parameters": st.session_state.get('best_params_selected', {})
+            "Best Parameters": selected_params
         }
     
     # Atualizar métricas com seleção de features
@@ -3200,6 +3215,7 @@ def evaluate_and_compare_models():
             'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
             'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
             'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
+            'Best Parameters': [original_params, selected_params]
         })
     else:
         comparison_df = pd.DataFrame({
@@ -3207,28 +3223,8 @@ def evaluate_and_compare_models():
             'R²': [original_metrics.get('R²', 0), selected_metrics.get('R²', 0)],
             'MAE': [original_metrics.get('MAE', 0), selected_metrics.get('MAE', 0)],
             'MSE': [original_metrics.get('MSE', 0), selected_metrics.get('MSE', 0)],
+            'Best Parameters': [original_params, selected_params]
         })
-    
-    # Adicionar mais logs de depuração
-    st.write("Métricas Originais:", original_metrics)
-    st.write("Métricas Com Seleção:", selected_metrics)
-    
-    # Exibir informações dos conjuntos de dados
-    total_samples = X_train_original.shape[0] + X_test_original.shape[0]
-    train_percent = (X_train_original.shape[0] / total_samples) * 100
-    test_percent = (X_test_original.shape[0] / total_samples) * 100
-    
-    st.subheader("📊 Tamanho dos Conjuntos de Dados")
-    st.write(f"• Amostras de Treino: {X_train_original.shape[0]} ({train_percent:.1f}% do total)")
-    st.write(f"• Amostras de Teste: {X_test_original.shape[0]} ({test_percent:.1f}% do total)")
-    st.write(f"• Features Originais: {X_train_original.shape[1]}")
-    st.write(f"• Features Removidas por Correlação: {len(to_drop)}")
-    st.write(f"• Features Após Remoção de Correlação: {X_train_original.shape[1]}")
-    st.write(f"• Features Após Seleção Final: {X_train_selected.shape[1]}")
-
-    # Exibir features selecionadas
-    st.subheader("✅ Features Selecionadas para o Novo Treino:")
-    st.write(valid_features)
     
     # Exibir tabela de comparação
     st.subheader("📈 Comparação dos Resultados:")
@@ -3239,8 +3235,11 @@ def evaluate_and_compare_models():
         'F1-Score': '{:.4f}',
         'R²': '{:.4f}',
         'MAE': '{:.4f}',
-        'MSE': '{:.4f}'
+        'MSE': '{:,.4f}'
     })))
+    
+    # Restante do código permanece o mesmo...
+    # (gráficos, botões, etc.)
     
     # Gráfico de comparação
     metric_to_plot = 'F1-Score' if model_type == 'Classificação' else 'R²'
