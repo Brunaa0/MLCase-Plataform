@@ -3047,20 +3047,21 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
-    # Identificar tipo de modelo
-    model_type = st.session_state.get('model_type', 'Indefinido') 
-
     # Verificar se há features selecionadas
     if 'selected_features' not in st.session_state:
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
         return
 
-    # Recuperar métricas originais salvas anteriormente
+    # Recuperar o tipo de modelo
+    model_type = st.session_state.get('model_type', 'Indefinido')
+
+    # Recuperar métricas originais e com seleção de features
     original_metrics = st.session_state.get('resultado_sem_selecao', {})
-    
-    # Verificar se as métricas originais existem
-    if not original_metrics:
-        st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento inicial.")
+    selected_metrics = st.session_state.get('resultado_com_selecao', {})
+
+    # Verificar se as métricas existem
+    if not original_metrics or not selected_metrics:
+        st.error("Não foi possível encontrar as métricas. Por favor, refaça o treinamento.")
         return
 
     # Obter dados originais
@@ -3069,17 +3070,17 @@ def evaluate_and_compare_models():
     y_train = st.session_state.y_train.copy()
     y_test = st.session_state.y_test.copy()
     
-    # 1. REMOVER FEATURES CORRELACIONADAS
+    # 1. Remover features correlacionadas
     corr_matrix = X_train_original.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper.columns if any(upper[column] > 0.9)]
     
     if to_drop:
-        st.warning(f"⚠️ A remover features altamente correlacionadas: {to_drop}")
+        st.warning(f"⚠️ Removendo features altamente correlacionadas: {to_drop}")
         X_train_original.drop(columns=to_drop, inplace=True)
         X_test_original.drop(columns=to_drop, inplace=True)
     
-    # 2. PREPARAR FEATURES SELECIONADAS
+    # 2. Preparar features selecionadas
     selected_features = st.session_state.selected_features
     
     # Garantir que todas as features selecionadas existem no DataFrame
@@ -3106,39 +3107,54 @@ def evaluate_and_compare_models():
         index=X_test_selected.index
     )
     
-    # Treinar com features selecionadas
-    model_after = LinearRegression()
-    model_after.fit(X_train_scaled_selected, y_train)
-    y_pred_after = model_after.predict(X_test_scaled_selected)
+    # Treinar o modelo original com features selecionadas
+    model_name = st.session_state.selected_model_name
+    model = st.session_state.models[model_name]
     
-    # Calcular métricas
-    r2_after = r2_score(y_test, y_pred_after)
-    mae_after = mean_absolute_error(y_test, y_pred_after)
-    mse_after = mean_squared_error(y_test, y_pred_after)
+    # Treinar modelo com features selecionadas
+    model.fit(X_train_scaled_selected, y_train)
+    y_pred_selected = model.predict(X_test_scaled_selected)
     
-    # Criar dicionário de resultados com seleção
-    selected_metrics = {
-        "Modelo": "LinearRegression",
-        "R²": r2_after,
-        "MAE": mae_after,
-        "MSE": mse_after,
-        "Best Parameters": {}
-    }
+    # Calcular métricas para o modelo com features selecionadas
+    if model_type == "Classificação":
+        selected_metrics = {
+            "Modelo": f"{model_name} Com Seleção",
+            "Accuracy": accuracy_score(y_test, y_pred_selected),
+            "Precision": precision_score(y_test, y_pred_selected, average='weighted'),
+            "Recall": recall_score(y_test, y_pred_selected, average='weighted'),
+            "F1-Score": f1_score(y_test, y_pred_selected, average='weighted'),
+            "Best Parameters": st.session_state.get('best_params_selected', {})
+        }
+    elif model_type == "Regressão":
+        selected_metrics = {
+            "Modelo": f"{model_name} Com Seleção",
+            "R²": r2_score(y_test, y_pred_selected),
+            "MAE": mean_absolute_error(y_test, y_pred_selected),
+            "MSE": mean_squared_error(y_test, y_pred_selected),
+            "Best Parameters": st.session_state.get('best_params_selected', {})
+        }
+    
+    # Atualizar métricas com seleção de features
     st.session_state['resultado_com_selecao'] = selected_metrics
     
-    # Recuperar métricas originais
-    r2_before = original_metrics.get('R²', 0)
-    mae_before = original_metrics.get('MAE', 0)
-    mse_before = original_metrics.get('MSE', 0)
-
-    # Função para formatar métricas
-    def format_metric(value):
-        try:
-            return float(f"{float(value):.4f}")
-        except (ValueError, TypeError):
-            return None
-
-    # 4. EXIBIR INFORMAÇÕES DE CONJUNTOS DE DADOS
+    # Criar DataFrame de comparação
+    if model_type == "Classificação":
+        comparison_df = pd.DataFrame({
+            'Modelo': [original_metrics['Modelo'], selected_metrics['Modelo']],
+            'Accuracy': [original_metrics.get('Accuracy', 0), selected_metrics.get('Accuracy', 0)],
+            'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
+            'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
+            'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
+        })
+    else:
+        comparison_df = pd.DataFrame({
+            'Modelo': [original_metrics['Modelo'], selected_metrics['Modelo']],
+            'R²': [original_metrics.get('R²', 0), selected_metrics.get('R²', 0)],
+            'MAE': [original_metrics.get('MAE', 0), selected_metrics.get('MAE', 0)],
+            'MSE': [original_metrics.get('MSE', 0), selected_metrics.get('MSE', 0)],
+        })
+    
+    # Exibir informações dos conjuntos de dados
     total_samples = X_train_original.shape[0] + X_test_original.shape[0]
     train_percent = (X_train_original.shape[0] / total_samples) * 100
     test_percent = (X_test_original.shape[0] / total_samples) * 100
@@ -3151,34 +3167,28 @@ def evaluate_and_compare_models():
     st.write(f"• Features Após Remoção de Correlação: {X_train_original.shape[1]}")
     st.write(f"• Features Após Seleção Final: {X_train_selected.shape[1]}")
 
-    # 5. EXIBIR FEATURES SELECIONADAS
+    # Exibir features selecionadas
     st.subheader("✅ Features Selecionadas para o Novo Treino:")
     st.write(valid_features)
-    
-    # Criar DataFrame de comparação
-    comparison_df = pd.DataFrame({
-        'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
-        'R²': [format_metric(r2_before), format_metric(r2_after)],
-        'MAE': [format_metric(mae_before), format_metric(mae_after)],
-        'MSE': [format_metric(mse_before), format_metric(mse_after)],
-        'Best Parameters': [
-            original_metrics.get('Best Parameters', {}), 
-            {}
-        ]
-    })
     
     # Exibir tabela de comparação
     st.subheader("📈 Comparação dos Resultados:")
     st.table(fix_dataframe_types(comparison_df.style.format({
+        'Accuracy': '{:.4f}', 
+        'Precision': '{:.4f}', 
+        'Recall': '{:.4f}', 
+        'F1-Score': '{:.4f}',
         'R²': '{:.4f}',
         'MAE': '{:.4f}',
-        'MSE': '{:,.4f}'
+        'MSE': '{:.4f}'
     })))
     
-    # Gráfico de comparação do R²
+    # Gráfico de comparação
+    metric_to_plot = 'F1-Score' if model_type == 'Classificação' else 'R²'
     fig, ax = plt.subplots(figsize=(10, 6))
-    x = ['Sem Seleção', 'Com Seleção']
-    y = [r2_before, r2_after]
+    
+    x = comparison_df['Modelo']
+    y = comparison_df[metric_to_plot]
     
     bars = ax.bar(x, y, width=0.6)
     
@@ -3187,19 +3197,19 @@ def evaluate_and_compare_models():
         height = bar.get_height()
         ax.annotate(f'{height:.4f}',
                     xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  # 3 pontos de deslocamento vertical
+                    xytext=(0, 3),
                     textcoords="offset points",
                     ha='center', va='bottom',
                     fontsize=12)
     
-    # Estilização do gráfico
-    ax.set_title('Comparação do R² antes e depois da seleção de features', fontsize=14)
-    ax.set_ylabel('Valor de R²')
-    plt.ylim(0, max(y)*1.1)  # Ajuste para caber os rótulos
+    ax.set_title(f'Comparação de {metric_to_plot}')
+    ax.set_ylabel(metric_to_plot)
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
     
     st.pyplot(fig)
     
-    # Botão para página final
+    # Botão para próxima etapa
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
