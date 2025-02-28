@@ -71,6 +71,7 @@ import scipy
 import time
 import json
 import requests
+import unidecode
 
 # -------------------------------------
 # Bibliotecas Adicionais para Geração de Relatórios
