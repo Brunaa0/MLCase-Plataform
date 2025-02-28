@@ -112,6 +112,29 @@ pd.set_option("display.max_columns", None)
 ##############################################
 def fix_dataframe_types(df):
     """Corrigir tipos de dados em um DataFrame para compatibilidade com PyArrow"""
+    # Verificar se é um objeto Styler e extrair o DataFrame
+    if hasattr(df, 'data'):  # Styler objects have a .data attribute
+        df = df.data
+    elif hasattr(df, 'render') and not hasattr(df, 'copy'):  # Another way to detect Styler
+        # Para versões mais recentes do pandas
+        if hasattr(df, '_data'):
+            df = df._data
+        # Para versões bem recentes do pandas onde pode ser diferente
+        elif hasattr(df, 'data'):
+            df = df.data
+        # Se ainda não conseguiu extrair o DataFrame
+        else:
+            # Tentar converter para dict primeiro e depois para DataFrame
+            try:
+                df = pd.DataFrame(df.to_dict())
+            except:
+                # Se tudo falhar, retornar um DataFrame vazio
+                return pd.DataFrame()
+    
+    # Se não for DataFrame, retornar vazio
+    if not isinstance(df, pd.DataFrame):
+        return pd.DataFrame()
+        
     # Criar uma cópia para não modificar o original
     df_fixed = df.copy()
     
@@ -2448,33 +2471,28 @@ def model_selection():
                     st.warning("Nenhum parâmetro encontrado para salvar.")
 
                 # Após o primeiro treino
+                # Após o primeiro treino
                 if resultado:
                     # Armazena os resultados iniciais para comparação futura
                     st.session_state['resultado_sem_selecao'] = resultado  # Salva os resultados sem seleção
                     st.session_state['treinos_realizados'].append(resultado)
                     
-                    # Criar o DataFrame
+                    # Criar o DataFrame com as métricas
                     df_resultado = pd.DataFrame([resultado])
-
-                    # Formatar apenas as colunas numéricas
-                    formatted_df = df_resultado.style.format(
-                        {col: "{:.4f}" for col in df_resultado.select_dtypes(include=['float', 'float64']).columns}
-                    )
-
-                    # Exibir a tabela formatada
-                    # Exibir as métricas com 4 casas decimais
-                    df_resultado = pd.DataFrame([resultado])
-                    # Formatar apenas colunas numéricas
-                    formatted_df = df_resultado.style.format(
-                        {col: "{:.4f}" for col in df_resultado.select_dtypes(include=['float', 'float64']).columns}
-                    )
-
+                
+                    # Corrigir os tipos antes de formatar
+                    df_corrigido = fix_dataframe_types(df_resultado)
+                    
+                    # Aplicar formatação depois de corrigir os tipos
                     st.write("Métricas do modelo treinado:")
-                    st.dataframe(fix_dataframe_types(formatted_df))
-
+                    formatted_display = df_corrigido.style.format(
+                        {col: "{:.4f}" for col in df_corrigido.select_dtypes(include=['float', 'float64']).columns}
+                    )
+                    st.dataframe(formatted_display)
+                
                     # Gráfico das métricas
-                    plot_metrics(df_resultado)
-
+                    plot_metrics(df_corrigido)
+                
                     # Marcar o treino como concluído
                     st.session_state['treino_concluido'] = True
                 else:
