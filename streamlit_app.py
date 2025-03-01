@@ -3636,34 +3636,39 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Gráficos de Métricas
     # Para cada métrica, criar um gráfico de barras
+
     for metric in metric_columns:
         if metric in comparison_df.columns:
             # Criar o gráfico
-            plt.figure(figsize=(8, 4))
+            plt.figure(figsize=(10, 6))  # Aumentar a altura do gráfico
             
             # Dados para o gráfico
             models = comparison_df['Modelo'].tolist()
             values = comparison_df[metric].tolist()
             
             # Criar barras
-            plt.bar(models, values, color=['#90EE90', '#006400']) 
+            plt.bar(models, values, color=['#90EE90', '#006400'])
             
             # Adicionar valores sobre as barras
             for i, v in enumerate(values):
                 if isinstance(v, (int, float)):
-                    plt.text(i, v + 0.01, f"{v:.4f}", ha='center')
+                    plt.text(i, v + 0.01, f"{v:.4f}", ha='center', fontsize=10)
             
             # Estilização
-            plt.title(f"Comparação de {metric}")
-            plt.ylabel(metric)
-            plt.xticks(rotation=45, ha='right')
-            plt.tight_layout()
+            plt.title(f"Comparação de {metric}", fontsize=14)
+            plt.ylabel(metric, fontsize=12)
+            plt.xticks(rotation=45, ha='right', fontsize=10)
+            
+            # Ajustar a altura do gráfico para evitar corte
+            plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20%
+            
+            plt.tight_layout()  # Ajusta automaticamente o layout
             
             # Salvar o gráfico em um arquivo temporário
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(temp_file.name)
+            plt.savefig(temp_file.name, bbox_inches='tight')  # Garante que nada seja cortado
             plt.close()
-            
+        
             # Adicionar o gráfico ao PDF
             pdf.add_page()
             pdf.set_font("Arial", style="B", size=14)
