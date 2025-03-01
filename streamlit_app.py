@@ -3142,7 +3142,7 @@ def evaluate_and_compare_models():
     st.dataframe(
     comparison_df.style.format(format_dict).set_table_styles(
         [{'selector': 'th', 'props': [('font-size', '18px')]}, 
-         {'selector': 'td', 'props': [('font-size', '14px')]},  
+         {'selector': 'td', 'props': [('font-size', '12px')]},  
          {'selector': 'table', 'props': [('width', '100%')]},    
         ]
     )
