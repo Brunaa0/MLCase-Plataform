@@ -2663,11 +2663,11 @@ def evaluate_regression_model(y_true, y_pred):
 
 def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params=None):
     try:
-        # Verificações simplificadas
+        # Verificações mais simples
         is_svr = isinstance(model, SVR)
         is_regression = is_svr or isinstance(model, LinearRegression)
 
-        # Escalonamento simples
+        # Escalonamento somente para SVR
         if is_svr:
             scaler = StandardScaler()
             X_train = scaler.fit_transform(X_train)
@@ -2678,43 +2678,51 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
             cv = KFold(n_splits=5, shuffle=True, random_state=42)
             scoring = 'r2' if is_regression else 'accuracy'
             
+            # Incorporar parâmetros manuais no grid
+            if manual_params:
+                param_grid.update({k: [v] for k, v in manual_params.items()})
+            
             grid_search = GridSearchCV(
                 model, 
                 param_grid, 
                 cv=cv, 
                 scoring=scoring, 
-                n_jobs=1  # Reduzir para 1 para evitar sobrecarga
+                n_jobs=1
             )
             grid_search.fit(X_train, y_train)
             
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
         else:
+            # Treinar sem GridSearch
+            if manual_params:
+                model.set_params(**manual_params)
+            
             model.fit(X_train, y_train)
             best_model = model
-            best_params = {}
+            best_params = manual_params or {}
 
         # Predições
         y_pred = best_model.predict(X_test)
 
-        # Métricas
-        if is_regression:
-            metrics = {
-                "Modelo": model.__class__.__name__,
-                "R²": r2_score(y_test, y_pred),
-                "MAE": mean_absolute_error(y_test, y_pred),
-                "MSE": mean_squared_error(y_test, y_pred),
-                "Best Parameters": best_params
-            }
-        else:
-            metrics = {
-                "Modelo": model.__class__.__name__,
-                "Accuracy": accuracy_score(y_test, y_pred),
-                "Precision": precision_score(y_test, y_pred, average='weighted'),
-                "Recall": recall_score(y_test, y_pred, average='weighted'),
-                "F1-Score": f1_score(y_test, y_pred, average='weighted'),
-                "Best Parameters": best_params
-            }
+        # Métricas baseadas no tipo de modelo
+        metrics = {
+            "Modelo": model.__class__.__name__,
+            **(
+                {
+                    "R²": r2_score(y_test, y_pred),
+                    "MAE": mean_absolute_error(y_test, y_pred),
+                    "MSE": mean_squared_error(y_test, y_pred)
+                } if is_regression else 
+                {
+                    "Accuracy": accuracy_score(y_test, y_pred),
+                    "Precision": precision_score(y_test, y_pred, average='weighted'),
+                    "Recall": recall_score(y_test, y_pred, average='weighted'),
+                    "F1-Score": f1_score(y_test, y_pred, average='weighted')
+                }
+            ),
+            "Best Parameters": best_params
+        }
 
         return metrics
 
