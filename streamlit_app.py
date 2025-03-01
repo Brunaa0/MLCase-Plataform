@@ -3163,6 +3163,7 @@ def evaluate_and_compare_models():
     
     if scoring_metric:
         # Gráfico de comparação usando a métrica escolhida pelo usuário
+
         x = comparison_df['Modelo']
         y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
         y2 = comparison_df[scoring_metric].iloc[1]  # Com Seleção de Features (índice 1)
@@ -3170,9 +3171,13 @@ def evaluate_and_compare_models():
         # Gráfico de comparação com melhorias no layout e visibilidade dos rótulos
         fig, ax = plt.subplots(figsize=(10, 6))
 
+        # Posições das barras
+        x_pos = [0, 1]  # Definindo a posição das barras para garantir que fiquem ao lado
+        width = 0.4  # Largura das barras
+
         # Ajustar as barras para uma boa visibilidade
-        bars1 = ax.bar(x[0], y1, width=0.4, label="Sem Seleção de Features", color='#90EE90', align='center')
-        bars2 = ax.bar(x[1], y2, width=0.4, label="Com Seleção de Features", color='#006400', align='center')
+        bars1 = ax.bar(x_pos[0], y1, width=width, label="Sem Seleção de Features", color='#90EE90', align='center')
+        bars2 = ax.bar(x_pos[1], y2, width=width, label="Com Seleção de Features", color='#006400', align='center')
 
         # Adicionar rótulos de valor nas barras com melhorias
         for bar in bars1:
@@ -3199,7 +3204,7 @@ def evaluate_and_compare_models():
         ax.set_xlabel("Modelos", fontsize=14)
 
         # Ajuste nos rótulos do eixo X e Y
-        plt.xticks(fontsize=12)
+        plt.xticks(x_pos, ['Sem Seleção de Features', 'Com Seleção de Features'], fontsize=12)
         plt.yticks(fontsize=12)
 
         # Legenda
@@ -3210,6 +3215,7 @@ def evaluate_and_compare_models():
 
         # Exibir o gráfico
         st.pyplot(fig)
+
 
     # Determinar o melhor modelo baseado na métrica escolhida
     if scoring_metric:
