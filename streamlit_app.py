@@ -3139,7 +3139,6 @@ def evaluate_and_compare_models():
         if col != 'Modelo' and col != 'Best Parameters':
             format_dict[col] = '{:.4f}'
     
-    st.table(fix_dataframe_types(comparison_df.style.format(format_dict)))
     st.dataframe(
     comparison_df.style.format(format_dict).set_table_styles(
         [{'selector': 'th', 'props': [('font-size', '16px')]},  # Ajuste do tamanho da fonte dos cabeçalhos
