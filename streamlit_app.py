@@ -1047,7 +1047,7 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
     summary_simplified = summary_simplified.fillna('')
 
     # Gerar a tabela diretamente no PDF
-    pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
+    pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
     col_widths = [pdf.get_string_width(col) for col in summary_simplified.columns]  # Largura das colunas
     max_width = 180  # Largura máxima disponível (ajustável para caber na largura do PDF)
 
@@ -1077,7 +1077,7 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
     if not missing_data.empty:  # Verifica se os dados estão vazios
         # Tabela de Valores Ausentes
         missing_data_list = [(col, str(count)) for col, count in missing_data.items()]
-        pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
         pdf.cell(50, 10, clean_text("Variável"), 1, 0, 'C', True)
         pdf.cell(50, 10, clean_text("Total de Ausentes"), 1, 1, 'C', True)
         for col, count in missing_data_list:
@@ -1097,7 +1097,7 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
     if outlier_summary:
         # Tabela de Outliers
         outlier_list = [(entry["Variável"], str(entry["Total de Outliers"])) for entry in outlier_summary]
-        pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
         pdf.cell(50, 10, clean_text("Variável"), 1, 0, 'C', True)
         pdf.cell(50, 10, clean_text("Total de Outliers"), 1, 1, 'C', True)
         for variable, total_outliers in outlier_list:
@@ -3567,7 +3567,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         # Formatar a tabela de informações
         pdf.set_font("Arial", size=10)
-        pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
         
         for i, (label, value) in enumerate(data_info):
             if i % 2 == 0:  # Linhas alternadas
@@ -3603,7 +3603,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Criar tabela de métricas
     pdf.set_font("Arial", style="B", size=10)
-    pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
+    pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
     
     # Definir a largura das colunas
     column_width = 30
