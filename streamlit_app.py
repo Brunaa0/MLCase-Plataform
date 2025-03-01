@@ -3379,16 +3379,29 @@ def execute_training():
 
 # Função para gerar o relatório em PDF
 class CustomPDF(FPDF):
-    def header(self):
-        # Baixar a imagem do logo e salvar localmente
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Baixar e armazenar o logo no início para reutilizá-lo em todas as páginas
+        self.logo_path = None
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
-        response = requests.get(logo_url)
-        if response.status_code == 200:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
-                tmpfile.write(response.content)
-                tmpfile_path = tmpfile.name
-                # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
+        try:
+            response = requests.get(logo_url)
+            if response.status_code == 200:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
+                    tmpfile.write(response.content)
+                    self.logo_path = tmpfile.name
+        except Exception as e:
+            print(f"Erro ao baixar o logo: {e}")
+
+    def header(self):
+        # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
+        if self.logo_path:
+            try:
+                self.image(self.logo_path, 10, 8, 20)
+            except Exception as e:
+                print(f"Erro ao adicionar imagem: {e}")
+                self.set_font('Arial', 'B', 12)
+                self.cell(0, 10, "Logo não disponível", align='C')
         else:
             self.set_font('Arial', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
@@ -3407,7 +3420,6 @@ class CustomPDF(FPDF):
         current_date = datetime.now().strftime('%d/%m/%Y')
         # Adicionar rodapé com a data e número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
-
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
         """
