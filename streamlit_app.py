@@ -3092,7 +3092,6 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
-
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
