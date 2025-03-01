@@ -3993,8 +3993,6 @@ def get_metric_mapping(metric):
     
     return mapped_metric
     
-
-
 def final_page():
     st.title("Resumo Final dos Modelos Treinados")
 
@@ -4245,7 +4243,7 @@ def final_page():
     if st.button("Concluir"):
         st.session_state.clear()  # Limpa o cache do Streamlit
         st.rerun()
-      
+
 ############ Relatório Final para Clustering ###################
 # Classe personalizada para PDF
 class CustomPDF(FPDF):
@@ -4605,7 +4603,7 @@ def main():
     initialize_session_state()
 
     # Exibir estado atual para depuração
-    st.write(f"📌 Estado atual: {st.session_state.step}")
+    #st.write(f"📌 Estado atual: {st.session_state.step}")
 
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
@@ -4624,15 +4622,17 @@ def main():
         feature_selection()
     elif st.session_state.step == 'train_with_selected_features':  
         train_with_selected_features_page()
-    elif st.session_state.step == 'evaluate_and_compare_models':  # Corrigido!
+    elif st.session_state.step == 'evaluate_and_compare_models':
         evaluate_and_compare_models()
+    elif st.session_state.step == 'clustering_final_page':  # ✅ Adicionado!
+        clustering_final_page()  # ✅ Chama a função do relatório final de clustering
     elif st.session_state.step == 'final_page':
         final_page()
     else:
         st.error(f"⚠ Etapa desconhecida: {st.session_state.step}. Reiniciando a aplicação.")
         st.session_state.step = 'file_upload'
         st.rerun()
-
+        
     # Exibir o estado após a execução para depuração
     #st.write(f"Estado final: {st.session_state.step}")
 
