@@ -3840,11 +3840,19 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Conclusão"), ln=True)
     
-    # Determinar a melhor métrica com base no tipo de modelo
-    main_metric = 'R²' if is_regression else 'F1-Score'
+    # Determinar a melhor métrica com base na escolha do usuário
+    scoring_metric = session_state.get("selected_scoring", None)
+
+    # Fallback para métricas padrão se a métrica selecionada não estiver disponível
+    if not scoring_metric or scoring_metric not in metric_columns:
+        main_metric = 'R²' if is_regression else 'F1-Score'
+    else:
+        main_metric = scoring_metric
+
+    # Obter os valores da métrica escolhida
     original_value = original_metrics.get(main_metric, 0)
     selected_value = selected_metrics.get(main_metric, 0)
-    
+
     # Texto da conclusão
     pdf.set_font("Arial", size=10)
     conclusion_text = f"Com base na métrica principal ({main_metric}), o modelo {best_model} apresentou o melhor desempenho."
