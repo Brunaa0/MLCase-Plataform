@@ -3163,6 +3163,11 @@ def evaluate_and_compare_models():
     
     if scoring_metric:
         # Gráfico de comparação usando a métrica escolhida pelo usuário
+        x = comparison_df['Modelo']
+        y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
+        y2 = comparison_df[scoring_metric].iloc[1]  # Com Seleção de Features (índice 1)
+
+        # Gráfico de comparação com melhorias no layout e visibilidade dos rótulos
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Ajustar as barras para uma boa visibilidade
