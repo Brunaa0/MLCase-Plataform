@@ -1963,7 +1963,6 @@ def model_selection():
                 st.warning("Selecione um modelo antes de continuar.")
 
 
-
     # Função para a configuração de Clustering
     import pandas as pd
 
@@ -1979,6 +1978,11 @@ def model_selection():
 
         # Dados categóricos codificados
         X = pd.get_dummies(st.session_state.data)
+
+        # Padronizar os dados
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
 
         # Análise de clusters
         st.write("### Análise para Determinação do Número de Clusters")
@@ -2052,7 +2056,7 @@ def model_selection():
         # Condicional para Clustering Hierárquico
         elif st.session_state.selected_model_name == "Clustering Hierárquico":
             for n_clusters in range(num_clusters_range[0], num_clusters_range[1] + 1):
-                temp_model = AgglomerativeClustering(n_clusters=n_clusters)
+                temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
                 temp_model.fit(X)
                 labels = temp_model.labels_
 
@@ -2135,7 +2139,7 @@ def model_selection():
             # Treinar modelo inicial
             if st.button(f"Treinar Modelo Inicial"):
                 model = st.session_state.models[st.session_state.selected_model_name]
-                model.set_params(n_clusters=best_n_clusters_retrain)
+                model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
                 model.fit(X)
                 st.session_state.clustering_labels = model.labels_
                 st.session_state.initial_metrics = {
@@ -2189,7 +2193,7 @@ def model_selection():
             # Botão para executar o re-treino
             if st.button("Treinar Novamente"):
                 model = st.session_state.models[st.session_state.selected_model_name]
-                model.set_params(n_clusters=best_n_clusters_retrain)
+                model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
                 model.fit(X)
                 st.session_state.retrain_metrics = {
                     "Número de Clusters": best_n_clusters_retrain,
@@ -2628,22 +2632,45 @@ def model_selection():
 
 # Função para treinar e avaliar os modelos de clustering
 def train_clustering_model(model, X_data, model_name):
-    # Adicionar a padronização para todos os modelos de clustering
-    from sklearn.preprocessing import StandardScaler
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_data)
-    
-    if model_name == "KMeans":
-        model.set_params(n_clusters=st.session_state.kmeans_clusters)
-        model.fit(X_scaled)  # Use X_scaled em vez de X_data
-        st.session_state['labels'] = model.labels_
-
-    elif model_name == "Clustering Hierárquico":
-        model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage="ward")
-        model.fit(X_scaled)  # Use X_scaled em vez de X_data
-        st.session_state['labels'] = model.labels_
-
-    st.write(f"Clusterização realizada com {model_name}")
+    try:
+        # Log para diagnóstico
+        st.write(f"Iniciando treinamento do modelo {model_name}...")
+        st.write(f"Forma dos dados: {X_data.shape}")
+        
+        # Verificar se há valores ausentes
+        if X_data.isnull().any().any():
+            st.warning("Dados contêm valores ausentes. Aplicando tratamento...")
+            X_data = X_data.fillna(X_data.mean())
+        
+        # Padronizar os dados
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X_data)
+        
+        # Configurar e treinar o modelo com base no tipo
+        if model_name == "KMeans":
+            st.write("Configurando KMeans...")
+            n_clusters = st.session_state.get('kmeans_clusters', 3)
+            model.set_params(n_clusters=n_clusters, random_state=42)
+            model.fit(X_scaled)
+            st.session_state['labels'] = model.labels_
+            
+        elif model_name == "Clustering Hierárquico":
+            st.write("Configurando Clustering Hierárquico...")
+            n_clusters = st.session_state.get('kmeans_clusters', 3)
+            # Definir explicitamente todos os parâmetros necessários
+            model.set_params(n_clusters=n_clusters, linkage="ward", compute_full_tree=True)
+            model.fit(X_scaled)
+            st.session_state['labels'] = model.labels_
+        
+        st.success(f"Clusterização concluída com {model_name}. Clusters detectados: {len(set(model.labels_))}")
+        return True
+        
+    except Exception as e:
+        st.error(f"Erro ao treinar o modelo {model_name}: {str(e)}")
+        import traceback
+        st.error(f"Detalhes do erro: {traceback.format_exc()}")
+        return False
 
 # Visualização dos Clusters usando PCA
 def visualize_clusters(X_data):
