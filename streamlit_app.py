@@ -3140,6 +3140,14 @@ def evaluate_and_compare_models():
             format_dict[col] = '{:.4f}'
     
     st.table(fix_dataframe_types(comparison_df.style.format(format_dict)))
+    st.dataframe(
+    comparison_df.style.format(format_dict).set_table_styles(
+        [{'selector': 'th', 'props': [('font-size', '16px')]},  # Ajuste do tamanho da fonte dos cabeçalhos
+         {'selector': 'td', 'props': [('font-size', '14px')]},  # Ajuste do tamanho da fonte das células
+         {'selector': 'table', 'props': [('width', '80%')]},     # Ajuste da largura da tabela
+        ]
+    )
+)
     
     # Determinar as métricas disponíveis com base no tipo de modelo
     if model_type == "Classificação":
