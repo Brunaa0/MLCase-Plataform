@@ -2885,19 +2885,27 @@ def feature_selection():
 def train_with_selected_features_page():
     st.title("Treinando Modelo com Features Selecionadas")
     
-    if 'models' not in st.session_state or 'selected_model_name' not in st.session_state:
+    if 'models' not in st.session_state or not st.session_state.models:
         st.error("Erro: Nenhum modelo foi treinado ou selecionado.")
         return
 
-    model = st.session_state.models.get(st.session_state.selected_model_name)
-    if model is None:
-        st.error("Modelo selecionado não encontrado.")
+    if 'selected_model_name' not in st.session_state or not st.session_state.selected_model_name:
+        st.error("Nenhum modelo foi selecionado. Por favor, selecione um modelo antes de continuar.")
         return
+
+    selected_model_name = st.session_state.selected_model_name.strip()
+
+    if selected_model_name not in st.session_state.models:
+        st.error(f"O modelo '{selected_model_name}' não foi encontrado na sessão.")
+        st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
+        return
+
+    model = st.session_state.models[selected_model_name]
     
     X_train_selected, X_test_selected = st.session_state.X_train_selected, st.session_state.X_test_selected
     y_train, y_test = st.session_state.y_train, st.session_state.y_test
     
-    st.write(f"Treinando o modelo {st.session_state.selected_model_name} com {len(st.session_state.selected_features)} features selecionadas...")
+    st.write(f"Treinando o modelo {selected_model_name} com {len(st.session_state.selected_features)} features selecionadas...")
     
     selected_metrics = train_and_store_metrics(model, X_train_selected, y_train, X_test_selected, y_test, "Com Seleção", False)
     
@@ -2915,7 +2923,6 @@ def train_with_selected_features_page():
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
-
 #Função para Treinar e Armazenar as metricas
 
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
