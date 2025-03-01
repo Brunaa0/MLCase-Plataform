@@ -1630,6 +1630,102 @@ def load_best_params():
             return pickle.load(f)
     return None
 
+
+def train_svr_with_gridsearch(X_train, y_train, X_test, y_test, use_grid_search=True, manual_params=None):
+    """
+    Train Support Vector Regression (SVR) model with optional GridSearchCV
+    
+    Parameters:
+    -----------
+    X_train : array-like
+        Training feature matrix
+    y_train : array-like
+        Training target vector
+    X_test : array-like
+        Testing feature matrix
+    y_test : array-like
+        Testing target vector
+    use_grid_search : bool, optional (default=True)
+        Whether to use GridSearchCV for hyperparameter tuning
+    manual_params : dict, optional
+        Manually specified parameters to override GridSearch
+    
+    Returns:
+    --------
+    dict
+        Dictionary containing model performance metrics and details
+    """
+    try:
+        # Standardize the features
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+        
+        # Base SVR model
+        svr = SVR()
+        
+        # Default parameter grid for SVR
+        param_grid = {
+            'C': [0.1, 1, 10, 100],
+            'epsilon': [0.01, 0.1, 0.2],
+            'kernel': ['linear', 'rbf'],
+            'gamma': ['scale', 'auto']
+        }
+        
+        # If manual parameters are provided, update the param_grid
+        if manual_params:
+            for param, value in manual_params.items():
+                # Ensure the value is a list for GridSearchCV
+                param_grid[param] = [value] if not isinstance(value, list) else value
+        
+        # Cross-validation strategy
+        cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
+        
+        if use_grid_search:
+            # Perform GridSearchCV
+            grid_search = GridSearchCV(
+                estimator=svr, 
+                param_grid=param_grid, 
+                cv=cv_strategy, 
+                scoring='neg_mean_squared_error', 
+                n_jobs=-1
+            )
+            grid_search.fit(X_train_scaled, y_train)
+            
+            # Best model from GridSearch
+            best_model = grid_search.best_estimator_
+            best_params = grid_search.best_params_
+        else:
+            # Use manual or default parameters
+            if manual_params:
+                svr.set_params(**manual_params)
+            
+            best_model = svr.fit(X_train_scaled, y_train)
+            best_params = manual_params or {}
+        
+        # Make predictions
+        y_pred = best_model.predict(X_test_scaled)
+        
+        # Calculate metrics
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+        
+        # Prepare metrics dictionary
+        metrics = {
+            "Modelo": "Support Vector Regression (SVR)",
+            "R²": r2,
+            "MAE": mae,
+            "MSE": mse,
+            "Best Parameters": best_params
+        }
+        
+        return metrics
+    
+    except Exception as e:
+        st.error(f"Erro ao treinar o modelo SVR: {str(e)}")
+        return None
+
 def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_search, manual_params=None, cv_choice="K-Fold"):
     try:
         # Inicializar parâmetros manuais como vazio, se não fornecido
@@ -2562,10 +2658,22 @@ def evaluate_regression_model(y_true, y_pred):
 def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params=None):
     metrics = {}  # Armazena as métricas
 
+    # Verificar se é SVR específico
+    is_svr = isinstance(model, SVR) or model.__class__.__name__ == 'SVR'
+    
     # Verificar se é regressão
     is_regression = isinstance(model, (LinearRegression, SVR)) or "Regressão" in model.__class__.__name__
 
     try:
+        # Preparação para SVR: Escalonamento dos dados
+        if is_svr:
+            scaler = StandardScaler()
+            X_train_scaled = scaler.fit_transform(X_train)
+            X_test_scaled = scaler.transform(X_test)
+        else:
+            X_train_scaled = X_train
+            X_test_scaled = X_test
+
         # Recuperar parâmetros manuais do estado
         manual_params = st.session_state.get('manual_params', {})
 
@@ -2574,6 +2682,19 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
             del manual_params['gamma']
         if 'gamma' in st.session_state.get('manual_params', {}):
             del st.session_state['manual_params']['gamma']
+
+        # Configurações específicas para SVR
+        if is_svr:
+            # Grid de parâmetros padrão para SVR
+            default_svr_param_grid = {
+                'C': [0.1, 1, 10, 100],
+                'epsilon': [0.01, 0.1, 0.2],
+                'kernel': ['linear', 'rbf'],
+                'gamma': ['scale', 'auto']
+            }
+            
+            # Atualizar param_grid com parâmetros padrão de SVR
+            param_grid = default_svr_param_grid
 
         # Aplicar GridSearch se necessário
         if use_grid_search:
@@ -2589,7 +2710,9 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
             scoring = 'r2' if is_regression else 'accuracy'
 
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
-            grid_search.fit(X_train, y_train)
+            
+            # Treinar com os dados corretos (escalados para SVR)
+            grid_search.fit(X_train_scaled, y_train)
 
             # Melhor modelo e parâmetros
             best_model = grid_search.best_estimator_
@@ -2607,27 +2730,19 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
             # Treinar sem GridSearch
             valid_params = model.get_params().keys()
             manual_params = {k: v for k, v in manual_params.items() if k in valid_params}
+            
             # Aplicar parâmetros do GridSearch antes do treino
             best_params = st.session_state.get('manual_params', {})
             if best_params:
                 model.set_params(**best_params)
 
-            # Selecione o método de treino
-            if use_grid_search:
-                grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
-                grid_search.fit(X_train, y_train)
-                best_model = grid_search.best_estimator_
-                best_params = grid_search.best_params_
-                st.session_state['best_params_selected'] = best_params  # Salva os melhores parâmetros
-            else:
-                model.fit(X_train, y_train)
-                best_model = model
-
+            # Treinar com os dados corretos
+            model.fit(X_train_scaled, y_train)
             best_model = model
             best_params = manual_params
 
-        # Fazer previsões
-        y_pred = best_model.predict(X_test)
+        # Fazer previsões com os dados corretos
+        y_pred = best_model.predict(X_test_scaled)
 
         # Avaliar desempenho
         if is_regression:
@@ -2662,7 +2777,7 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
-
+        
 # Função para selecionar o scoring
 def select_scoring():
     # Verifica se 'selected_scoring' já existe, caso contrário, inicializa com 'f1' como padrão
