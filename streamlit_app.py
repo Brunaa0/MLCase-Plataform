@@ -3516,7 +3516,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Título do Relatório
     pdf.set_font("Arial", style="B", size=16)
-    pdf.cell(0, 10, txt=clean_text("Relatório Final dos Modelos Treinados"), ln=True, align="C")
+    pdf.cell(0, 10, txt=clean_text("Relatório Final do Modelo Treinado"), ln=True, align="C")
     pdf.ln(10)
     
     # Tipo de Modelo
@@ -3646,7 +3646,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
             values = comparison_df[metric].tolist()
             
             # Criar barras
-            plt.bar(models, values, color=['#3498DB', '#2980B9'])
+            plt.bar(models, values, color=['#90EE90', '#006400']) 
             
             # Adicionar valores sobre as barras
             for i, v in enumerate(values):
@@ -4209,7 +4209,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
 
     # Título
     pdf.set_font("Arial", style="B", size=16)
-    pdf.cell(0, 10, txt="Relatório Final de Clustering", ln=True, align="C")
+    pdf.cell(0, 10, txt="Relatório Final do Modelo Treinados", ln=True, align="C")
     pdf.ln(10)
 
     # Modelo Selecionado
@@ -4280,7 +4280,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
         if retrain_metrics:
             labels.append("Re-Treino")
             values.append(retrain_metrics[metric])
-        plt.bar(labels, values, color=['#a8ddb5', '#005a32'], edgecolor='black')
+        plt.bar(labels, values, color=['#90EE90', '#006400'], edgecolor='black')
         plt.title(f"{metric} por Treino")
         plt.ylabel(metric)
         plt.xlabel("Treino")
