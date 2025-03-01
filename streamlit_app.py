@@ -1632,27 +1632,12 @@ def load_best_params():
 
 def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_search, manual_params=None, cv_choice="K-Fold"):
     try:
-        st.write("Parâmetros recebidos:")
-        st.write("param_grid:", param_grid)
-        st.write("manual_params:", manual_params)
         # Inicializar parâmetros manuais como vazio, se não fornecido
         if manual_params is None:
             manual_params = {}
-        # Verifica se max_depth está no param_grid antes de iniciar o GridSearch
-        st.write("Parâmetros antes do GridSearchCV:", param_grid)
+
         # Obter o nome do modelo
-        model_name = None
-        if isinstance(model, SVC):
-            model_name = "Support Vector Classification (SVC)"
-        elif isinstance(model, KNeighborsClassifier):
-            model_name = "K-Nearest Neighbors (KNN)"
-        elif isinstance(model, RandomForestClassifier):
-            model_name = "Random Forest"
-        elif isinstance(model, SVR):
-            model_name = "Regressão por Vetores de Suporte (SVR)"
-        else:
-            st.error(f"Modelo não reconhecido: {model}")
-            return None, None
+        model_name = type(model).__name__
 
         # Logs para diagnóstico - Parâmetros no estado global antes do treino
         st.write("Parâmetros no estado global antes do treino:")
@@ -1662,51 +1647,47 @@ def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_se
         # Carregar parâmetros salvos do estado global
         saved_params = st.session_state.get('best_params', None)
 
-        # **Aplicar parâmetros salvos, se existirem**
-        if saved_params and not use_grid_search:  # Se não usar GridSearch, aplica os salvos
+        # Aplicar parâmetros salvos, se existirem e não usar GridSearch
+        if saved_params and not use_grid_search:
             st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
             model.set_params(**saved_params)
 
         # Remover 'gamma' se o kernel for 'linear'
         if manual_params.get("kernel") == "linear" and "gamma" in manual_params:
-            del manual_params["gamma"]  # Remove localmente
+            del manual_params["gamma"]
             if 'gamma' in st.session_state.get('manual_params', {}):
-                del st.session_state['manual_params']['gamma']  # Remove globalmente
+                del st.session_state['manual_params']['gamma']
 
-        # **Se usar GridSearch**
+        # Se usar GridSearch
         if use_grid_search:
             # Atualizar grid com parâmetros manuais fornecidos
             if manual_params:
                 for param, value in manual_params.items():
                     if not isinstance(value, list):
-                        manual_params[param] = [value]  # Converter para lista
-
-                # Atualiza o param_grid
+                        manual_params[param] = [value]
                 param_grid.update(manual_params)
 
             # Configurar validação cruzada
             cv_strategy = get_cv_strategy(cv_choice, X_train, y_train)
-            scoring = 'r2' if model_name == "Regressão por Vetores de Suporte (SVR)" else 'accuracy'
+            scoring = 'r2' if model_name == "SVR" else 'accuracy'
 
             # Treinar com GridSearch
             grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_strategy, scoring=scoring, n_jobs=-1)
             grid_search.fit(X_train, y_train)
 
             # Melhor modelo e parâmetros
+            best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
-            st.session_state['best_params'] = best_params  # Salva no estado global
+            st.session_state['best_params'] = best_params
             st.success(f"Melhores parâmetros encontrados: {best_params}")
-            st.write("Parâmetros salvos no estado global:", st.session_state['best_params'])
 
-            # Retorna o melhor modelo e parâmetros
-            return grid_search.best_estimator_, best_params
+            return best_model, best_params
 
         else:
             # Se não usar GridSearch, aplicar manualmente os parâmetros
-            if manual_params:
-                valid_params = model.get_params().keys()
-                manual_params = {k: v for k, v in manual_params.items() if k in valid_params}
-                model.set_params(**manual_params)
+            valid_params = model.get_params().keys()
+            manual_params = {k: v for k, v in manual_params.items() if k in valid_params}
+            model.set_params(**manual_params)
 
             # Treinar diretamente
             model.fit(X_train, y_train)
@@ -1715,13 +1696,11 @@ def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_se
             st.session_state['manual_params'] = manual_params
             st.success(f"Parâmetros manuais salvos: {manual_params}")
 
-            # Retorna o modelo e parâmetros manuais
             return model, manual_params
 
     except Exception as e:
         st.error(f"Ocorreu um erro ao treinar o modelo: {str(e)}")
         return None, None
-
 
 # Função para calcular o Gap Statistic para o Clustering Hierárquico
 def calculate_gap_statistic_hierarchical(X, n_clusters_range, n_ref=10):
