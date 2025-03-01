@@ -3196,7 +3196,7 @@ def evaluate_and_compare_models():
                         xytext=(0, 3),
                         textcoords="offset points",
                         ha='center', va='bottom',
-                        fontsize=12, color='white')  # Altere a cor para garantir contraste
+                        fontsize=12, color='black')  # Altere a cor para garantir contraste
 
         # Melhorando o título e as labels
         ax.set_title(f'Comparação de {scoring_metric}', fontsize=16, fontweight='bold')
