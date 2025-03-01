@@ -3385,35 +3385,63 @@ from datetime import datetime
 from io import BytesIO
 
 class CustomPDF(FPDF):
-    def header(self):
-        # Baixar a imagem do logo e salvar localmente
-        logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
-        response = requests.get(logo_url)
-        if response.status_code == 200:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
-                tmpfile.write(response.content)
-                tmpfile_path = tmpfile.name
-                # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
-        else:
-            self.set_font('Arial', 'B', 12)
-            self.cell(0, 10, "Logo não disponível", align='C')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Definir as margens para garantir espaço para cabeçalho e rodapé
+        self.set_margins(20, 25, 20)  # left, top, right
         
-        # Definir fonte para o cabeçalho
+        # Baixar o logo no início para reutilizá-lo
+        self.logo_path = None
+        logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
+        try:
+            response = requests.get(logo_url)
+            if response.status_code == 200:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
+                    tmpfile.write(response.content)
+                    self.logo_path = tmpfile.name
+        except Exception as e:
+            print(f"Erro ao baixar o logo: {e}")
+
+    def header(self):
+        """Método para o cabeçalho da página"""
+        # Salvar posição atual
+        self.set_y(10)
+        
+        # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
+        if self.logo_path:
+            self.image(self.logo_path, 10, 10, 20)  # Posição fixa para o logo
+        
+        # Configurar fonte para o título
         self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
-        self.ln(15)  # Espaço após o cabeçalho
+        self.set_text_color(0, 0, 0)  # Texto preto
+        
+        # Centralizar o título (ajuste para o espaço do logo)
+        self.cell(20)  # Espaço para o logo
+        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 1, 'C')
+        
+        # Linha separadora
+        self.line(10, 25, 200, 25)
+        
+        # Espaço após o cabeçalho
+        self.ln(15)
 
     def footer(self):
+        """Método para o rodapé da página"""
         # Ir para 1.5 cm da parte inferior
-        self.set_y(-15)
+        self.set_y(-20)
+        
+        # Linha separadora
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(1)
+        
         # Definir fonte para o rodapé
-        self.set_font('Arial', 'I', 10)
+        self.set_font('Arial', 'I', 8)
+        
         # Data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
+        
         # Adicionar rodapé com a data e número da página
-        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
-
+        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', 0, 0, 'C')
 
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
@@ -3491,38 +3519,7 @@ class MLCaseModelReportGenerator:
         plt.close()
         
         return buf
-
-class CustomPDF(FPDF):
-    def header(self):
-        # Baixar a imagem do logo e salvar localmente
-        logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
-        response = requests.get(logo_url)
-        if response.status_code == 200:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
-                tmpfile.write(response.content)
-                tmpfile_path = tmpfile.name
-                # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
-        else:
-            self.set_font('Arial', 'B', 12)
-            self.cell(0, 10, "Logo não disponível", align='C')
-        
-        # Definir fonte para o cabeçalho
-        self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
-        self.ln(15)  # Espaço após o cabeçalho
-
-    def footer(self):
-        # Ir para 1.5 cm da parte inferior
-        self.set_y(-15)
-        # Definir fonte para o rodapé
-        self.set_font('Arial', 'I', 10)
-        # Data atual
-        current_date = datetime.now().strftime('%d/%m/%Y')
-        # Adicionar rodapé com a data e número da página
-        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
-
-
+    
 def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     """
     Gera um relatório PDF com os resultados da comparação de modelos.
@@ -4229,17 +4226,6 @@ import os
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 from io import BytesIO
-
-class CustomPDF(FPDF):
-    def header(self):
-        self.set_font("Arial", "B", 12)
-        self.cell(0, 10, "Relatório Final do Modelo Treinado", 0, 1, "C")
-        self.ln(10)
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font("Arial", "I", 8)
-        self.cell(0, 10, f"Página {self.page_no()}", 0, 0, "C")
 
 def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_type, st_session):
     pdf = CustomPDF(format='A4')
