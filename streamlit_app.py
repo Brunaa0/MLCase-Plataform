@@ -3182,7 +3182,7 @@ def evaluate_and_compare_models():
     # Mapeamento de modelos
     model_name_map = {
         "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",  # Ajustado para o nome correto
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",  # Nome correto do modelo
         "Random Forest": "RandomForestClassifier",
         "Regressão Linear Simples (RLS)": "LinearRegression",
         "Regressão por Vetores de Suporte (SVR)": "SVR"
@@ -3208,14 +3208,14 @@ def evaluate_and_compare_models():
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Encontrar o modelo no dicionário
+    # Encontrar o nome correto do modelo a partir do mapeamento
     model_class_name = model_name_map.get(model_name)  # Usar o mapeamento de nome
     if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(model_name_map.keys()))
         return
 
-    # Recuperar o modelo da sessão
+    # Recuperar o modelo da sessão com base no nome correto
     model = st.session_state.models.get(model_class_name)
     if model is None:
         st.error(f"O modelo {model_class_name} não foi encontrado na sessão.")
