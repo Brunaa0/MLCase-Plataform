@@ -2974,25 +2974,11 @@ def feature_selection():
 
             # Botão para confirmar seleção e avançar
             if st.button("Finalizar Seleção de Features"):
-                st.session_state.step = 'train_and_store_metrics'
+                st.session_state.step = 'train_with_selected_features'
                 st.rerun()
         
 #Função para Treinar e Armazenar as metricas
-import json
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.impute import SimpleImputer
-from sklearn.model_selection import GridSearchCV, KFold
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    r2_score, mean_squared_error, mean_absolute_error
-)
-from sklearn.preprocessing import LabelEncoder
-
-
-# Função para treinar e armazenar métricas
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
     try:
         # Imports necessários
@@ -3092,6 +3078,77 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
+
+# Depois de selecionar as features, devemos treinar o modelo novamente
+def train_with_selected_features_page():
+    st.title("Treinando Modelo com Features Selecionadas")
+    
+    # Verificar se todos os dados necessários estão disponíveis
+    if not all(key in st.session_state for key in ['X_train_selected', 'y_train', 'X_test_selected', 'y_test', 'selected_model_name']):
+        st.error("Dados necessários para treinamento não encontrados. Volte para a etapa anterior.")
+        return
+    
+    # Obter modelo e dados
+    model = st.session_state.models[st.session_state.selected_model_name]
+    X_train_selected = st.session_state.X_train_selected
+    X_test_selected = st.session_state.X_test_selected
+    y_train = st.session_state.y_train
+    y_test = st.session_state.y_test
+    
+    # Exibir informações para o usuário
+    st.write(f"**Modelo selecionado:** {st.session_state.selected_model_name}")
+    st.write(f"**Features selecionadas:** {len(st.session_state.selected_features)}")
+    st.write(f"**Features mantidas:** {', '.join(st.session_state.selected_features)}")
+    
+    # Status do treinamento
+    progress = st.progress(0)
+    status = st.empty()
+    
+    # Treinar o modelo com features selecionadas
+    status.text("Treinando modelo com features selecionadas...")
+    progress.progress(25)
+    
+    # Usar a função existente train_and_store_metrics
+    selected_metrics = train_and_store_metrics(
+        model,
+        X_train_selected, 
+        y_train, 
+        X_test_selected, 
+        y_test,
+        "Com Seleção",  # Este é o metric_type
+        st.session_state.use_grid_search == "Sim",
+        st.session_state.get('best_params', {})
+    )
+    
+    progress.progress(75)
+    
+    # Armazenar métricas explicitamente no session_state
+    st.session_state['resultado_com_selecao'] = selected_metrics
+    
+    # Verificar se as métricas foram armazenadas corretamente
+    if selected_metrics:
+        st.success("Métricas calculadas e armazenadas com sucesso!")
+    else:
+        st.warning("Não foi possível calcular as métricas. Verifique os logs para mais detalhes.")
+    
+    # Atualizar progresso
+    progress.progress(100)
+    status.text("Treinamento concluído!")
+    
+    # Mostrar métricas obtidas para debugging
+    st.subheader("Métricas do Modelo com Features Selecionadas")
+    if selected_metrics:
+        for key, value in selected_metrics.items():
+            if isinstance(value, (int, float)):
+                st.write(f"**{key}:** {value:.4f}")
+            else:
+                st.write(f"**{key}:** {value}")
+    
+    # Botão para avançar para comparação
+    if st.button("Comparar Modelos"):
+        st.session_state.step = 'model_comparison'
+        st.rerun()
+        
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
@@ -3122,8 +3179,8 @@ def evaluate_and_compare_models():
     # Recuperar o tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')
 
-    # Recuperar a métrica escolhida pelo usuário para seleção de features (exemplo: 'accuracy', 'f1', etc.)
-    scoring_metric = st.session_state.get("selected_scoring", None)  # Usar a chave correta do session_state
+    # Recuperar a métrica escolhida pelo usuário para seleção de features
+    scoring_metric = st.session_state.get("selected_scoring", None)
     if not scoring_metric:
         st.error("Nenhuma métrica de avaliação foi escolhida. Por favor, volte à etapa de seleção de métricas.")
         return
@@ -3135,7 +3192,7 @@ def evaluate_and_compare_models():
         return
 
     # Encontrar o nome correto do modelo a partir do mapeamento
-    model_class_name = model_name_map.get(model_name)  # Usar o mapeamento de nome amigável para classe
+    model_class_name = model_name_map.get(model_name)
     if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(model_name_map.keys()))
@@ -3152,84 +3209,130 @@ def evaluate_and_compare_models():
     original_metrics = st.session_state.get('resultado_sem_selecao', {}) 
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
+    # Código de depuração para verificar os valores armazenados
+    with st.expander("Depuração de Métricas"):
+        st.write("**Métricas originais:**", original_metrics)
+        st.write("**Métricas com seleção:**", selected_metrics)
+
     # Verificar se as métricas existem
     if not original_metrics:
         st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento.")
         return
+        
+    if not selected_metrics:
+        st.error("Não foi possível encontrar as métricas com seleção de features. Por favor, execute o treino com features selecionadas.")
+        return
 
     # Criar DataFrame de comparação
-    comparison_df = pd.DataFrame({
-        'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
-        'Accuracy': [original_metrics.get('Accuracy', 0), selected_metrics.get('Accuracy', 0)],
-        'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
-        'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
-        'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
-        'Best Parameters': [original_metrics.get('Best Parameters', 'N/A'), selected_metrics.get('Best Parameters', 'N/A')]
-    })
+    if model_type == "Classificação":
+        comparison_df = pd.DataFrame({
+            'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
+            'Accuracy': [original_metrics.get('Accuracy', 0), selected_metrics.get('Accuracy', 0)],
+            'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
+            'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
+            'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
+            'Best Parameters': [original_metrics.get('Best Parameters', 'N/A'), selected_metrics.get('Best Parameters', 'N/A')]
+        })
+    elif model_type == "Regressão":
+        comparison_df = pd.DataFrame({
+            'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
+            'R²': [original_metrics.get('R²', 0), selected_metrics.get('R²', 0)],
+            'MAE': [original_metrics.get('MAE', 0), selected_metrics.get('MAE', 0)],
+            'MSE': [original_metrics.get('MSE', 0), selected_metrics.get('MSE', 0)],
+            'Best Parameters': [original_metrics.get('Best Parameters', 'N/A'), selected_metrics.get('Best Parameters', 'N/A')]
+        })
+    else:
+        st.error(f"Tipo de modelo não reconhecido: {model_type}")
+        return
 
     # Exibir tabela de comparação
     st.subheader("📈 Comparação dos Resultados:")
-    st.table(fix_dataframe_types(comparison_df.style.format({
-        'Accuracy': '{:.4f}', 
-        'Precision': '{:.4f}', 
-        'Recall': '{:.4f}', 
-        'F1-Score': '{:.4f}',
-    })))
     
-    # Gráfico de comparação usando a métrica escolhida pelo usuário (scoring)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Formatar todas as colunas numéricas
+    format_dict = {}
+    for col in comparison_df.columns:
+        if col != 'Modelo' and col != 'Best Parameters':
+            format_dict[col] = '{:.4f}'
+    
+    st.table(fix_dataframe_types(comparison_df.style.format(format_dict)))
+    
+    # Determinar as métricas disponíveis com base no tipo de modelo
+    if model_type == "Classificação":
+        metric_columns = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+    elif model_type == "Regressão":
+        metric_columns = ['R²', 'MAE', 'MSE']
+    else:
+        metric_columns = []
+    
+    # Garantir que a métrica escolhida existe nas colunas disponíveis
+    if scoring_metric not in metric_columns:
+        st.warning(f"A métrica selecionada '{scoring_metric}' não está disponível. Usando a primeira métrica disponível.")
+        scoring_metric = metric_columns[0] if metric_columns else None
+    
+    if scoring_metric:
+        # Gráfico de comparação usando a métrica escolhida pelo usuário
+        fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Garantir que estamos pegando os valores corretos para as barras
-    x = comparison_df['Modelo']
-    y1 = comparison_df[scoring_metric].iloc[0]  # Primeiro modelo (com seleção)
-    y2 = comparison_df[scoring_metric].iloc[1]  # Segundo modelo (sem seleção)
+        # Garantir que estamos pegando os valores corretos para as barras
+        x = comparison_df['Modelo']
+        y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
+        y2 = comparison_df[scoring_metric].iloc[1]  # Com Seleção de Features (índice 1)
 
-    # Agora vamos criar as barras para os dois modelos (barras verticais)
-    bars1 = ax.bar(x[0], y1, width=0.4, label="Com Seleção de Features", color='green', align='center')
-    bars2 = ax.bar(x[1], y2, width=0.4, label="Sem Seleção de Features", color='darkgreen', align='center')
+        # Agora vamos criar as barras para os dois modelos (barras verticais)
+        bars1 = ax.bar(x[0], y1, width=0.4, label="Sem Seleção de Features", color='#90EE90', align='center')
+        bars2 = ax.bar(x[1], y2, width=0.4, label="Com Seleção de Features", color='#006400', align='center')
 
-    # Adicionar rótulos de valor nas barras
-    for bar in bars1:
-        height = bar.get_height()
-        ax.annotate(f'{height:.4f}',  # Ajuste para exibir valores com 4 casas decimais
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  # Ajustando a posição do texto
-                    textcoords="offset points",
-                    ha='center', va='bottom',
-                    fontsize=12, color='white')
+        # Adicionar rótulos de valor nas barras
+        for bar in bars1:
+            height = bar.get_height()
+            ax.annotate(f'{height:.4f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom',
+                        fontsize=12, color='black')
 
-    for bar in bars2:
-        height = bar.get_height()
-        ax.annotate(f'{height:.4f}',  # Ajuste para exibir valores com 4 casas decimais
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  # Ajustando a posição do texto
-                    textcoords="offset points",
-                    ha='center', va='bottom',
-                    fontsize=12, color='white')
+        for bar in bars2:
+            height = bar.get_height()
+            ax.annotate(f'{height:.4f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom',
+                        fontsize=12, color='white')
 
-    # Melhorando o título e as labels
-    ax.set_title(f'Comparação de {scoring_metric}', fontsize=14)
-    ax.set_xlabel(scoring_metric, fontsize=12)
-    ax.set_ylabel("Modelos", fontsize=12)
+        # Melhorando o título e as labels
+        ax.set_title(f'Comparação de {scoring_metric}', fontsize=14)
+        ax.set_ylabel(scoring_metric, fontsize=12)
+        ax.set_xlabel("Modelos", fontsize=12)
 
-    # Ajuste nos rótulos do eixo X e Y
-    plt.xticks(fontsize=10)
-    plt.yticks(fontsize=10)
+        # Ajuste nos rótulos do eixo X e Y
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
 
-    # Legendas
-    ax.legend()
+        # Legendas
+        ax.legend()
 
-    # Ajuste do layout para garantir que tudo fique visível
-    plt.tight_layout()
+        # Ajuste do layout para garantir que tudo fique visível
+        plt.tight_layout()
 
-    # Exibir o gráfico
-    st.pyplot(fig)
-
+        # Exibir o gráfico
+        st.pyplot(fig)
+    
+    # Determinar o melhor modelo baseado na métrica escolhida
+    if scoring_metric:
+        score_without = comparison_df[scoring_metric].iloc[0]
+        score_with = comparison_df[scoring_metric].iloc[1]
+        
+        better_model = "Com Seleção de Features" if score_with > score_without else "Sem Seleção de Features"
+        better_score = max(score_with, score_without)
+        
+        st.success(f"🏆 **Melhor modelo:** {better_model} com {scoring_metric} = {better_score:.4f}")
+    
     # Botão para próxima etapa
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
-
 
 # Função para gerar interpretação personalizada das métricas
 def generate_metrics_interpretation(metrics):
