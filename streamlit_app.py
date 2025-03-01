@@ -2930,12 +2930,12 @@ def train_with_selected_features_page():
         
         st.subheader("Métricas do Modelo com Features Selecionadas")
         metrics_df = pd.DataFrame([selected_metrics])
+        metrics_df.insert(0, "Modelo", "Com Seleção de Features")
         st.table(metrics_df)
     
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
-
 
 #Função para Treinar e Armazenar as metricas
 
