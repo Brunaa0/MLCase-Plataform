@@ -3165,16 +3165,11 @@ def evaluate_and_compare_models():
         # Gráfico de comparação usando a métrica escolhida pelo usuário
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Garantir que estamos pegando os valores corretos para as barras
-        x = comparison_df['Modelo']
-        y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
-        y2 = comparison_df[scoring_metric].iloc[1]  # Com Seleção de Features (índice 1)
-
-        # Agora vamos criar as barras para os dois modelos (barras verticais)
+        # Ajustar as barras para uma boa visibilidade
         bars1 = ax.bar(x[0], y1, width=0.4, label="Sem Seleção de Features", color='#90EE90', align='center')
         bars2 = ax.bar(x[1], y2, width=0.4, label="Com Seleção de Features", color='#006400', align='center')
 
-        # Adicionar rótulos de valor nas barras
+        # Adicionar rótulos de valor nas barras com melhorias
         for bar in bars1:
             height = bar.get_height()
             ax.annotate(f'{height:.4f}',
@@ -3191,18 +3186,18 @@ def evaluate_and_compare_models():
                         xytext=(0, 3),
                         textcoords="offset points",
                         ha='center', va='bottom',
-                        fontsize=12, color='white')
+                        fontsize=12, color='white')  # Altere a cor para garantir contraste
 
         # Melhorando o título e as labels
-        ax.set_title(f'Comparação de {scoring_metric}', fontsize=14)
-        ax.set_ylabel(scoring_metric, fontsize=12)
-        ax.set_xlabel("Modelos", fontsize=12)
+        ax.set_title(f'Comparação de {scoring_metric}', fontsize=16, fontweight='bold')
+        ax.set_ylabel(scoring_metric, fontsize=14)
+        ax.set_xlabel("Modelos", fontsize=14)
 
         # Ajuste nos rótulos do eixo X e Y
-        plt.xticks(fontsize=10)
-        plt.yticks(fontsize=10)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
 
-        # Legendas
+        # Legenda
         ax.legend()
 
         # Ajuste do layout para garantir que tudo fique visível
@@ -3210,7 +3205,7 @@ def evaluate_and_compare_models():
 
         # Exibir o gráfico
         st.pyplot(fig)
-    
+
     # Determinar o melhor modelo baseado na métrica escolhida
     if scoring_metric:
         score_without = comparison_df[scoring_metric].iloc[0]
