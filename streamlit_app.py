@@ -2055,69 +2055,92 @@ def model_selection():
 
         # Condicional para Clustering Hierárquico
         elif st.session_state.selected_model_name == "Clustering Hierárquico":
-            for n_clusters in range(num_clusters_range[0], num_clusters_range[1] + 1):
-                temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
-                temp_model.fit(X)
-                labels = temp_model.labels_
+            try:
+                # Padronizar os dados
+                from sklearn.preprocessing import StandardScaler
+                scaler = StandardScaler()
+                X_scaled = scaler.fit_transform(X)
+                
+                # Processar cada número de cluster com tratamento de erros
+                for n_clusters in range(num_clusters_range[0], num_clusters_range[1] + 1):
+                    try:
+                        # Usar linkage='ward' explicitamente
+                        temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
+                        temp_model.fit(X_scaled)
+                        labels = temp_model.labels_
+                        
+                        # Calcular as métricas com dados padronizados
+                        silhouette_scores.append(silhouette_score(X_scaled, labels))
+                        davies_bouldin_scores.append(davies_bouldin_score(X_scaled, labels))
+                        calinski_harabasz_scores.append(calinski_harabasz_score(X_scaled, labels))
+                        
+                    except Exception as e:
+                        st.error(f"Erro ao processar {n_clusters} clusters: {str(e)}")
+                        # Adicionar valores neutros para manter o array no tamanho correto
+                        silhouette_scores.append(0)
+                        davies_bouldin_scores.append(0)
+                        calinski_harabasz_scores.append(0)
+                
+                # Criar DataFrame com os resultados
+                metrics_df = pd.DataFrame({
+                    "Número de Clusters": range(num_clusters_range[0], num_clusters_range[1] + 1),
+                    "Silhouette Score": silhouette_scores,
+                    "Davies-Bouldin Index": davies_bouldin_scores,
+                    "Calinski-Harabasz Score": calinski_harabasz_scores,
+                })
+                
+                # Exibir a tabela no Streamlit
+                st.write("#### Tabela de Métricas por Número de Clusters")
+                st.dataframe(fix_dataframe_types(metrics_df.style.format({
+                    "Silhouette Score": "{:.2f}",
+                    "Davies-Bouldin Index": "{:.2f}",
+                    "Calinski-Harabasz Score": "{:.2f}",
+                })))
 
-                # Calcular as métricas e armazená-las
-                silhouette_scores.append(silhouette_score(X, labels))
-                davies_bouldin_scores.append(davies_bouldin_score(X, labels))
-                calinski_harabasz_scores.append(calinski_harabasz_score(X, labels))
+                # Exibir gráficos para as métricas
+                st.write("#### Gráficos das Métricas por Número de Clusters")
+                col1, col2, col3 = st.columns(3)
 
-            # Criar DataFrame com os resultados
-            metrics_df = pd.DataFrame({
-                "Número de Clusters": range(num_clusters_range[0], num_clusters_range[1] + 1),
-                "Silhouette Score": silhouette_scores,
-                "Davies-Bouldin Index": davies_bouldin_scores,
-                "Calinski-Harabasz Score": calinski_harabasz_scores,
-            })
+                with col1:
+                    plt.figure(figsize=(6, 4))
+                    plt.plot(metrics_df["Número de Clusters"], metrics_df["Silhouette Score"], marker='o')
+                    plt.title("Silhouette Score por Número de Clusters")
+                    plt.xlabel("Número de Clusters")
+                    plt.ylabel("Silhouette Score")
+                    st.pyplot(plt.gcf())
+                    plt.clf()
 
-            # Exibir a tabela no Streamlit
-            st.write("#### Tabela de Métricas por Número de Clusters")
-            st.dataframe(fix_dataframe_types(metrics_df.style.format({
-                "Silhouette Score": "{:.2f}",
-                "Davies-Bouldin Index": "{:.2f}",
-                "Calinski-Harabasz Score": "{:.2f}",
-            })))
+                with col2:
+                    plt.figure(figsize=(6, 4))
+                    plt.plot(metrics_df["Número de Clusters"], metrics_df["Davies-Bouldin Index"], marker='o')
+                    plt.title("Davies-Bouldin Index por Número de Clusters")
+                    plt.xlabel("Número de Clusters")
+                    plt.ylabel("Davies-Bouldin Index")
+                    st.pyplot(plt.gcf())
+                    plt.clf()
 
-            # Exibir gráficos para as métricas
-            st.write("#### Gráficos das Métricas por Número de Clusters")
-            col1, col2, col3 = st.columns(3)
+                with col3:
+                    plt.figure(figsize=(6, 4))
+                    plt.plot(metrics_df["Número de Clusters"], metrics_df["Calinski-Harabasz Score"], marker='o')
+                    plt.title("Calinski-Harabasz Score por Número de Clusters")
+                    plt.xlabel("Número de Clusters")
+                    plt.ylabel("Calinski-Harabasz Score")
+                    st.pyplot(plt.gcf())
+                    plt.clf()
 
-            with col1:
-                plt.figure(figsize=(6, 4))
-                plt.plot(metrics_df["Número de Clusters"], metrics_df["Silhouette Score"], marker='o')
-                plt.title("Silhouette Score por Número de Clusters")
-                plt.xlabel("Número de Clusters")
-                plt.ylabel("Silhouette Score")
-                st.pyplot(plt.gcf())
-                plt.clf()
+                # Escolher o melhor número de clusters com base no Silhouette Score (ou outra métrica)
+                best_n_clusters = metrics_df.loc[metrics_df["Silhouette Score"].idxmax(), "Número de Clusters"]
+                st.write(f"**Melhor Número de Clusters** (com base no Silhouette Score): {best_n_clusters}")
 
-            with col2:
-                plt.figure(figsize=(6, 4))
-                plt.plot(metrics_df["Número de Clusters"], metrics_df["Davies-Bouldin Index"], marker='o')
-                plt.title("Davies-Bouldin Index por Número de Clusters")
-                plt.xlabel("Número de Clusters")
-                plt.ylabel("Davies-Bouldin Index")
-                st.pyplot(plt.gcf())
-                plt.clf()
-
-            with col3:
-                plt.figure(figsize=(6, 4))
-                plt.plot(metrics_df["Número de Clusters"], metrics_df["Calinski-Harabasz Score"], marker='o')
-                plt.title("Calinski-Harabasz Score por Número de Clusters")
-                plt.xlabel("Número de Clusters")
-                plt.ylabel("Calinski-Harabasz Score")
-                st.pyplot(plt.gcf())
-                plt.clf()
-
-            # Escolher o melhor número de clusters com base no Silhouette Score (ou outra métrica)
-            best_n_clusters = metrics_df.loc[metrics_df["Silhouette Score"].idxmax(), "Número de Clusters"]
-            st.write(f"**Melhor Número de Clusters** (com base no Silhouette Score): {best_n_clusters}")
-
-            # Inicializar `best_n_clusters_retrain` com o valor automático, caso aplicável
-            best_n_clusters_retrain = best_n_clusters
+                # Inicializar `best_n_clusters_retrain` com o valor automático, caso aplicável
+                best_n_clusters_retrain = best_n_clusters
+            
+            except Exception as e:
+                st.error(f"Erro geral ao processar clustering hierárquico: {str(e)}")
+                # Definir valores padrão para evitar erros subsequentes
+                silhouette_scores = [0] * (num_clusters_range[1] - num_clusters_range[0] + 1)
+                davies_bouldin_scores = [0] * (num_clusters_range[1] - num_clusters_range[0] + 1)
+                calinski_harabasz_scores = [0] * (num_clusters_range[1] - num_clusters_range[0] + 1)
 
         # Escolher abordagem para número de clusters
         st.write("### Escolha a Abordagem para Determinar o Número de Clusters")
@@ -2139,18 +2162,24 @@ def model_selection():
             # Treinar modelo inicial
             if st.button(f"Treinar Modelo Inicial"):
                 model = st.session_state.models[st.session_state.selected_model_name]
+                
+                # Padronizar os dados novamente para consistência
+                from sklearn.preprocessing import StandardScaler
+                scaler = StandardScaler()
+                X_scaled = scaler.fit_transform(X)
+                
                 model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
-                model.fit(X)
+                model.fit(X_scaled)  # Use X_scaled em vez de X
                 st.session_state.clustering_labels = model.labels_
                 st.session_state.initial_metrics = {
                     "Número de Clusters": best_n_clusters_retrain,
-                    "Silhouette Score": silhouette_score(X, st.session_state.clustering_labels),
-                    "Davies-Bouldin Index": davies_bouldin_score(X, st.session_state.clustering_labels),
-                    "Calinski-Harabasz Score": calinski_harabasz_score(X, st.session_state.clustering_labels)
+                    "Silhouette Score": silhouette_score(X_scaled, st.session_state.clustering_labels),
+                    "Davies-Bouldin Index": davies_bouldin_score(X_scaled, st.session_state.clustering_labels),
+                    "Calinski-Harabasz Score": calinski_harabasz_score(X_scaled, st.session_state.clustering_labels)
                 }
                 st.success(f"Modelo inicial treinado com sucesso usando {best_n_clusters_retrain} clusters!")
                 st.session_state.training_completed = True  # Marcar como concluído
-
+                
         # Exibir métricas e próxima ação apenas após o treino
         if st.session_state.get("training_completed", False):
             st.write("### Métricas do Treino Inicial")
@@ -2193,17 +2222,23 @@ def model_selection():
             # Botão para executar o re-treino
             if st.button("Treinar Novamente"):
                 model = st.session_state.models[st.session_state.selected_model_name]
+                
+                # Padronizar os dados
+                from sklearn.preprocessing import StandardScaler
+                scaler = StandardScaler()
+                X_scaled = scaler.fit_transform(X)
+                
                 model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
-                model.fit(X)
+                model.fit(X_scaled)  # Use X_scaled em vez de X
                 st.session_state.retrain_metrics = {
                     "Número de Clusters": best_n_clusters_retrain,
-                    "Silhouette Score": silhouette_score(X, model.labels_),
-                    "Davies-Bouldin Index": davies_bouldin_score(X, model.labels_),
-                    "Calinski-Harabasz Score": calinski_harabasz_score(X, model.labels_)
+                    "Silhouette Score": silhouette_score(X_scaled, model.labels_),
+                    "Davies-Bouldin Index": davies_bouldin_score(X_scaled, model.labels_),
+                    "Calinski-Harabasz Score": calinski_harabasz_score(X_scaled, model.labels_)
                 }
                 st.session_state.retrain_completed = True
                 st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters!")
-
+                
             # Exibir métricas do re-treino após a execução
             if st.session_state.get("retrain_completed", False):
                 st.write("### Métricas do Re-Treino")
@@ -2216,7 +2251,6 @@ def model_selection():
                     st.session_state.step = 'clustering_final_page'
                     st.rerun()
 
-                        
     # 3. Seleção da Coluna Alvo
     from sklearn.preprocessing import LabelEncoder
     import pandas as pd
@@ -2633,45 +2667,26 @@ def model_selection():
 # Função para treinar e avaliar os modelos de clustering
 def train_clustering_model(model, X_data, model_name):
     try:
-        # Log para diagnóstico
-        st.write(f"Iniciando treinamento do modelo {model_name}...")
-        st.write(f"Forma dos dados: {X_data.shape}")
-        
-        # Verificar se há valores ausentes
-        if X_data.isnull().any().any():
-            st.warning("Dados contêm valores ausentes. Aplicando tratamento...")
-            X_data = X_data.fillna(X_data.mean())
-        
         # Padronizar os dados
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X_data)
         
-        # Configurar e treinar o modelo com base no tipo
         if model_name == "KMeans":
-            st.write("Configurando KMeans...")
-            n_clusters = st.session_state.get('kmeans_clusters', 3)
-            model.set_params(n_clusters=n_clusters, random_state=42)
-            model.fit(X_scaled)
-            st.session_state['labels'] = model.labels_
-            
-        elif model_name == "Clustering Hierárquico":
-            st.write("Configurando Clustering Hierárquico...")
-            n_clusters = st.session_state.get('kmeans_clusters', 3)
-            # Definir explicitamente todos os parâmetros necessários
-            model.set_params(n_clusters=n_clusters, linkage="ward", compute_full_tree=True)
+            model.set_params(n_clusters=st.session_state.kmeans_clusters)
             model.fit(X_scaled)
             st.session_state['labels'] = model.labels_
         
-        st.success(f"Clusterização concluída com {model_name}. Clusters detectados: {len(set(model.labels_))}")
-        return True
+        elif model_name == "Clustering Hierárquico":
+            # Configurar explicitamente todos os parâmetros necessários
+            model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage="ward")
+            model.fit(X_scaled)
+            st.session_state['labels'] = model.labels_
+        
+        st.write(f"Clusterização realizada com {model_name}")
         
     except Exception as e:
         st.error(f"Erro ao treinar o modelo {model_name}: {str(e)}")
-        import traceback
-        st.error(f"Detalhes do erro: {traceback.format_exc()}")
-        return False
-
 # Visualização dos Clusters usando PCA
 def visualize_clusters(X_data):
     if 'labels' in st.session_state:
