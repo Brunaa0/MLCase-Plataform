@@ -4062,6 +4062,7 @@ def final_page():
     # **COMPARAÇÃO DE MÉTRICAS**
     st.subheader("Comparação de Métricas")
 
+
     # Formatar valores com 4 casas decimais
     def format_metric(value):
         try:
@@ -4119,7 +4120,7 @@ def final_page():
         return
 
     # Exibir tabela de métricas com ajustes finos
-    st.table(fix_dataframe_types(comparison_df.style.format({
+    st.dataframe(comparison_df.style.format({
         'Accuracy': '{:.4f}' if 'Accuracy' in comparison_df.columns else None,
         'Precision': '{:.4f}' if 'Precision' in comparison_df.columns else None,
         'Recall': '{:.4f}' if 'Recall' in comparison_df.columns else None,
@@ -4133,7 +4134,7 @@ def final_page():
         {'selector': 'table', 'props': [('width', '100%'), ('border-collapse', 'collapse')]},  # Largura da tabela e bordas
         {'selector': 'tr:nth-child(even)', 'props': [('background-color', '#f9f9f9')]},  # Cor de fundo alternada para as linhas
         {'selector': 'tr:nth-child(odd)', 'props': [('background-color', '#ffffff')]},  # Cor de fundo para linhas ímpares
-    ])))
+    ]))
 
     # Verificar se a métrica escolhida existe no DataFrame
     if scoring_metric_capitalized not in comparison_df.columns:
