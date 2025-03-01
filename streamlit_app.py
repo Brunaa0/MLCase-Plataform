@@ -3899,6 +3899,8 @@ def get_metric_mapping(metric):
     
     return mapped_metric
     
+
+
 def final_page():
     st.title("Resumo Final dos Modelos Treinados")
 
@@ -3950,9 +3952,8 @@ def final_page():
     scoring_metric_capitalized = get_metric_mapping(scoring_metric)
     if not scoring_metric_capitalized:
         st.error(f"A métrica '{scoring_metric}' não é válida ou não está disponível.")
-        
-        
         return
+
     # **COMPARAÇÃO DE MÉTRICAS**
     st.subheader("Comparação de Métricas")
 
@@ -4014,13 +4015,10 @@ def final_page():
 
     # Exibir tabela de métricas
     st.table(fix_dataframe_types(comparison_df.style.format({
-        'R²': '{:.4f}' if 'R²' in comparison_df.columns else None,
-        'MAE': '{:.4f}' if 'MAE' in comparison_df.columns else None,
-        'MSE': '{:,.4f}' if 'MSE' in comparison_df.columns else None,
         'Accuracy': '{:.4f}' if 'Accuracy' in comparison_df.columns else None,
         'Precision': '{:.4f}' if 'Precision' in comparison_df.columns else None,
         'Recall': '{:.4f}' if 'Recall' in comparison_df.columns else None,
-        'F1-Score': '{:.4f}' if 'F1-Score' in comparison_df.columns else None
+        'F1-Score': '{:.4f}' if 'F1-Score' in comparison_df.columns else None,
     })))
 
     # Verificar se a métrica escolhida existe no DataFrame
@@ -4054,7 +4052,8 @@ def final_page():
         # Dados para o gráfico
         bars = ax.bar(
             comparison_df['Modelo'],
-            comparison_df[selected_metric]
+            comparison_df[selected_metric],
+            color=['#9ACD32', '#006400']  # Verde claro e verde escuro
         )
         
         # Adicionar valores nas barras
@@ -4086,22 +4085,12 @@ def final_page():
         score_with_selection = scoring_values[1]
 
         # Determina o melhor modelo
-        if score_with_selection is not None and score_without_selection is not None:
-            if score_with_selection > score_without_selection:
-                best_model = "Com Seleção de Features"
-                best_score = score_with_selection
-            else:
-                best_model = "Sem Seleção de Features"
-                best_score = score_without_selection
-        elif score_with_selection is not None:
+        if score_with_selection > score_without_selection:
             best_model = "Com Seleção de Features"
             best_score = score_with_selection
-        elif score_without_selection is not None:
+        else:
             best_model = "Sem Seleção de Features"
             best_score = score_without_selection
-        else:
-            st.warning("Não foi possível determinar o melhor modelo.")
-            return
     else:
         st.warning("Erro na determinação das métricas na tabela.")
         return
@@ -4134,10 +4123,7 @@ def final_page():
     # **DOWNLOAD DO MODELO TREINADO**
     st.subheader("Download do Melhor Modelo Treinado")
     model = st.session_state.models.get(st.session_state.selected_model_name)
-    if best_model == "Com Seleção de Features":
-        model_filename = save_best_model(model, with_feature_selection=True)
-    else:
-        model_filename = save_best_model(model, with_feature_selection=False)
+    model_filename = save_best_model(model, with_feature_selection=(best_model == "Com Seleção de Features"))
 
     if model_filename:
         with open(model_filename, "rb") as file:
@@ -4151,11 +4137,7 @@ def final_page():
     # **DOWNLOAD DO RELATÓRIO EM PDF**
     try:
         pdf_buffer = gerar_relatorio_pdf(comparison_df, best_model, st.session_state)
-        # Recuperar o nome do modelo selecionado
-        selected_model_name = st.session_state.get('selected_model_name', 'modelo')
-        # Criar o nome do arquivo incluindo o modelo
-        pdf_file_name = f"relatorio_final_{selected_model_name}.pdf"
-        # Adicionar o botão de download com o nome personalizado
+        pdf_file_name = f"relatorio_final_{st.session_state.get('selected_model_name', 'modelo')}.pdf"
         st.download_button(
             label="💾 Download Relatório PDF",
             data=pdf_buffer,
@@ -4169,7 +4151,7 @@ def final_page():
     if st.button("Concluir"):
         st.session_state.clear()  # Limpa o cache do Streamlit
         st.rerun()
-        
+      
 ############ Relatório Final para Clustering ###################
 # Classe personalizada para PDF
 class CustomPDF(FPDF):
