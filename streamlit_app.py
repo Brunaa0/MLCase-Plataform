@@ -3415,10 +3415,6 @@ class CustomPDF(FPDF):
         self.cell(25)  # Espaço para o logo
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 0, 'C')
         
-        # Adicionar uma linha horizontal após o cabeçalho
-        self.ln(15)
-        self.line(10, 25, 200, 25)
-        self.ln(5)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
@@ -4223,10 +4219,6 @@ class CustomPDF(FPDF):
         self.cell(25)  # Espaço para o logo
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 0, 'C')
         
-        # Adicionar uma linha horizontal após o cabeçalho
-        self.ln(15)
-        self.line(10, 25, 200, 25)
-        self.ln(5)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
