@@ -3378,6 +3378,10 @@ def execute_training():
 ## Relatório Final para Classificação/Regressao ##
 
 # Função para gerar o relatório em PDF
+import matplotlib.pyplot as plt
+from io import BytesIO
+import tempfile
+
 class CustomPDF(FPDF):
     def header(self):
         # Baixar a imagem do logo e salvar localmente
@@ -3483,13 +3487,12 @@ class MLCaseModelReportGenerator:
 
         plt.tight_layout()
         
-        # Save to a bytes buffer
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight')
-        buf.seek(0)
+        # Save to a temporary file
+        tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+        plt.savefig(tmpfile.name, format='png', bbox_inches='tight')
         plt.close()
         
-        return buf
+        return tmpfile.name  # Return the file path of the image
     
 def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     """
@@ -3534,13 +3537,13 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
 
     # Gerar gráfico para a comparação das métricas selecionadas
     selected_metric = 'Accuracy'  # Exemplo de métrica escolhida
-    chart_buffer = MLCaseModelReportGenerator().create_bar_chart(comparison_df[selected_metric].values, comparison_df['Modelo'].values, f"Comparação de {selected_metric}")
+    chart_path = MLCaseModelReportGenerator().create_bar_chart(comparison_df[selected_metric].values, comparison_df['Modelo'].values, f"Comparação de {selected_metric}")
 
     # Adicionar gráfico ao PDF
     pdf.add_page()
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, f"Gráfico de Comparação - {selected_metric}", ln=True, align="C")
-    pdf.image(chart_buffer, x=10, y=40, w=180)
+    pdf.image(chart_path, x=10, y=40, w=190)
     
     # Finalizar e salvar o PDF
     pdf_output = pdf.output(dest='S').encode('latin1')
