@@ -1632,11 +1632,14 @@ def load_best_params():
 
 def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_search, manual_params=None, cv_choice="K-Fold"):
     try:
+        st.write("Parâmetros recebidos:")
+        st.write("param_grid:", param_grid)
+        st.write("manual_params:", manual_params)
         # Inicializar parâmetros manuais como vazio, se não fornecido
         if manual_params is None:
             manual_params = {}
         # Verifica se max_depth está no param_grid antes de iniciar o GridSearch
-        print("Parâmetros antes do GridSearchCV:", param_grid)
+        st.write("Parâmetros antes do GridSearchCV:", param_grid)
         # Obter o nome do modelo
         model_name = None
         if isinstance(model, SVC):
@@ -3050,10 +3053,10 @@ def evaluate_and_compare_models():
     # Mapeamento de modelos
     model_name_map = {
         "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier", 
         "Random Forest": "RandomForestClassifier",
         "Regressão Linear Simples (RLS)": "LinearRegression",
-        "Regressão por Vetores de Suporte (SVR)": "SVR",
+        "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
     reverse_model_name_map = {v: k for k, v in model_name_map.items()}
 
@@ -3062,38 +3065,29 @@ def evaluate_and_compare_models():
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
         return
 
-    # Verificar se os modelos estão definidos
+    # Verificar se os modelos estão definidos  
     if 'models' not in st.session_state or not st.session_state.models:
         st.error("Configuração de modelos não encontrada. Por favor, reinicie o processo de seleção de modelos.")
         return
 
     # Recuperar o tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')
-    
+
     # Recuperar o nome do modelo selecionado
     model_name = st.session_state.get('selected_model_name')
     if not model_name:
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Recuperar as opções de modelo dos treinos realizados
-    model_options = [resultado['Modelo'] for resultado in st.session_state['treinos_realizados']]
-    
-    # Encontrar o índice do modelo selecionado nas opções
-    selected_model_index = model_options.index(model_name) if model_name in model_options else 0
-    
-    # Selecionar o modelo usando o índice encontrado
-    selected_model_name = model_options[selected_model_index]
-    
-    # Encontrar o modelo no dicionário usando o nome selecionado
-    model = st.session_state.models.get(selected_model_name)
+    # Encontrar o modelo no dicionário
+    model = st.session_state.models.get(model_name)
     if model is None:
-        st.error(f"O modelo {selected_model_name} não foi encontrado na lista de modelos disponíveis.")
+        st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
     # Recuperar métricas originais e com seleção de features
-    original_metrics = st.session_state.get('resultado_sem_selecao', {})
+    original_metrics = st.session_state.get('resultado_sem_selecao', {}) 
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
     # Verificar se as métricas existem
@@ -3159,7 +3153,7 @@ def evaluate_and_compare_models():
     # Calcular métricas para o modelo com features selecionadas
     if model_type == "Classificação":
         selected_metrics = {
-            "Modelo": mapped_model_name,
+            "Modelo": model_name,
             "Accuracy": accuracy_score(y_test, y_pred_selected),
             "Precision": precision_score(y_test, y_pred_selected, average='weighted'),
             "Recall": recall_score(y_test, y_pred_selected, average='weighted'),
@@ -3168,7 +3162,7 @@ def evaluate_and_compare_models():
         }
     elif model_type == "Regressão":
         selected_metrics = {
-            "Modelo": mapped_model_name,
+            "Modelo": model_name,
             "R²": r2_score(y_test, y_pred_selected),
             "MAE": mean_absolute_error(y_test, y_pred_selected),
             "MSE": mean_squared_error(y_test, y_pred_selected),
@@ -3209,11 +3203,11 @@ def evaluate_and_compare_models():
         'MSE': '{:,.4f}'
     })))
     
-    # Gráfico de comparação
+    # Gráfico de comparação 
     metric_to_plot = 'F1-Score' if model_type == 'Classificação' else 'R²'
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    x = comparison_df['Modelo']
+    x = comparison_df['Modelo'] 
     y = comparison_df[metric_to_plot]
     
     bars = ax.bar(x, y, width=0.6)
@@ -3221,9 +3215,9 @@ def evaluate_and_compare_models():
     # Adicionar rótulos de valor nas barras
     for bar in bars:
         height = bar.get_height()
-        ax.annotate(f'{height:.4f}',
+        ax.annotate(f'{height:.4f}', 
                     xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),
+                    xytext=(0, 3),  
                     textcoords="offset points",
                     ha='center', va='bottom',
                     fontsize=12)
@@ -3904,7 +3898,7 @@ def get_metric_mapping(metric):
         mapped_metric = METRIC_MAPPING[metric]
         
     # Adicionar debug
-    print(f"Métrica original: {metric}, limpa: {metric_clean}, mapeada: {mapped_metric}")
+    st.write(f"Métrica original: {metric}, limpa: {metric_clean}, mapeada: {mapped_metric}")
     
     return mapped_metric
     
