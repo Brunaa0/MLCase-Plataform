@@ -4128,7 +4128,7 @@ def final_page():
         'MAE': '{:.4f}' if 'MAE' in comparison_df.columns else None,
         'MSE': '{:.4f}' if 'MSE' in comparison_df.columns else None,
     }).set_table_styles([
-        {'selector': 'th', 'props': [('font-size', '14px'), ('background-color', '#f0f0f0'), ('text-align', 'center')]},  # Cabeçalho
+        {'selector': 'th', 'props': [('font-size', '14px'), ('background-color', '#f0f0f0'), ('text-align', 'center'), ('font-weight', 'bold')]},  # Cabeçalho
         {'selector': 'td', 'props': [('font-size', '14px'), ('text-align', 'center')]},  # Tamanho das células e alinhamento
         {'selector': 'table', 'props': [('width', '100%'), ('border-collapse', 'collapse')]},  # Largura da tabela e bordas
         {'selector': 'tr:nth-child(even)', 'props': [('background-color', '#f9f9f9')]},  # Cor de fundo alternada para as linhas
@@ -4139,6 +4139,7 @@ def final_page():
     if scoring_metric_capitalized not in comparison_df.columns:
         st.error(f"A métrica '{scoring_metric}' não está disponível no DataFrame.")
         return
+
 
     # **GRÁFICOS DAS MÉTRICAS**
     st.subheader("Gráfico Interativo de Comparação de Métricas")
