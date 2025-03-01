@@ -3411,7 +3411,8 @@ class CustomPDF(FPDF):
 
         # Adicionar o título
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
-        self.ln(15)  # Espaço após o cabeçalho
+        
+        self.ln(15)  # Espaço após o cabeçalho, pode ser ajustado conforme necessário
 
     def footer(self):
         """Método para o rodapé da página"""
@@ -3522,10 +3523,11 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
             return str(text)
         return text.encode('latin-1', errors='ignore').decode('latin-1')
     
-    # Inicialização do PDF
+    # Inicialização do PDF com cabeçalho e rodapé
     pdf = CustomPDF(format='A4')
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
+    pdf.add_page()  # Chama o header aqui
+    
     
     # Título do Relatório
     pdf.set_font("Arial", style="B", size=16)
@@ -3843,7 +3845,6 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf_output = pdf.output(dest='S').encode('latin1', errors='ignore')
     pdf_buffer.write(pdf_output)
     pdf_buffer.seek(0)
-    
     return pdf_buffer
 
 # Função para exibir a página final com o relatório
