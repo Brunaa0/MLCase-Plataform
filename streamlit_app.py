@@ -2663,69 +2663,133 @@ def evaluate_regression_model(y_true, y_pred):
 
 def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params=None):
     try:
-        # Verificações mais simples
+        # Verificar se o modelo é SVR para tratamento especial
         is_svr = isinstance(model, SVR)
         is_regression = is_svr or isinstance(model, LinearRegression)
 
-        # Escalonamento somente para SVR
+        # Escalonamento para SVR
         if is_svr:
             scaler = StandardScaler()
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
-
-        # GridSearch simplificado
-        if use_grid_search:
+            
+            # Para SVR, usar abordagem otimizada
+            if use_grid_search == "Sim":
+                st.info("⚡ Usando configuração otimizada para SVR...")
+                
+                # Se tiver menos de 1000 amostras, testa todo o grid
+                # Caso contrário, usa RandomizedSearchCV
+                if X_train.shape[0] < 1000:
+                    # Grid reduzido
+                    param_grid = {
+                        'C': [1, 10],
+                        'epsilon': [0.1],
+                        'kernel': ['rbf']
+                    }
+                    
+                    # Validação cruzada com apenas 3 folds
+                    cv = KFold(n_splits=3, shuffle=True, random_state=42)
+                    
+                    grid_search = GridSearchCV(
+                        model, param_grid, cv=cv, scoring='r2', n_jobs=-1, verbose=1
+                    )
+                    grid_search.fit(X_train, y_train)
+                    
+                    best_model = grid_search.best_estimator_
+                    best_params = grid_search.best_params_
+                else:
+                    # Para conjuntos grandes, usar RandomizedSearchCV
+                    from sklearn.model_selection import RandomizedSearchCV
+                    
+                    # Parâmetros mais amplos para randomized search
+                    param_distributions = {
+                        'C': [0.1, 1, 10, 100],
+                        'epsilon': [0.01, 0.1, 0.2],
+                        'kernel': ['linear', 'rbf']
+                    }
+                    
+                    random_search = RandomizedSearchCV(
+                        model, param_distributions, n_iter=5, cv=3, 
+                        scoring='r2', n_jobs=-1, random_state=42, verbose=1
+                    )
+                    random_search.fit(X_train, y_train)
+                    
+                    best_model = random_search.best_estimator_
+                    best_params = random_search.best_params_
+            else:
+                # Se não usar GridSearch, aplicar parâmetros manualmente
+                if manual_params:
+                    model.set_params(**manual_params)
+                
+                model.fit(X_train, y_train)
+                best_model = model
+                best_params = manual_params or {}
+            
+            # Predições e métricas
+            y_pred = best_model.predict(X_test)
+            
+            metrics = {
+                "Modelo": "Support Vector Regression (SVR)",
+                "R²": r2_score(y_test, y_pred),
+                "MAE": mean_absolute_error(y_test, y_pred),
+                "MSE": mean_squared_error(y_test, y_pred),
+                "Best Parameters": best_params
+            }
+            
+            return metrics
+        
+        # Para outros modelos, manter a lógica original
+        if use_grid_search == "Sim":
+            # Implementar validação cruzada
             cv = KFold(n_splits=5, shuffle=True, random_state=42)
             scoring = 'r2' if is_regression else 'accuracy'
             
-            # Incorporar parâmetros manuais no grid
+            # Atualizar grid com parâmetros manuais
             if manual_params:
-                param_grid.update({k: [v] for k, v in manual_params.items()})
+                for param, value in manual_params.items():
+                    if not isinstance(value, list):
+                        param_grid[param] = [value]
+                    else:
+                        param_grid[param] = value
             
-            grid_search = GridSearchCV(
-                model, 
-                param_grid, 
-                cv=cv, 
-                scoring=scoring, 
-                n_jobs=1
-            )
+            grid_search = GridSearchCV(model, param_grid, cv=cv, scoring=scoring, n_jobs=-1)
             grid_search.fit(X_train, y_train)
             
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
         else:
-            # Treinar sem GridSearch
+            # Se não usar GridSearch, aplicar manualmente
             if manual_params:
                 model.set_params(**manual_params)
             
             model.fit(X_train, y_train)
             best_model = model
             best_params = manual_params or {}
-
+        
         # Predições
         y_pred = best_model.predict(X_test)
-
-        # Métricas baseadas no tipo de modelo
-        metrics = {
-            "Modelo": model.__class__.__name__,
-            **(
-                {
-                    "R²": r2_score(y_test, y_pred),
-                    "MAE": mean_absolute_error(y_test, y_pred),
-                    "MSE": mean_squared_error(y_test, y_pred)
-                } if is_regression else 
-                {
-                    "Accuracy": accuracy_score(y_test, y_pred),
-                    "Precision": precision_score(y_test, y_pred, average='weighted'),
-                    "Recall": recall_score(y_test, y_pred, average='weighted'),
-                    "F1-Score": f1_score(y_test, y_pred, average='weighted')
-                }
-            ),
-            "Best Parameters": best_params
-        }
-
+        
+        # Métricas baseadas no tipo
+        if is_regression:
+            metrics = {
+                "Modelo": model.__class__.__name__,
+                "R²": r2_score(y_test, y_pred),
+                "MAE": mean_absolute_error(y_test, y_pred),
+                "MSE": mean_squared_error(y_test, y_pred),
+                "Best Parameters": best_params
+            }
+        else:
+            metrics = {
+                "Modelo": model.__class__.__name__,
+                "Accuracy": accuracy_score(y_test, y_pred),
+                "Precision": precision_score(y_test, y_pred, average='weighted'),
+                "Recall": recall_score(y_test, y_pred, average='weighted'),
+                "F1-Score": f1_score(y_test, y_pred, average='weighted'),
+                "Best Parameters": best_params
+            }
+        
         return metrics
-
+    
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
