@@ -3233,106 +3233,167 @@ def evaluate_and_compare_models():
 
 # Função para gerar interpretação personalizada das métricas
 def generate_metrics_interpretation(metrics):
+    """Função para gerar interpretação personalizada das métricas"""
     interpretacao = []
 
+    # Verificar se as métricas estão no formato esperado
+    if not isinstance(metrics, dict):
+        return "Formato de métricas inválido."
+
     # Accuracy
-    accuracy = float(metrics['Accuracy'])
-    if accuracy > 0.9:
-        interpretacao.append(f"- Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
-    elif accuracy > 0.75:
-        interpretacao.append(f"- Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
-    elif accuracy > 0.5:
-        interpretacao.append(f"- Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
-    else:
-        interpretacao.append(f"- Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
+    if 'Accuracy' in metrics:
+        try:
+            accuracy = float(metrics['Accuracy'])
+            if accuracy > 0.9:
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
+            elif accuracy > 0.75:
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
+            elif accuracy > 0.5:
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
+            else:
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
+        except (ValueError, TypeError):
+            interpretacao.append("- Acurácia: Não disponível ou inválida.")
 
     # Precision
-    precision = float(metrics['Precision'])
-    if precision > 0.9:
-        interpretacao.append(f"- Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
-    elif precision > 0.75:
-        interpretacao.append(f"- Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
-    elif precision > 0.5:
-        interpretacao.append(f"- Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
-    else:
-        interpretacao.append(f"- Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
+    if 'Precision' in metrics:
+        try:
+            precision = float(metrics['Precision'])
+            if precision > 0.9:
+                interpretacao.append(f"- Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
+            elif precision > 0.75:
+                interpretacao.append(f"- Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
+            elif precision > 0.5:
+                interpretacao.append(f"- Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
+            else:
+                interpretacao.append(f"- Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
+        except (ValueError, TypeError):
+            interpretacao.append("- Precisão: Não disponível ou inválida.")
 
     # Recall
-    recall = float(metrics['Recall'])
-    if recall > 0.9:
-        interpretacao.append(f"- Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
-    elif recall > 0.75:
-        interpretacao.append(f"- Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
-    elif recall > 0.5:
-        interpretacao.append(f"- Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
-    else:
-        interpretacao.append(f"- Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros. Pode ser necessário ajustar os pesos ou thresholds.")
+    if 'Recall' in metrics:
+        try:
+            recall = float(metrics['Recall'])
+            if recall > 0.9:
+                interpretacao.append(f"- Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
+            elif recall > 0.75:
+                interpretacao.append(f"- Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
+            elif recall > 0.5:
+                interpretacao.append(f"- Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
+            else:
+                interpretacao.append(f"- Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros. Pode ser necessário ajustar os pesos ou thresholds.")
+        except (ValueError, TypeError):
+            interpretacao.append("- Recall: Não disponível ou inválido.")
     
     # F1-Score
-    f1_score = float(metrics['F1-Score'])
-    if f1_score > 0.9:
-        interpretacao.append(f"- F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade. O modelo está altamente otimizado.")
-    elif f1_score > 0.75:
-        interpretacao.append(f"- F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias nos falsos positivos ou negativos.")
-    elif f1_score > 0.5:
-        interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho moderado. Ajustes no treino ou balanceamento dos dados podem ajudar.")
-    else:
-        interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho fraco. Recomenda-se rever os dados, ajustar hiperparâmetros ou otimizar o modelo.")
+    if 'F1-Score' in metrics:
+        try:
+            f1_score = float(metrics['F1-Score'])
+            if f1_score > 0.9:
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade. O modelo está altamente otimizado.")
+            elif f1_score > 0.75:
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias nos falsos positivos ou negativos.")
+            elif f1_score > 0.5:
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho moderado. Ajustes no treino ou balanceamento dos dados podem ajudar.")
+            else:
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho fraco. Recomenda-se rever os dados, ajustar hiperparâmetros ou otimizar o modelo.")
+        except (ValueError, TypeError):
+            interpretacao.append("- F1-Score: Não disponível ou inválido.")
 
+    # Se nenhuma métrica conhecida foi encontrada
+    if not interpretacao:
+        interpretacao.append("Nenhuma métrica de classificação reconhecida encontrada nos dados.")
 
     # Conclusão Geral
-    if f1_score > 0.9 and precision > 0.9 and recall > 0.9:
-        interpretacao.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excecional em todas as métricas. Está pronto para produção!")
-    elif f1_score > 0.75 and precision > 0.75 and recall > 0.75:
-        interpretacao.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral, mas pode ser ligeiramente melhorado com ajustes finos.")
-    elif f1_score > 0.5 or precision > 0.5 or recall > 0.5:
-        interpretacao.append("\nConclusão Geral:⚠️ O modelo tem um desempenho moderado. Recomenda-se ajustar os hiperparâmetros ou melhorar os dados de treino.")
-    else:
-        interpretacao.append("\nConclusão Geral: ❗ O modelo apresenta um desempenho fraco. Será necessário rever o processo de treino, os dados e os parâmetros.")
+    if all(key in metrics for key in ['F1-Score', 'Precision', 'Recall']):
+        try:
+            f1_score = float(metrics['F1-Score'])
+            precision = float(metrics['Precision'])
+            recall = float(metrics['Recall'])
+            
+            if f1_score > 0.9 and precision > 0.9 and recall > 0.9:
+                interpretacao.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excecional em todas as métricas. Está pronto para produção!")
+            elif f1_score > 0.75 and precision > 0.75 and recall > 0.75:
+                interpretacao.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral, mas pode ser ligeiramente melhorado com ajustes finos.")
+            elif f1_score > 0.5 or precision > 0.5 or recall > 0.5:
+                interpretacao.append("\nConclusão Geral:⚠️ O modelo tem um desempenho moderado. Recomenda-se ajustar os hiperparâmetros ou melhorar os dados de treino.")
+            else:
+                interpretacao.append("\nConclusão Geral: ❗ O modelo apresenta um desempenho fraco. Será necessário rever o processo de treino, os dados e os parâmetros.")
+        except (ValueError, TypeError):
+            pass
 
     return "\n".join(interpretacao)
 
 def generate_regression_interpretation(metrics):
+    """Função para gerar interpretação personalizada das métricas de regressão"""
     interpretation = []
 
+    # Verificar se as métricas estão no formato esperado
+    if not isinstance(metrics, dict):
+        return "Formato de métricas inválido."
+
     # R² (Coeficiente de Determinação)
-    r2 = float(metrics['R²'])
-    if r2 > 0.9:
-        interpretation.append(f"- R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados. Isso indica um forte ajuste entre as previsões e os valores reais.")
-    elif r2 > 0.75:
-        interpretation.append(f"- R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados, mas ainda pode ser melhorado.")
-    elif r2 > 0.5:
-        interpretation.append(f"- R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade, mas há limitações importantes no ajuste.")
-    else:
-        interpretation.append(f"- R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados. Considere revisar as features ou usar um modelo mais adequado.")
+    if 'R²' in metrics:
+        try:
+            r2 = float(metrics['R²'])
+            if r2 > 0.9:
+                interpretation.append(f"- R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados. Isso indica um forte ajuste entre as previsões e os valores reais.")
+            elif r2 > 0.75:
+                interpretation.append(f"- R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados, mas ainda pode ser melhorado.")
+            elif r2 > 0.5:
+                interpretation.append(f"- R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade, mas há limitações importantes no ajuste.")
+            else:
+                interpretation.append(f"- R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados. Considere revisar as features ou usar um modelo mais adequado.")
+        except (ValueError, TypeError):
+            interpretation.append("- R²: Não disponível ou inválido.")
 
     # MAE (Erro Absoluto Médio)
-    mae = float(metrics['MAE'])
-    if mae < 0.1:
-        interpretation.append(f"- MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno, sugerindo que as previsões são altamente precisas.")
-    elif mae < 1:
-        interpretation.append(f"- MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável, mas ainda pode ser otimizado.")
-    else:
-        interpretation.append(f"- MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais. Considere ajustar o modelo ou as features.")
+    if 'MAE' in metrics:
+        try:
+            mae = float(metrics['MAE'])
+            if mae < 0.1:
+                interpretation.append(f"- MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno, sugerindo que as previsões são altamente precisas.")
+            elif mae < 1:
+                interpretation.append(f"- MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável, mas ainda pode ser otimizado.")
+            else:
+                interpretation.append(f"- MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais. Considere ajustar o modelo ou as features.")
+        except (ValueError, TypeError):
+            interpretation.append("- MAE: Não disponível ou inválido.")
 
     # MSE (Erro Quadrático Médio)
-    mse = float(metrics['MSE'])
-    if mse < 0.1:
-        interpretation.append(f"- MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo, indicando que as previsões estão próximas dos valores reais.")
-    elif mse < 1:
-        interpretation.append(f"- MSE: {mse:.4f} - Bom. O erro é relativamente baixo, mas ainda há espaço para reduzir as discrepâncias.")
-    else:
-        interpretation.append(f"- MSE: {mse:.4f} - Alto. O erro é significativo. Isso pode indicar que o modelo não está capturando bem os padrões nos dados.")
+    if 'MSE' in metrics:
+        try:
+            mse = float(metrics['MSE'])
+            if mse < 0.1:
+                interpretation.append(f"- MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo, indicando que as previsões estão próximas dos valores reais.")
+            elif mse < 1:
+                interpretation.append(f"- MSE: {mse:.4f} - Bom. O erro é relativamente baixo, mas ainda há espaço para reduzir as discrepâncias.")
+            else:
+                interpretation.append(f"- MSE: {mse:.4f} - Alto. O erro é significativo. Isso pode indicar que o modelo não está capturando bem os padrões nos dados.")
+        except (ValueError, TypeError):
+            interpretation.append("- MSE: Não disponível ou inválido.")
+
+    # Se nenhuma métrica conhecida foi encontrada
+    if not interpretation:
+        interpretation.append("Nenhuma métrica de regressão reconhecida encontrada nos dados.")
 
     # Conclusão geral com base nas métricas
-    if r2 > 0.9 and mse < 0.1 and mae < 0.1:
-        interpretation.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excepcional! Está pronto para produção.")
-    elif r2 > 0.75 and mse < 1 and mae < 1:
-        interpretation.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral. Com ajustes menores, pode se tornar ainda melhor.")
-    elif r2 > 0.5 or mse < 1 or mae < 1:
-        interpretation.append("\nConclusão Geral: ⚠️ O modelo está funcional, mas ainda apresenta limitações. Ajustes adicionais são recomendados.")
-    else:
-        interpretation.append("\nConclusão Geral: ❗ O modelo apresenta desempenho insatisfatório. Considere reavaliar as features, ajustar hiperparâmetros ou explorar modelos alternativos.")
+    if all(key in metrics for key in ['R²', 'MAE', 'MSE']):
+        try:
+            r2 = float(metrics['R²'])
+            mse = float(metrics['MSE'])
+            mae = float(metrics['MAE'])
+            
+            if r2 > 0.9 and mse < 0.1 and mae < 0.1:
+                interpretation.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excepcional! Está pronto para produção.")
+            elif r2 > 0.75 and mse < 1 and mae < 1:
+                interpretation.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral. Com ajustes menores, pode se tornar ainda melhor.")
+            elif r2 > 0.5 or mse < 1 or mae < 1:
+                interpretation.append("\nConclusão Geral: ⚠️ O modelo está funcional, mas ainda apresenta limitações. Ajustes adicionais são recomendados.")
+            else:
+                interpretation.append("\nConclusão Geral: ❗ O modelo apresenta desempenho insatisfatório. Considere reavaliar as features, ajustar hiperparâmetros ou explorar modelos alternativos.")
+        except (ValueError, TypeError):
+            pass
 
     return "\n".join(interpretation)
 
