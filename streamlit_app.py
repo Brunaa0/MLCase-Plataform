@@ -3182,7 +3182,7 @@ def evaluate_and_compare_models():
     # Mapeamento de modelos
     model_name_map = {
         "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier", 
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",  # Ajustado para o nome correto
         "Random Forest": "RandomForestClassifier",
         "Regressão Linear Simples (RLS)": "LinearRegression",
         "Regressão por Vetores de Suporte (SVR)": "SVR"
@@ -3209,9 +3209,16 @@ def evaluate_and_compare_models():
         return
 
     # Encontrar o modelo no dicionário
-    model = st.session_state.models.get(model_name)
-    if model is None:
+    model_class_name = model_name_map.get(model_name)  # Usar o mapeamento de nome
+    if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
+        st.write("Modelos disponíveis:", list(model_name_map.keys()))
+        return
+
+    # Recuperar o modelo da sessão
+    model = st.session_state.models.get(model_class_name)
+    if model is None:
+        st.error(f"O modelo {model_class_name} não foi encontrado na sessão.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
@@ -3362,6 +3369,7 @@ def evaluate_and_compare_models():
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
+
 
 # Função para gerar interpretação personalizada das métricas
 def generate_metrics_interpretation(metrics):
