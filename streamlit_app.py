@@ -1397,121 +1397,38 @@ def plot_metrics(metrics_df):
         plt.clf()  # Limpar a figura para evitar sobreposições
 
 
-def perform_grid_search(model, X_train, y_train, param_grid, model_type):
-    """
-    Realiza GridSearch de forma robusta para diferentes tipos de modelos
-    
-    Parâmetros:
-    - model: Modelo de machine learning
-    - X_train: Dados de treino (features)
-    - y_train: Dados de treino (target)
-    - param_grid: Dicionário de hiperparâmetros para busca
-    - model_type: Tipo de modelo ('classificação' ou 'regressão')
-    
-    Retorna:
-    - Modelo com melhores parâmetros
-    - Melhores parâmetros
-    """
-    try:
-        # Configurações de validação cruzada
-        cv = KFold(n_splits=5, shuffle=True, random_state=42)
-        
-        # Definir scoring baseado no tipo de modelo
-        if model_type == "Classificação":
-            scoring = 'accuracy'
-        elif model_type == "Regressão":
-            scoring = 'r2'
-        else:
-            scoring = None
 
-        # Tratamento especial para modelos que precisam de escalonamento
-        if str(type(model).__name__) in ['SVR', 'SVC']:
-            # Criar pipeline para escalonar e treinar
-            from sklearn.pipeline import Pipeline
-            from sklearn.preprocessing import StandardScaler
-            
-            pipeline = Pipeline([
-                ('scaler', StandardScaler()),
-                ('model', model)
-            ])
-            
-            # Ajustar param_grid para o pipeline
-            param_grid_pipeline = {
-                f'model__{k}': v for k, v in param_grid.items()
-            }
-            
-            # GridSearch no pipeline
-            grid_search = GridSearchCV(
-                pipeline, 
-                param_grid_pipeline, 
-                cv=cv, 
-                scoring=scoring, 
-                n_jobs=-1,  # Usar todos os núcleos
-                verbose=1  # Para depuração
-            )
-        else:
-            # GridSearch padrão para outros modelos
-            grid_search = GridSearchCV(
-                model, 
-                param_grid, 
-                cv=cv, 
-                scoring=scoring, 
-                n_jobs=-1,  # Usar todos os núcleos
-                verbose=1  # Para depuração
-            )
-        
-        # Treinar GridSearch
-        grid_search.fit(X_train, y_train)
-        
-        # Recuperar melhor modelo e melhores parâmetros
-        best_model = grid_search.best_estimator_
-        best_params = grid_search.best_params_
-        
-        # Para pipeline, remover o prefixo 'model__'
-        if str(type(model).__name__) in ['SVR', 'SVC']:
-            best_params = {
-                k.replace('model__', ''): v for k, v in best_params.items()
-            }
-        
-        return best_model, best_params
-    
-    except Exception as e:
-        st.error(f"Erro no GridSearch: {e}")
-        return None, None
-
-# Função para gerar grade de parâmetros padrão
+# Adicionar os modelos de regressão na função get_default_param_grid
 def get_default_param_grid(model_name):
-    """
-    Gera grade de parâmetros padrão para diferentes modelos
-    """
     if model_name == "Support Vector Classification (SVC)":
         return {
-            'C': [0.1, 1, 10, 100],
+            'C': [0.1, 1, 10],
             'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']
+            'gamma': ['scale', 'auto']  # Apenas para kernel 'rbf'
         }
     elif model_name == "K-Nearest Neighbors (KNN)":
         return {
-            'n_neighbors': list(range(3, 21)),
+            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20
             'weights': ['uniform', 'distance']
         }
     elif model_name == "Random Forest":
+        # Geração dinâmica de max_depth como range
+        max_depth_range = [None] + list(range(5, 21, 5))  # [None, 5, 10, 15, 20]
         return {
-            'n_estimators': [50, 100, 200],
-            'max_depth': [None, 10, 20, 30],
-            'min_samples_split': [2, 5, 10]
+            'max_depth': max_depth_range,
+            'n_estimators': [10, 50, 100]
         }
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
-            'C': [0.1, 1, 10, 100],
-            'epsilon': [0.01, 0.1, 0.5],
-            'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']
+            'C': [ 1, 10],
+            'epsilon': [0.1, 0.2],
+            'kernel': ['linear', 'rbf']
         }
-    elif model_name == "Regressão Linear Simples (RLS)":
-        return {}  # Sem hiperparâmetros para ajuste
+    elif model_name in ["Regressão Linear Simples (RLS)"]:
+        return {}  # Regressão Linear geralmente não tem hiperparâmetros ajustáveis
     else:
-        return {}  # Padrão para modelos não mapeados
+        return {}
+
 
 def configure_manual_params(model_key, param_grid, manual_params):
     """
@@ -3182,12 +3099,12 @@ def evaluate_and_compare_models():
     # Mapeamento de modelos bidirecional
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
-        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",  # Nome correto da classe
+        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
         "RandomForestClassifier": "Random Forest",
         "LinearRegression": "Regressão Linear Simples (RLS)",
         "SVR": "Regressão por Vetores de Suporte (SVR)",
         "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",  # Mapeamento reverso
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier", 
         "Random Forest": "RandomForestClassifier",
         "Regressão Linear Simples (RLS)": "LinearRegression",
         "Regressão por Vetores de Suporte (SVR)": "SVR"
@@ -3205,6 +3122,12 @@ def evaluate_and_compare_models():
 
     # Recuperar o tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')
+
+    # Recuperar a métrica escolhida pelo usuário para seleção de features (exemplo: 'accuracy', 'f1', etc.)
+    scoring_metric = st.session_state.get("selected_scoring", None)  # Usar a chave correta do session_state
+    if not scoring_metric:
+        st.error("Nenhuma métrica de avaliação foi escolhida. Por favor, volte à etapa de seleção de métricas.")
+        return
 
     # Recuperar o nome do modelo selecionado
     model_name = st.session_state.get('selected_model_name')
@@ -3313,24 +3236,15 @@ def evaluate_and_compare_models():
     st.session_state['resultado_com_selecao'] = selected_metrics
     
     # Criar DataFrame de comparação
-    if model_type == "Classificação":
-        comparison_df = pd.DataFrame({
-            'Modelo': [original_metrics['Modelo'], selected_metrics['Modelo']],
-            'Accuracy': [original_metrics.get('Accuracy', 0), selected_metrics.get('Accuracy', 0)],
-            'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
-            'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
-            'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
-            'Best Parameters': [original_params, selected_params]
-        })
-    else:
-        comparison_df = pd.DataFrame({
-            'Modelo': [original_metrics['Modelo'], selected_metrics['Modelo']],
-            'R²': [original_metrics.get('R²', 0), selected_metrics.get('R²', 0)],
-            'MAE': [original_metrics.get('MAE', 0), selected_metrics.get('MAE', 0)],
-            'MSE': [original_metrics.get('MSE', 0), selected_metrics.get('MSE', 0)],
-            'Best Parameters': [original_params, selected_params]
-        })
-    
+    comparison_df = pd.DataFrame({
+        'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
+        'Accuracy': [original_metrics.get('Accuracy', 0), selected_metrics.get('Accuracy', 0)],
+        'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
+        'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
+        'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
+        'Best Parameters': [original_params, selected_params]
+    })
+
     # Exibir tabela de comparação
     st.subheader("📈 Comparação dos Resultados:")
     st.table(fix_dataframe_types(comparison_df.style.format({
@@ -3343,37 +3257,59 @@ def evaluate_and_compare_models():
         'MSE': '{:,.4f}'
     })))
     
-    # Gráfico de comparação 
-    metric_to_plot = 'F1-Score' if model_type == 'Classificação' else 'R²'
+    # Gráfico de comparação usando a métrica escolhida pelo usuário (scoring)
     fig, ax = plt.subplots(figsize=(10, 6))
-    
-    x = comparison_df['Modelo'] 
-    y = comparison_df[metric_to_plot]
-    
-    bars = ax.bar(x, y, width=0.6)
-    
+
+    # Garantir que estamos pegando os valores corretos para as barras
+    x = comparison_df['Modelo']
+    y1 = comparison_df[scoring_metric].iloc[0]  # Primeiro modelo (com seleção)
+    y2 = comparison_df[scoring_metric].iloc[1]  # Segundo modelo (sem seleção)
+
+    # Agora vamos criar as barras para os dois modelos
+    bars1 = ax.barh(x[0], y1, height=0.4, label="Com Seleção de Features", color='green', align='center')
+    bars2 = ax.barh(x[1], y2, height=0.4, label="Sem Seleção de Features", color='darkgreen', align='center')
+
     # Adicionar rótulos de valor nas barras
-    for bar in bars:
-        height = bar.get_height()
-        ax.annotate(f'{height:.4f}', 
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  
+    for bar in bars1:
+        width = bar.get_width()
+        ax.annotate(f'{width:.4f}',  # Ajuste para exibir valores com 4 casas decimais
+                    xy=(width, bar.get_y() + bar.get_height() / 2),
+                    xytext=(5, 0),  # Ajustando a posição do texto
                     textcoords="offset points",
-                    ha='center', va='bottom',
-                    fontsize=12)
-    
-    ax.set_title(f'Comparação de {metric_to_plot}')
-    ax.set_ylabel(metric_to_plot)
-    plt.xticks(rotation=45, ha='right')
+                    ha='left', va='center',
+                    fontsize=12, color='white')
+
+    for bar in bars2:
+        width = bar.get_width()
+        ax.annotate(f'{width:.4f}',  # Ajuste para exibir valores com 4 casas decimais
+                    xy=(width, bar.get_y() + bar.get_height() / 2),
+                    xytext=(5, 0),  # Ajustando a posição do texto
+                    textcoords="offset points",
+                    ha='left', va='center',
+                    fontsize=12, color='white')
+
+    # Melhorando o título e as labels
+    ax.set_title(f'Comparação de {scoring_metric}', fontsize=14)
+    ax.set_xlabel(scoring_metric, fontsize=12)
+    ax.set_ylabel("Modelos", fontsize=12)
+
+    # Ajuste nos rótulos do eixo X e Y
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+
+    # Legendas
+    ax.legend()
+
+    # Ajuste do layout para garantir que tudo fique visível
     plt.tight_layout()
-    
+
+    # Exibir o gráfico
     st.pyplot(fig)
     
     # Botão para próxima etapa
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
-
 
 
 # Função para gerar interpretação personalizada das métricas
