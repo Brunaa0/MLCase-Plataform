@@ -4128,9 +4128,11 @@ def final_page():
         'MAE': '{:.4f}' if 'MAE' in comparison_df.columns else None,
         'MSE': '{:.4f}' if 'MSE' in comparison_df.columns else None,
     }).set_table_styles([
-        {'selector': 'th', 'props': [('font-size', '14px'), ('background-color', '#f1f1f1')]},  # Cabeçalho
-        {'selector': 'td', 'props': [('font-size', '12px')]},  # Tamanho das células
-        {'selector': 'table', 'props': [('width', '100%'), ('border-collapse', 'collapse')]},  # Largura e bordas
+        {'selector': 'th', 'props': [('font-size', '16px'), ('background-color', '#f0f0f0'), ('color', '#333'), ('text-align', 'center')]},  # Cabeçalho
+        {'selector': 'td', 'props': [('font-size', '14px'), ('text-align', 'center')]},  # Tamanho das células e alinhamento
+        {'selector': 'table', 'props': [('width', '100%'), ('border-collapse', 'collapse')]},  # Largura da tabela e bordas
+        {'selector': 'tr:nth-child(even)', 'props': [('background-color', '#f9f9f9')]},  # Cor de fundo alternada para as linhas
+        {'selector': 'tr:nth-child(odd)', 'props': [('background-color', '#ffffff')]},  # Cor de fundo para linhas ímpares
     ])))
 
     # Verificar se a métrica escolhida existe no DataFrame
