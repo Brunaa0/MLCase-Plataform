@@ -4609,6 +4609,9 @@ def main():
     # Inicialização das variáveis de estado da sessão
     initialize_session_state()
 
+    # Exibir estado atual para depuração
+    st.write(f"📌 Estado atual: {st.session_state.step}")
+
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
         upload_file()
@@ -4624,17 +4627,17 @@ def main():
         model_selection()
     elif st.session_state.step == 'feature_selection':
         feature_selection()
-    elif st.session_state.step == 'train_with_selected_features':  # Adicionado
+    elif st.session_state.step == 'train_with_selected_features':  
         train_with_selected_features_page()
-    elif st.session_state.step == 'model_comparison':
+    elif st.session_state.step == 'evaluate_and_compare_models':  # Corrigido!
         evaluate_and_compare_models()
     elif st.session_state.step == 'final_page':
         final_page()
     else:
-        st.error(f"Etapa desconhecida: {st.session_state.step}. Reiniciando a aplicação.")
+        st.error(f"⚠ Etapa desconhecida: {st.session_state.step}. Reiniciando a aplicação.")
         st.session_state.step = 'file_upload'
         st.rerun()
-        
+
     # Exibir o estado após a execução para depuração
     #st.write(f"Estado final: {st.session_state.step}")
 
