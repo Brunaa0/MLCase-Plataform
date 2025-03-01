@@ -172,6 +172,12 @@ def configure_sidebar():
 configure_sidebar()
 
 ##############################################
+import matplotlib
+matplotlib.use('Agg')  # Usar backend não interativo
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
+##############################################
 
 # FUNÇÃO DE UPLOAD 
 
@@ -1414,8 +1420,8 @@ def get_default_param_grid(model_name):
         }
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
-            'C': [0.1, 1, 10],
-            'epsilon': [0.1, 0.2, 0.5],
+            'C': [ 1, 10],
+            'epsilon': [0.1, 0.2],
             'kernel': ['linear', 'rbf']
         }
     elif model_name in ["Regressão Linear Simples (RLS)"]:
@@ -2656,119 +2662,57 @@ def evaluate_regression_model(y_true, y_pred):
     return {"R²": r2, "MAE": mae,"MSE": mse }
 
 def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params=None):
-    metrics = {}  # Armazena as métricas
-
-    # Verificar se é SVR específico
-    is_svr = isinstance(model, SVR) or model.__class__.__name__ == 'SVR'
-    
-    # Verificar se é regressão
-    is_regression = isinstance(model, (LinearRegression, SVR)) or "Regressão" in model.__class__.__name__
-
     try:
-        # Preparação para SVR: Escalonamento dos dados
+        # Verificações simplificadas
+        is_svr = isinstance(model, SVR)
+        is_regression = is_svr or isinstance(model, LinearRegression)
+
+        # Escalonamento simples
         if is_svr:
             scaler = StandardScaler()
-            X_train_scaled = scaler.fit_transform(X_train)
-            X_test_scaled = scaler.transform(X_test)
-        else:
-            X_train_scaled = X_train
-            X_test_scaled = X_test
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
 
-        # Recuperar parâmetros manuais do estado
-        manual_params = st.session_state.get('manual_params', {})
-
-        # Remover parâmetros inválidos antes do treino
-        if manual_params.get('kernel') == 'linear' and 'gamma' in manual_params:
-            del manual_params['gamma']
-        if 'gamma' in st.session_state.get('manual_params', {}):
-            del st.session_state['manual_params']['gamma']
-
-        # Configurações específicas para SVR
-        if is_svr:
-            # Grid de parâmetros padrão para SVR
-            default_svr_param_grid = {
-                'C': [0.1, 1, 10, 100],
-                'epsilon': [0.01, 0.1, 0.2],
-                'kernel': ['linear', 'rbf'],
-                'gamma': ['scale', 'auto']
-            }
-            
-            # Atualizar param_grid com parâmetros padrão de SVR
-            param_grid = default_svr_param_grid
-
-        # Aplicar GridSearch se necessário
+        # GridSearch simplificado
         if use_grid_search:
-            # Atualizar param_grid com parâmetros manuais
-            if manual_params:
-                for param, value in manual_params.items():
-                    if not isinstance(value, list):
-                        manual_params[param] = [value]
-                param_grid.update(manual_params)
-
-            # Configurar GridSearchCV
-            cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
+            cv = KFold(n_splits=5, shuffle=True, random_state=42)
             scoring = 'r2' if is_regression else 'accuracy'
-
-            grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             
-            # Treinar com os dados corretos (escalados para SVR)
-            grid_search.fit(X_train_scaled, y_train)
-
-            # Melhor modelo e parâmetros
+            grid_search = GridSearchCV(
+                model, 
+                param_grid, 
+                cv=cv, 
+                scoring=scoring, 
+                n_jobs=1  # Reduzir para 1 para evitar sobrecarga
+            )
+            grid_search.fit(X_train, y_train)
+            
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
-
-            # Remover 'gamma' se não for necessário
-            if best_params.get('kernel') == 'linear' and 'gamma' in best_params:
-                del best_params['gamma']
-
-            # Salvar no estado global
-            st.session_state['manual_params'] = best_params
-            st.session_state['best_params_str'] = json.dumps(best_params, indent=2)
-
         else:
-            # Treinar sem GridSearch
-            valid_params = model.get_params().keys()
-            manual_params = {k: v for k, v in manual_params.items() if k in valid_params}
-            
-            # Aplicar parâmetros do GridSearch antes do treino
-            best_params = st.session_state.get('manual_params', {})
-            if best_params:
-                model.set_params(**best_params)
-
-            # Treinar com os dados corretos
-            model.fit(X_train_scaled, y_train)
+            model.fit(X_train, y_train)
             best_model = model
-            best_params = manual_params
+            best_params = {}
 
-        # Fazer previsões com os dados corretos
-        y_pred = best_model.predict(X_test_scaled)
+        # Predições
+        y_pred = best_model.predict(X_test)
 
-        # Avaliar desempenho
+        # Métricas
         if is_regression:
-            mse = mean_squared_error(y_test, y_pred)
-            mae = mean_absolute_error(y_test, y_pred)
-            r2 = r2_score(y_test, y_pred)
-
             metrics = {
                 "Modelo": model.__class__.__name__,
-                "R²": r2,
-                "MAE": mae,
-                "MSE": mse,
+                "R²": r2_score(y_test, y_pred),
+                "MAE": mean_absolute_error(y_test, y_pred),
+                "MSE": mean_squared_error(y_test, y_pred),
                 "Best Parameters": best_params
             }
         else:
-            accuracy = accuracy_score(y_test, y_pred)
-            precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
-            recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
-            f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
-
             metrics = {
                 "Modelo": model.__class__.__name__,
-                "Accuracy": accuracy,
-                "Precision": precision,
-                "Recall": recall,
-                "F1-Score": f1,
+                "Accuracy": accuracy_score(y_test, y_pred),
+                "Precision": precision_score(y_test, y_pred, average='weighted'),
+                "Recall": recall_score(y_test, y_pred, average='weighted'),
+                "F1-Score": f1_score(y_test, y_pred, average='weighted'),
                 "Best Parameters": best_params
             }
 
