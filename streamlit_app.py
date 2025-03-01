@@ -2885,6 +2885,20 @@ def feature_selection():
 def train_with_selected_features_page():
     st.title("Treinando Modelo com Features Selecionadas")
     
+    # Mapeamento de modelos bidirecional
+    model_name_map = {
+        "SVC": "Support Vector Classification (SVC)",
+        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
+        "RandomForestClassifier": "Random Forest",
+        "LinearRegression": "Regressão Linear Simples (RLS)",
+        "SVR": "Regressão por Vetores de Suporte (SVR)",
+        "Support Vector Classification (SVC)": "SVC",
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier", 
+        "Random Forest": "RandomForestClassifier",
+        "Regressão Linear Simples (RLS)": "LinearRegression",
+        "Regressão por Vetores de Suporte (SVR)": "SVR"
+    }
+    
     if 'models' not in st.session_state or not st.session_state.models:
         st.error("Erro: Nenhum modelo foi treinado ou selecionado.")
         return
@@ -2894,13 +2908,14 @@ def train_with_selected_features_page():
         return
 
     selected_model_name = st.session_state.selected_model_name.strip()
+    model_class_name = model_name_map.get(selected_model_name, selected_model_name)
 
-    if selected_model_name not in st.session_state.models:
+    if model_class_name not in st.session_state.models:
         st.error(f"O modelo '{selected_model_name}' não foi encontrado na sessão.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
-    model = st.session_state.models[selected_model_name]
+    model = st.session_state.models[model_class_name]
     
     X_train_selected, X_test_selected = st.session_state.X_train_selected, st.session_state.X_test_selected
     y_train, y_test = st.session_state.y_train, st.session_state.y_test
@@ -2923,6 +2938,7 @@ def train_with_selected_features_page():
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
+
 #Função para Treinar e Armazenar as metricas
 
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
