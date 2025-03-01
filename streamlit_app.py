@@ -3179,16 +3179,19 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
-    # Mapeamento de modelos invertido
+    # Mapeamento de modelos bidirecional
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
-        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",  # Nome correto do modelo
+        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",  # Nome correto da classe
         "RandomForestClassifier": "Random Forest",
         "LinearRegression": "Regressão Linear Simples (RLS)",
         "SVR": "Regressão por Vetores de Suporte (SVR)",
-        "K-Nearest Neighbors (KNN)":"KNeighborsClassifier"
+        "Support Vector Classification (SVC)": "SVC",
+        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",  # Mapeamento reverso
+        "Random Forest": "RandomForestClassifier",
+        "Regressão Linear Simples (RLS)": "LinearRegression",
+        "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
-    reverse_model_name_map = {v: k for k, v in model_name_map.items()}
 
     # Verificações preliminares
     if 'selected_features' not in st.session_state:
@@ -3210,13 +3213,13 @@ def evaluate_and_compare_models():
         return
 
     # Encontrar o nome correto do modelo a partir do mapeamento
-    model_class_name = reverse_model_name_map.get(model_name)  # Usar o mapeamento invertido
+    model_class_name = model_name_map.get(model_name)  # Usar o mapeamento de nome amigável para classe
     if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
-        st.write("Modelos disponíveis:", list(model_name_map.values()))
+        st.write("Modelos disponíveis:", list(model_name_map.keys()))
         return
 
-    # Recuperar o modelo da sessão com base no nome correto
+    # Recuperar o modelo da sessão com base no nome correto da classe
     model = st.session_state.models.get(model_class_name)
     if model is None:
         st.error(f"O modelo {model_class_name} não foi encontrado na sessão.")
@@ -3370,6 +3373,7 @@ def evaluate_and_compare_models():
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
+
 
 
 # Função para gerar interpretação personalizada das métricas
