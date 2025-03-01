@@ -3099,11 +3099,6 @@ def evaluate_and_compare_models():
     original_metrics = st.session_state.get('resultado_sem_selecao', {}) 
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
-    # Código de depuração para verificar os valores armazenados
-    with st.expander("Depuração de Métricas"):
-        st.write("**Métricas originais:**", original_metrics)
-        st.write("**Métricas com seleção:**", selected_metrics)
-
     # Verificar se as métricas existem
     if not original_metrics:
         st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento.")
