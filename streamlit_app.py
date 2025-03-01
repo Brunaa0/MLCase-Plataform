@@ -2628,19 +2628,23 @@ def model_selection():
 
 # Função para treinar e avaliar os modelos de clustering
 def train_clustering_model(model, X_data, model_name):
+    # Adicionar a padronização para todos os modelos de clustering
+    from sklearn.preprocessing import StandardScaler
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_data)
+    
     if model_name == "KMeans":
         model.set_params(n_clusters=st.session_state.kmeans_clusters)
-        model.fit(X_data)
+        model.fit(X_scaled)  # Use X_scaled em vez de X_data
         st.session_state['labels'] = model.labels_
 
     elif model_name == "Clustering Hierárquico":
-        # Adicione explicitamente o parâmetro linkage='ward'
-        model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage='ward')
-        model.fit(X_data)
+        model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage="ward")
+        model.fit(X_scaled)  # Use X_scaled em vez de X_data
         st.session_state['labels'] = model.labels_
 
     st.write(f"Clusterização realizada com {model_name}")
-    
+
 # Visualização dos Clusters usando PCA
 def visualize_clusters(X_data):
     if 'labels' in st.session_state:
