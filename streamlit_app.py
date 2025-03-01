@@ -1925,7 +1925,7 @@ def model_selection():
         elif st.session_state.model_type == "Clustering":
             models = {
                 "KMeans": KMeans(),
-                "Clustering Hierárquico": AgglomerativeClustering(),
+                "Clustering Hierárquico": AgglomerativeClustering(linkage='ward'),
             }
 
         # Armazena os modelos no session_state para uso posterior
@@ -4666,7 +4666,7 @@ def initialize_session_state():
             "K-Nearest Neighbors (KNN)": KNeighborsClassifier(),
             "Random Forest": RandomForestClassifier(),
             "KMeans": KMeans(),
-            "Clustering Hierárquico": AgglomerativeClustering(),
+            "Clustering Hierárquico": AgglomerativeClustering(linkage='ward')
             "Regressão Linear Simples (RLS)": LinearRegression(),
             "Regressão por Vetores de Suporte (SVR)": SVR(),
         },
