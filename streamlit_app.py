@@ -3417,7 +3417,7 @@ class CustomPDF(FPDF):
         
         # Adicionar uma linha horizontal após o cabeçalho
         self.ln(15)
-        self.ln(5)  # Espaço após o cabeçalho
+        self.ln(15)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
@@ -4224,7 +4224,7 @@ class CustomPDF(FPDF):
         
         # Adicionar uma linha horizontal após o cabeçalho
         self.ln(15)
-        self.ln(5)  # Espaço após o cabeçalho
+        self.ln(15)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
