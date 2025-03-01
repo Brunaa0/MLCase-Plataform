@@ -2883,7 +2883,7 @@ def feature_selection():
             st.rerun()
 
 def train_with_selected_features_page():
-    st.title("Treinando Modelo com Features Selecionadas")
+    st.title("Treino do Modelo com Features Selecionadas")
     
     # Mapeamento de modelos bidirecional
     model_name_map = {
@@ -2929,11 +2929,9 @@ def train_with_selected_features_page():
         st.success("Treinamento concluído!")
         
         st.subheader("Métricas do Modelo com Features Selecionadas")
-        for key, value in selected_metrics.items():
-            if isinstance(value, (int, float)):
-                st.write(f"**{key}:** {value:.4f}")
-            else:
-                st.write(f"**{key}:** {value}")
+        metrics_df = pd.DataFrame(list(selected_metrics.items()), columns=["Métrica", "Valor"])
+        metrics_df["Valor"] = metrics_df["Valor"].apply(lambda x: f"{x:.4f}" if isinstance(x, (int, float)) else x)
+        st.table(metrics_df)
     
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
