@@ -3146,7 +3146,7 @@ def train_with_selected_features_page():
     
     # Botão para avançar para comparação
     if st.button("Comparar Modelos"):
-        st.session_state.step = 'model_comparison'
+        st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
         
 def evaluate_and_compare_models():
