@@ -2634,7 +2634,8 @@ def train_clustering_model(model, X_data, model_name):
         st.session_state['labels'] = model.labels_
 
     elif model_name == "Clustering Hierárquico":
-        model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage="ward")
+        # Adicione explicitamente o parâmetro linkage='ward'
+        model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage='ward')
         model.fit(X_data)
         st.session_state['labels'] = model.labels_
 
