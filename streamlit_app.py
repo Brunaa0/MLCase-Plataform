@@ -1397,38 +1397,121 @@ def plot_metrics(metrics_df):
         plt.clf()  # Limpar a figura para evitar sobreposições
 
 
+def perform_grid_search(model, X_train, y_train, param_grid, model_type):
+    """
+    Realiza GridSearch de forma robusta para diferentes tipos de modelos
+    
+    Parâmetros:
+    - model: Modelo de machine learning
+    - X_train: Dados de treino (features)
+    - y_train: Dados de treino (target)
+    - param_grid: Dicionário de hiperparâmetros para busca
+    - model_type: Tipo de modelo ('classificação' ou 'regressão')
+    
+    Retorna:
+    - Modelo com melhores parâmetros
+    - Melhores parâmetros
+    """
+    try:
+        # Configurações de validação cruzada
+        cv = KFold(n_splits=5, shuffle=True, random_state=42)
+        
+        # Definir scoring baseado no tipo de modelo
+        if model_type == "Classificação":
+            scoring = 'accuracy'
+        elif model_type == "Regressão":
+            scoring = 'r2'
+        else:
+            scoring = None
 
-# Adicionar os modelos de regressão na função get_default_param_grid
+        # Tratamento especial para modelos que precisam de escalonamento
+        if str(type(model).__name__) in ['SVR', 'SVC']:
+            # Criar pipeline para escalonar e treinar
+            from sklearn.pipeline import Pipeline
+            from sklearn.preprocessing import StandardScaler
+            
+            pipeline = Pipeline([
+                ('scaler', StandardScaler()),
+                ('model', model)
+            ])
+            
+            # Ajustar param_grid para o pipeline
+            param_grid_pipeline = {
+                f'model__{k}': v for k, v in param_grid.items()
+            }
+            
+            # GridSearch no pipeline
+            grid_search = GridSearchCV(
+                pipeline, 
+                param_grid_pipeline, 
+                cv=cv, 
+                scoring=scoring, 
+                n_jobs=-1,  # Usar todos os núcleos
+                verbose=1  # Para depuração
+            )
+        else:
+            # GridSearch padrão para outros modelos
+            grid_search = GridSearchCV(
+                model, 
+                param_grid, 
+                cv=cv, 
+                scoring=scoring, 
+                n_jobs=-1,  # Usar todos os núcleos
+                verbose=1  # Para depuração
+            )
+        
+        # Treinar GridSearch
+        grid_search.fit(X_train, y_train)
+        
+        # Recuperar melhor modelo e melhores parâmetros
+        best_model = grid_search.best_estimator_
+        best_params = grid_search.best_params_
+        
+        # Para pipeline, remover o prefixo 'model__'
+        if str(type(model).__name__) in ['SVR', 'SVC']:
+            best_params = {
+                k.replace('model__', ''): v for k, v in best_params.items()
+            }
+        
+        return best_model, best_params
+    
+    except Exception as e:
+        st.error(f"Erro no GridSearch: {e}")
+        return None, None
+
+# Função para gerar grade de parâmetros padrão
 def get_default_param_grid(model_name):
+    """
+    Gera grade de parâmetros padrão para diferentes modelos
+    """
     if model_name == "Support Vector Classification (SVC)":
         return {
-            'C': [0.1, 1, 10],
+            'C': [0.1, 1, 10, 100],
             'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']  # Apenas para kernel 'rbf'
+            'gamma': ['scale', 'auto']
         }
     elif model_name == "K-Nearest Neighbors (KNN)":
         return {
-            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20
+            'n_neighbors': list(range(3, 21)),
             'weights': ['uniform', 'distance']
         }
     elif model_name == "Random Forest":
-        # Geração dinâmica de max_depth como range
-        max_depth_range = [None] + list(range(5, 21, 5))  # [None, 5, 10, 15, 20]
         return {
-            'max_depth': max_depth_range,
-            'n_estimators': [10, 50, 100]
+            'n_estimators': [50, 100, 200],
+            'max_depth': [None, 10, 20, 30],
+            'min_samples_split': [2, 5, 10]
         }
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
-            'C': [ 1, 10],
-            'epsilon': [0.1, 0.2],
-            'kernel': ['linear', 'rbf']
+            'C': [0.1, 1, 10, 100],
+            'epsilon': [0.01, 0.1, 0.5],
+            'kernel': ['linear', 'rbf'],
+            'gamma': ['scale', 'auto']
         }
-    elif model_name in ["Regressão Linear Simples (RLS)"]:
-        return {}  # Regressão Linear geralmente não tem hiperparâmetros ajustáveis
+    elif model_name == "Regressão Linear Simples (RLS)":
+        return {}  # Sem hiperparâmetros para ajuste
     else:
-        return {}
-
+        return {}  # Padrão para modelos não mapeados
 
 def configure_manual_params(model_key, param_grid, manual_params):
     """
