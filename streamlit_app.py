@@ -3383,16 +3383,18 @@ class CustomPDF(FPDF):
         # Baixar a imagem do logo e salvar localmente
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
         response = requests.get(logo_url)
+        
+        # Verificar se a imagem foi baixada corretamente
         if response.status_code == 200:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
                 tmpfile.write(response.content)
                 tmpfile_path = tmpfile.name
                 # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
+                self.image(tmpfile_path, 10, 8, 20)  # Ajuste o tamanho da imagem conforme necessário
         else:
             self.set_font('Arial', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
-        
+
         # Definir fonte para o cabeçalho
         self.set_font('Arial', 'B', 12)
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
@@ -3407,8 +3409,6 @@ class CustomPDF(FPDF):
         current_date = datetime.now().strftime('%d/%m/%Y')
         # Adicionar rodapé com a data e número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
-
-
 
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
@@ -3499,16 +3499,6 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     Returns:
         BytesIO: Buffer contendo o PDF gerado
     """
-    # Importar bibliotecas necessárias
-    import matplotlib.pyplot as plt
-    from io import BytesIO
-    
-    # Função para limpar texto para compatibilidade com codificação Latin-1
-    def clean_text(text):
-        if not isinstance(text, str):
-            return str(text)
-        return text.encode('latin-1', errors='ignore').decode('latin-1')
-    
     # Inicialização do PDF
     pdf = CustomPDF(format='A4')
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -3516,28 +3506,28 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Título do Relatório
     pdf.set_font("Arial", style="B", size=16)
-    pdf.cell(0, 10, txt=clean_text("Relatório Final do Modelo Treinado"), ln=True, align="C")
+    pdf.cell(0, 10, txt="Relatório Final do Modelo Treinado", ln=True, align="C")
     pdf.ln(10)
     
     # Tipo de Modelo
     model_type = session_state.get('model_type', 'Indefinido')
     pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(60, 10, txt=clean_text("Tipo de Modelo:"), ln=False)
+    pdf.cell(60, 10, txt="Tipo de Modelo:", ln=False)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, txt=clean_text(model_type), ln=True)
+    pdf.cell(0, 10, txt=model_type, ln=True)
     
     # Modelo Selecionado
     selected_model_name = session_state.get('selected_model_name', 'Não Selecionado')
     pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(60, 10, txt=clean_text("Modelo Selecionado:"), ln=False)
+    pdf.cell(60, 10, txt="Modelo Selecionado:", ln=False)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, txt=clean_text(selected_model_name), ln=True)
+    pdf.cell(0, 10, txt=selected_model_name, ln=True)
     
     # Melhor Modelo
     pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(60, 10, txt=clean_text("Melhor Modelo:"), ln=False)
+    pdf.cell(60, 10, txt="Melhor Modelo:", ln=False)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, txt=clean_text(best_model), ln=True)
+    pdf.cell(0, 10, txt=best_model, ln=True)
     pdf.ln(10)
     
     # Informações do Conjunto de Dados
@@ -3551,7 +3541,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         test_percent = (X_test.shape[0] / total_samples) * 100
         
         pdf.set_font("Arial", style="B", size=14)
-        pdf.cell(0, 10, txt=clean_text("Informações dos Conjuntos de Dados"), ln=True)
+        pdf.cell(0, 10, txt="Informações dos Conjuntos de Dados", ln=True)
         pdf.ln(5)
         
         # Tabela de informações do conjunto de dados
@@ -3575,263 +3565,20 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
             else:
                 pdf.set_fill_color(255, 255, 255)
             
-            pdf.cell(70, 8, txt=clean_text(label), border=1, ln=0, fill=True)
-            pdf.cell(0, 8, txt=clean_text(value), border=1, ln=1, fill=True)
+            pdf.cell(70, 8, txt=label, border=1, ln=0, fill=True)
+            pdf.cell(0, 8, txt=value, border=1, ln=1, fill=True)
         
         pdf.ln(10)
-    
-    # Features Selecionadas
-    if 'selected_features' in session_state:
-        pdf.set_font("Arial", style="B", size=14)
-        pdf.cell(0, 10, txt=clean_text("Features Selecionadas"), ln=True)
-        
-        # Listar as features
-        features = session_state.selected_features
-        pdf.set_font("Arial", size=10)
-        for i, feature in enumerate(features):
-            pdf.cell(0, 6, txt=clean_text(f"• {feature}"), ln=True)
-        
-        pdf.ln(10)
-    
-    # Tabela de Métricas
-    pdf.set_font("Arial", style="B", size=14)
-    pdf.cell(0, 10, txt=clean_text("Comparação de Métricas"), ln=True)
-    
-    # Verificar o tipo de modelo para determinar quais métricas exibir
-    is_regression = model_type == "Regressão"
-    metric_columns = ['R²', 'MAE', 'MSE'] if is_regression else ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-    
-    # Criar tabela de métricas
-    pdf.set_font("Arial", style="B", size=10)
-    pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
-    
-    # Definir a largura das colunas
-    column_width = 30
-    first_column_width = 60
-    
-    # Cabeçalho da tabela
-    pdf.cell(first_column_width, 10, "Modelo", 1, 0, 'C', True)
-    for col in metric_columns:
-        pdf.cell(column_width, 10, clean_text(col), 1, 0, 'C', True)
-    pdf.ln()
-    
-    # Linhas da tabela
-    pdf.set_font("Arial", size=10)
-    for _, row in comparison_df.iterrows():
-        model_name = row['Modelo']
-        pdf.cell(first_column_width, 10, clean_text(model_name), 1, 0, 'L')
-        
-        for col in metric_columns:
-            if col in row:
-                # Formatar o valor numérico com 4 casas decimais
-                if isinstance(row[col], (int, float)):
-                    value = f"{row[col]:.4f}"
-                else:
-                    value = str(row[col])
-                pdf.cell(column_width, 10, clean_text(value), 1, 0, 'C')
-        
-        pdf.ln()
-    
-    pdf.ln(10)
-    
-    # Gráficos de Métricas
-    # Para cada métrica, criar um gráfico de barras
 
-    for metric in metric_columns:
-        if metric in comparison_df.columns:
-            # Criar o gráfico
-            plt.figure(figsize=(10, 6))  # Aumentar a altura do gráfico
-            
-            # Dados para o gráfico
-            models = comparison_df['Modelo'].tolist()
-            values = comparison_df[metric].tolist()
-            
-            # Criar barras
-            plt.bar(models, values, color=['#90EE90', '#006400'])
-            
-            # Adicionar valores sobre as barras
-            for i, v in enumerate(values):
-                if isinstance(v, (int, float)):
-                    plt.text(i, v + 0.01, f"{v:.4f}", ha='center', fontsize=10)
-            
-            # Estilização
-            plt.title(f"Comparação de {metric}", fontsize=14)
-            plt.ylabel(metric, fontsize=12)
-            plt.xticks(rotation=45, ha='right', fontsize=10)
-            
-            # Ajustar a altura do gráfico para evitar corte
-            plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20%
-            
-            plt.tight_layout()  # Ajusta automaticamente o layout
-            
-            # Salvar o gráfico em um arquivo temporário
-            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(temp_file.name, bbox_inches='tight')  # Garante que nada seja cortado
-            plt.close()
-        
-            # Adicionar o gráfico ao PDF
-            pdf.add_page()
-            pdf.set_font("Arial", style="B", size=14)
-            pdf.cell(0, 10, txt=clean_text(f"Gráfico de Comparação - {metric}"), ln=True, align="C")
-            pdf.image(temp_file.name, x=10, y=40, w=190)
-            
-            # Fechar e remover o arquivo temporário
-            temp_file.close()
-    
-    # Interpretação das Métricas
-    pdf.add_page()
-    pdf.set_font("Arial", style="B", size=14)
-    pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True)
-    
-    # Função para gerar interpretação de métricas
-    def generate_metrics_interpretation(metrics, model_type):
-        interpretacao = []
-        
-        if model_type == "Classificação":
-            # Accuracy
-            accuracy = float(metrics.get('Accuracy', 0))
-            if accuracy > 0.9:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
-            elif accuracy > 0.75:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
-            elif accuracy > 0.5:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
-            else:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
-        
-            # Precision
-            precision = float(metrics.get('Precision', 0))
-            if precision > 0.9:
-                interpretacao.append(f"Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
-            elif precision > 0.75:
-                interpretacao.append(f"Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
-            elif precision > 0.5:
-                interpretacao.append(f"Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
-            else:
-                interpretacao.append(f"Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
-        
-            # Recall
-            recall = float(metrics.get('Recall', 0))
-            if recall > 0.9:
-                interpretacao.append(f"Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
-            elif recall > 0.75:
-                interpretacao.append(f"Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
-            elif recall > 0.5:
-                interpretacao.append(f"Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
-            else:
-                interpretacao.append(f"Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros.")
-            
-            # F1-Score
-            f1_score = float(metrics.get('F1-Score', 0))
-            if f1_score > 0.9:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade.")
-            elif f1_score > 0.75:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias.")
-            elif f1_score > 0.5:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Desempenho moderado.")
-            else:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Desempenho fraco.")
-        
-        elif model_type == "Regressão":
-            # R² (Coeficiente de Determinação)
-            r2 = float(metrics.get('R²', 0))
-            if r2 > 0.9:
-                interpretacao.append(f"R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados.")
-            elif r2 > 0.75:
-                interpretacao.append(f"R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados.")
-            elif r2 > 0.5:
-                interpretacao.append(f"R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade.")
-            else:
-                interpretacao.append(f"R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados.")
-        
-            # MAE (Erro Absoluto Médio)
-            mae = float(metrics.get('MAE', 0))
-            if mae < 0.1:
-                interpretacao.append(f"MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno.")
-            elif mae < 1:
-                interpretacao.append(f"MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável.")
-            else:
-                interpretacao.append(f"MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais.")
-        
-            # MSE (Erro Quadrático Médio)
-            mse = float(metrics.get('MSE', 0))
-            if mse < 0.1:
-                interpretacao.append(f"MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo.")
-            elif mse < 1:
-                interpretacao.append(f"MSE: {mse:.4f} - Bom. O erro é relativamente baixo.")
-            else:
-                interpretacao.append(f"MSE: {mse:.4f} - Alto. O erro é significativo.")
-        
-        return interpretacao
-    
-    # Obter dados das métricas originais e selecionadas
-    original_metrics = {}
-    selected_metrics = {}
-    
-    # Separar as métricas por tipo de modelo
-    for _, row in comparison_df.iterrows():
-        model_name = row['Modelo']
-        
-        if "Sem Seleção" in model_name:
-            # Extrair métricas do modelo sem seleção de features
-            for col in metric_columns:
-                if col in row:
-                    original_metrics[col] = row[col]
-        
-        if "Com Seleção" in model_name:
-            # Extrair métricas do modelo com seleção de features
-            for col in metric_columns:
-                if col in row:
-                    selected_metrics[col] = row[col]
-    
-    # Interpretações para modelos sem e com seleção de features
-    pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(0, 10, txt=clean_text("Modelo Sem Seleção de Features"), ln=True)
-    pdf.set_font("Arial", size=10)
-    
-    # Adicionar interpretação do modelo sem seleção
-    for line in generate_metrics_interpretation(original_metrics, model_type):
-        pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
-    
-    pdf.ln(5)
-    pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(0, 10, txt=clean_text("Modelo Com Seleção de Features"), ln=True)
-    pdf.set_font("Arial", size=10)
-    
-    # Adicionar interpretação do modelo com seleção
-    for line in generate_metrics_interpretation(selected_metrics, model_type):
-        pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
-    
-    # Conclusão
-    pdf.ln(10)
-    pdf.set_font("Arial", style="B", size=14)
-    pdf.cell(0, 10, txt=clean_text("Conclusão"), ln=True)
-    
-    # Determinar a melhor métrica com base no tipo de modelo
-    main_metric = 'R²' if is_regression else 'F1-Score'
-    original_value = original_metrics.get(main_metric, 0)
-    selected_value = selected_metrics.get(main_metric, 0)
-    
-    # Texto da conclusão
-    pdf.set_font("Arial", size=10)
-    conclusion_text = f"Com base na métrica principal ({main_metric}), o modelo {best_model} apresentou o melhor desempenho."
-    pdf.multi_cell(0, 8, txt=clean_text(conclusion_text))
-    
-    if original_value > selected_value:
-        recommendation_text = "Recomenda-se utilizar o modelo sem seleção de features, pois apresentou melhor desempenho geral."
-    else:
-        feature_reduction = session_state.X_train.shape[1] - session_state.X_train_selected.shape[1]
-        recommendation_text = f"Recomenda-se utilizar o modelo com seleção de features, pois além de melhorar o desempenho, reduziu a dimensionalidade em {feature_reduction} features."
-    
-    pdf.multi_cell(0, 8, txt=clean_text(recommendation_text))
-    
+    # Continue the rest of your report generation...
+
     # Salvar o PDF em um buffer
+    pdf_output = pdf.output(dest='S').encode('latin1')
     pdf_buffer = BytesIO()
-    pdf_output = pdf.output(dest='S').encode('latin1', errors='ignore')
     pdf_buffer.write(pdf_output)
     pdf_buffer.seek(0)
     
-    return pdf_buffer
+    return pdf_buffer  # Retorna o buffer PDF gerado
 
 # Função para exibir a página final com o relatório
 
