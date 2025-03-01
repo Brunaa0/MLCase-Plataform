@@ -3382,6 +3382,7 @@ from fpdf import FPDF
 import requests
 import tempfile
 from datetime import datetime
+from io import BytesIO
 
 class CustomPDF(FPDF):
     def __init__(self, *args, **kwargs):
@@ -3400,33 +3401,26 @@ class CustomPDF(FPDF):
 
     def header(self):
         """Método para o cabeçalho da página"""
+        self.set_font('Arial', 'B', 12)
+        
         # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
         if self.logo_path:
-            try:
-                self.image(self.logo_path, 10, 8, 20)  # Adiciona a imagem com o tamanho adequado
-            except Exception as e:
-                print(f"Erro ao adicionar imagem: {e}")
-                self.set_font('Arial', 'B', 12)
-                self.cell(0, 10, "Logo não disponível", align='C')
+            self.image(self.logo_path, 10, 8, 20)  # Adiciona a imagem com o tamanho adequado
         else:
-            self.set_font('Arial', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
-        
-        # Definir fonte para o cabeçalho
-        self.set_font('Arial', 'B', 12)
-        # Adicionar o nome da plataforma no cabeçalho
+
+        # Adicionar o título
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
         self.ln(15)  # Espaço após o cabeçalho
 
     def footer(self):
         """Método para o rodapé da página"""
-        # Ir para 1.5 cm da parte inferior
+        # Definir posição do rodapé (1.5 cm da parte inferior)
         self.set_y(-15)
-        # Definir fonte para o rodapé
-        self.set_font('Arial', 'I', 10)
-        # Data atual
+        self.set_font('Arial', 'I', 8)
+        
+        # Adicionar data e número da página
         current_date = datetime.now().strftime('%d/%m/%Y')
-        # Adicionar rodapé com a data e número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
 
 class MLCaseModelReportGenerator:
