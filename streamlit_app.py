@@ -4118,13 +4118,20 @@ def final_page():
         st.error("Tipo de modelo não reconhecido. Não é possível gerar a tabela de métricas.")
         return
 
-    # Exibir tabela de métricas
+    # Exibir tabela de métricas com ajustes
     st.table(fix_dataframe_types(comparison_df.style.format({
         'Accuracy': '{:.4f}' if 'Accuracy' in comparison_df.columns else None,
         'Precision': '{:.4f}' if 'Precision' in comparison_df.columns else None,
         'Recall': '{:.4f}' if 'Recall' in comparison_df.columns else None,
         'F1-Score': '{:.4f}' if 'F1-Score' in comparison_df.columns else None,
-    })))
+        'R²': '{:.4f}' if 'R²' in comparison_df.columns else None,
+        'MAE': '{:.4f}' if 'MAE' in comparison_df.columns else None,
+        'MSE': '{:.4f}' if 'MSE' in comparison_df.columns else None,
+    }).set_table_styles([
+        {'selector': 'th', 'props': [('font-size', '14px'), ('background-color', '#f1f1f1')]},  # Cabeçalho
+        {'selector': 'td', 'props': [('font-size', '12px')]},  # Tamanho das células
+        {'selector': 'table', 'props': [('width', '100%'), ('border-collapse', 'collapse')]},  # Largura e bordas
+    ])))
 
     # Verificar se a métrica escolhida existe no DataFrame
     if scoring_metric_capitalized not in comparison_df.columns:
