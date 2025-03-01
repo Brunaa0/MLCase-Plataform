@@ -3185,7 +3185,8 @@ def evaluate_and_compare_models():
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",  # Nome correto do modelo
         "RandomForestClassifier": "Random Forest",
         "LinearRegression": "Regressão Linear Simples (RLS)",
-        "SVR": "Regressão por Vetores de Suporte (SVR)"
+        "SVR": "Regressão por Vetores de Suporte (SVR)",
+        "KNeighborsClassifier":"K-Nearest Neighbors (KNN)"
     }
     reverse_model_name_map = {v: k for k, v in model_name_map.items()}
 
