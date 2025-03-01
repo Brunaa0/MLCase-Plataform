@@ -3417,7 +3417,7 @@ class CustomPDF(FPDF):
         
         # Adicionar uma linha horizontal após o cabeçalho
         self.ln(15)
-        self.ln(15)  # Espaço após o cabeçalho
+        self.ln(5)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
@@ -3714,7 +3714,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     # Interpretação das Métricas
     pdf.add_page()
     pdf.set_font("Arial", style="B", size=14)
-    pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True)
+    pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True, align="C")
     
     # Função para gerar interpretação de métricas
     def generate_metrics_interpretation(metrics, model_type):
@@ -4224,7 +4224,7 @@ class CustomPDF(FPDF):
         
         # Adicionar uma linha horizontal após o cabeçalho
         self.ln(15)
-        self.ln(15)  # Espaço após o cabeçalho
+        self.ln(5)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
