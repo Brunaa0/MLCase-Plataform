@@ -3179,14 +3179,13 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
-    # Mapeamento de modelos
+    # Mapeamento de modelos invertido
     model_name_map = {
-        "Support Vector Classification (SVC)": "SVC",
-        "K-Nearest Neighbors (KNN)": "KNeighborsClassifier",  # Nome correto do modelo
-        "Random Forest": "RandomForestClassifier",
-        "Regressão Linear Simples (RLS)": "LinearRegression",
-        "Regressão por Vetores de Suporte (SVR)": "SVR",
-         "KNeighborsClassifier":"K-Nearest Neighbors (KNN)"
+        "SVC": "Support Vector Classification (SVC)",
+        "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",  # Nome correto do modelo
+        "RandomForestClassifier": "Random Forest",
+        "LinearRegression": "Regressão Linear Simples (RLS)",
+        "SVR": "Regressão por Vetores de Suporte (SVR)"
     }
     reverse_model_name_map = {v: k for k, v in model_name_map.items()}
 
@@ -3210,10 +3209,10 @@ def evaluate_and_compare_models():
         return
 
     # Encontrar o nome correto do modelo a partir do mapeamento
-    model_class_name = model_name_map.get(model_name)  # Usar o mapeamento de nome
+    model_class_name = reverse_model_name_map.get(model_name)  # Usar o mapeamento invertido
     if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
-        st.write("Modelos disponíveis:", list(model_name_map.keys()))
+        st.write("Modelos disponíveis:", list(model_name_map.values()))
         return
 
     # Recuperar o modelo da sessão com base no nome correto
