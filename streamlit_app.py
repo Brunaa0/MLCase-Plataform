@@ -3387,7 +3387,10 @@ from io import BytesIO
 class CustomPDF(FPDF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Baixar e armazenar o logo no início para reutilizá-lo em todas as páginas
+        # Definir as margens para garantir espaço para cabeçalho e rodapé
+        self.set_margins(20, 25, 20)  # left, top, right
+        
+        # Baixar o logo no início para reutilizá-lo
         self.logo_path = None
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
         try:
@@ -3401,28 +3404,44 @@ class CustomPDF(FPDF):
 
     def header(self):
         """Método para o cabeçalho da página"""
-        self.set_font('Arial', 'B', 12)
+        # Salvar posição atual
+        self.set_y(10)
         
         # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
         if self.logo_path:
-            self.image(self.logo_path, 10, 8, 20)  # Adiciona a imagem com o tamanho adequado
-        else:
-            self.cell(0, 10, "Logo não disponível", align='C')
-
-        # Adicionar o título
-        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
+            self.image(self.logo_path, 10, 10, 20)  # Posição fixa para o logo
         
-        self.ln(15)  # Espaço após o cabeçalho, pode ser ajustado conforme necessário
+        # Configurar fonte para o título
+        self.set_font('Arial', 'B', 12)
+        self.set_text_color(0, 0, 0)  # Texto preto
+        
+        # Centralizar o título (ajuste para o espaço do logo)
+        self.cell(20)  # Espaço para o logo
+        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 1, 'C')
+        
+        # Linha separadora
+        self.line(10, 25, 200, 25)
+        
+        # Espaço após o cabeçalho
+        self.ln(15)
 
     def footer(self):
         """Método para o rodapé da página"""
-        # Definir posição do rodapé (1.5 cm da parte inferior)
-        self.set_y(-15)
+        # Ir para 1.5 cm da parte inferior
+        self.set_y(-20)
+        
+        # Linha separadora
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(1)
+        
+        # Definir fonte para o rodapé
         self.set_font('Arial', 'I', 8)
         
-        # Adicionar data e número da página
+        # Data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
-        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
+        
+        # Adicionar rodapé com a data e número da página
+        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', 0, 0, 'C')
 
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
@@ -3513,9 +3532,12 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     Returns:
         BytesIO: Buffer contendo o PDF gerado
     """
-    # Importar bibliotecas necessárias
-    import matplotlib.pyplot as plt
-    from io import BytesIO
+
+    # Inicialização do PDF com cabeçalho e rodapé
+    pdf = CustomPDF(format='A4')
+    pdf.set_auto_page_break(auto=True, margin=25)
+    pdf.add_page()  # Chama o header aqui
+    
     
     # Função para limpar texto para compatibilidade com codificação Latin-1
     def clean_text(text):
@@ -3523,12 +3545,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
             return str(text)
         return text.encode('latin-1', errors='ignore').decode('latin-1')
     
-    # Inicialização do PDF com cabeçalho e rodapé
-    pdf = CustomPDF(format='A4')
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()  # Chama o header aqui
-    
-    
+
     # Título do Relatório
     pdf.set_font("Arial", style="B", size=16)
     pdf.cell(0, 10, txt=clean_text("Relatório Final do Modelo Treinado"), ln=True, align="C")
