@@ -3076,13 +3076,19 @@ def evaluate_and_compare_models():
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Mapear o nome do modelo para sua versão curta
-    mapped_model_name = model_name_map.get(model_name, model_name)
-
-    # Encontrar o modelo no dicionário
-    model = st.session_state.models.get(model_name)
+    # Recuperar as opções de modelo dos treinos realizados
+    model_options = [resultado['Modelo'] for resultado in st.session_state['treinos_realizados']]
+    
+    # Encontrar o índice do modelo selecionado nas opções
+    selected_model_index = model_options.index(model_name) if model_name in model_options else 0
+    
+    # Selecionar o modelo usando o índice encontrado
+    selected_model_name = model_options[selected_model_index]
+    
+    # Encontrar o modelo no dicionário usando o nome selecionado
+    model = st.session_state.models.get(selected_model_name)
     if model is None:
-        st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
+        st.error(f"O modelo {selected_model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
