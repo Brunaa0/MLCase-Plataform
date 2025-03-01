@@ -965,11 +965,11 @@ class CustomPDF(FPDF):
                 # Adicionar a imagem no cabeçalho
                 self.image(tmpfile_path, 10, 8, 20) 
         else:
-            self.set_font('Helvetica', 'B', 12)
+            self.set_font('DejaVu Sans', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
         
         # Definir fonte para o cabeçalho
-        self.set_font('Helvetica', 'B', 12)
+        self.set_font('DejaVu Sans', 'B', 12)
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
         self.ln(15)  # Espaço após o cabeçalho
 
@@ -977,7 +977,7 @@ class CustomPDF(FPDF):
         # Ir para 1.5 cm da parte inferior
         self.set_y(-15)
         # Definir fonte para o rodapé
-        self.set_font('Helvetica', 'I', 10)
+        self.set_font('DejaVu Sans', 'I', 10)
         # Data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
         # Adicionar rodapé com a data e número da página
@@ -1000,17 +1000,17 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
     pdf = CustomPDF(format='A4')
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-    pdf.set_font("Helvetica", size=8)  
+    pdf.set_font("DejaVu Sans", size=8)  
 
     # Título do Relatório
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Relatório Resumo dos Dados"), ln=True, align="C")
     pdf.ln(5)
 
     # Estatísticas Descritivas Simplificadas
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Estatísticas Descritivas"), ln=True)
-    pdf.set_font("Helvetica", size=8)  
+    pdf.set_font("DejaVu Sans", size=8)  
 
     # Criar um DataFrame simplificado com as colunas solicitadas: Nome da Coluna, Tipo de Dados, Count, e Média
     summary_simplified = pd.DataFrame({
@@ -1064,9 +1064,9 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
     pdf.ln(10)  # Espaço após a tabela de estatísticas
 
     # Resumo de Valores Ausentes
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Resumo de Valores Ausentes"), ln=True)
-    pdf.set_font("Helvetica", size=8)
+    pdf.set_font("DejaVu Sans", size=8)
 
     if not missing_data.empty:  # Verifica se os dados estão vazios
         # Tabela de Valores Ausentes
@@ -1079,14 +1079,14 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
             pdf.cell(50, 10, clean_text(count), 1, 1)
         pdf.ln(10)
     else:
-        pdf.set_font("Helvetica", style="I", size=10)
+        pdf.set_font("DejaVu Sans", style="I", size=10)
         pdf.cell(0, 10, txt=clean_text("Não há valores ausentes."), ln=True)
         pdf.ln(5)
 
     # Resumo de Outliers
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Resumo de Outliers"), ln=True)
-    pdf.set_font("Helvetica", size=8)
+    pdf.set_font("DejaVu Sans", size=8)
 
     if outlier_summary:
         # Tabela de Outliers
@@ -1099,14 +1099,14 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
             pdf.cell(50, 10, clean_text(total_outliers), 1, 1)
         pdf.ln(10)
     else:
-        pdf.set_font("Helvetica", style="I", size=10)
+        pdf.set_font("DejaVu Sans", style="I", size=10)
         pdf.cell(0, 10, txt=clean_text("Não há outliers."), ln=True)
         pdf.ln(75)
 
     # **Matriz de Correlação (Heatmap)**
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Matriz de Correlação das Variáveis"), ln=True)
-    pdf.set_font("Helvetica", size=8)
+    pdf.set_font("DejaVu Sans", size=8)
 
     # Selecionar apenas as colunas numéricas para correlação
     numeric_data = dataset.select_dtypes(include=['float64', 'int64'])
@@ -1129,9 +1129,9 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
     pdf.ln(95)  # Ajustar o espaço após o gráfico
 
     # **Boxplot combinado de todas as variáveis numéricas**
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Boxplot das Variáveis Numéricas"), ln=True)
-    pdf.set_font("Helvetica", size=8)
+    pdf.set_font("DejaVu Sans", size=8)
 
     # Gerar boxplot para todas as variáveis numéricas no mesmo gráfico
     plt.figure(figsize=(10, 6))
@@ -1301,7 +1301,7 @@ def data_summary():
     # Gerar o heatmap da correlação
     plt.figure(figsize=(8, 6))
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".4f", cbar=True, square=True)
-    plt.title('Matriz de Correlação das Variáveis', fontsize=14, fontweight='bold', fontname='Helvetica')
+    plt.title('Matriz de Correlação das Variáveis', fontsize=14, fontweight='bold', fontname='DejaVu Sans')
     st.pyplot(plt)
     
     # **Função de Download do PDF**
@@ -3399,11 +3399,11 @@ class CustomPDF(FPDF):
                 # Adicionar a imagem no cabeçalho
                 self.image(tmpfile_path, 10, 8, 20) 
         else:
-            self.set_font('Helvetica', 'B', 12)
+            self.set_font('DejaVu Sans', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
         
         # Definir fonte para o cabeçalho
-        self.set_font('Helvetica', 'B', 12)
+        self.set_font('DejaVu Sans', 'B', 12)
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
         self.ln(15)  # Espaço após o cabeçalho
 
@@ -3411,7 +3411,7 @@ class CustomPDF(FPDF):
         # Ir para 1.5 cm da parte inferior
         self.set_y(-15)
         # Definir fonte para o rodapé
-        self.set_font('Helvetica', 'I', 10)
+        self.set_font('DejaVu Sans', 'I', 10)
         # Data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
         # Adicionar rodapé com a data e número da página
@@ -3524,28 +3524,28 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.add_page()
     
     # Título do Relatório
-    pdf.set_font("Helvetica", style="B", size=16)
+    pdf.set_font("DejaVu Sans", style="B", size=16)
     pdf.cell(0, 10, txt=clean_text("Relatório Final dos Modelos Treinados"), ln=True, align="C")
     pdf.ln(10)
     
     # Tipo de Modelo
     model_type = session_state.get('model_type', 'Indefinido')
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Tipo de Modelo:"), ln=False)
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("DejaVu Sans", size=12)
     pdf.cell(0, 10, txt=clean_text(model_type), ln=True)
     
     # Modelo Selecionado
     selected_model_name = session_state.get('selected_model_name', 'Não Selecionado')
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Modelo Selecionado:"), ln=False)
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("DejaVu Sans", size=12)
     pdf.cell(0, 10, txt=clean_text(selected_model_name), ln=True)
     
     # Melhor Modelo
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Melhor Modelo:"), ln=False)
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("DejaVu Sans", size=12)
     pdf.cell(0, 10, txt=clean_text(best_model), ln=True)
     pdf.ln(10)
     
@@ -3559,7 +3559,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         train_percent = (X_train.shape[0] / total_samples) * 100
         test_percent = (X_test.shape[0] / total_samples) * 100
         
-        pdf.set_font("Helvetica", style="B", size=14)
+        pdf.set_font("DejaVu Sans", style="B", size=14)
         pdf.cell(0, 10, txt=clean_text("Informações dos Conjuntos de Dados"), ln=True)
         pdf.ln(5)
         
@@ -3575,7 +3575,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
             data_info.append(["Features Após Seleção", f"{session_state.X_train_selected.shape[1]}"])
         
         # Formatar a tabela de informações
-        pdf.set_font("Helvetica", size=10)
+        pdf.set_font("DejaVu Sans", size=10)
         pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
         
         for i, (label, value) in enumerate(data_info):
@@ -3591,19 +3591,19 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Features Selecionadas
     if 'selected_features' in session_state:
-        pdf.set_font("Helvetica", style="B", size=14)
+        pdf.set_font("DejaVu Sans", style="B", size=14)
         pdf.cell(0, 10, txt=clean_text("Features Selecionadas"), ln=True)
         
         # Listar as features
         features = session_state.selected_features
-        pdf.set_font("Helvetica", size=10)
+        pdf.set_font("DejaVu Sans", size=10)
         for i, feature in enumerate(features):
             pdf.cell(0, 6, txt=clean_text(f"• {feature}"), ln=True)
         
         pdf.ln(10)
     
     # Tabela de Métricas
-    pdf.set_font("Helvetica", style="B", size=14)
+    pdf.set_font("DejaVu Sans", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Comparação de Métricas"), ln=True)
     
     # Verificar o tipo de modelo para determinar quais métricas exibir
@@ -3611,7 +3611,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     metric_columns = ['R²', 'MAE', 'MSE'] if is_regression else ['Accuracy', 'Precision', 'Recall', 'F1-Score']
     
     # Criar tabela de métricas
-    pdf.set_font("Helvetica", style="B", size=10)
+    pdf.set_font("DejaVu Sans", style="B", size=10)
     pdf.set_fill_color(200, 220, 255)  # Cor de fundo do cabeçalho
     
     # Definir a largura das colunas
@@ -3625,7 +3625,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.ln()
     
     # Linhas da tabela
-    pdf.set_font("Helvetica", size=10)
+    pdf.set_font("DejaVu Sans", size=10)
     for _, row in comparison_df.iterrows():
         model_name = row['Modelo']
         pdf.cell(first_column_width, 10, clean_text(model_name), 1, 0, 'L')
@@ -3675,7 +3675,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
             
             # Adicionar o gráfico ao PDF
             pdf.add_page()
-            pdf.set_font("Helvetica", style="B", size=14)
+            pdf.set_font("DejaVu Sans", style="B", size=14)
             pdf.cell(0, 10, txt=clean_text(f"Gráfico de Comparação - {metric}"), ln=True, align="C")
             pdf.image(temp_file.name, x=10, y=40, w=190)
             
@@ -3684,7 +3684,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Interpretação das Métricas
     pdf.add_page()
-    pdf.set_font("Helvetica", style="B", size=14)
+    pdf.set_font("DejaVu Sans", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True)
     
     # Função para gerar interpretação de métricas
@@ -3789,18 +3789,18 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
                     selected_metrics[col] = row[col]
     
     # Interpretações para modelos sem e com seleção de features
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Modelo Sem Seleção de Features"), ln=True)
-    pdf.set_font("Helvetica", size=10)
+    pdf.set_font("DejaVu Sans", size=10)
     
     # Adicionar interpretação do modelo sem seleção
     for line in generate_metrics_interpretation(original_metrics, model_type):
         pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
     
     pdf.ln(5)
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Modelo Com Seleção de Features"), ln=True)
-    pdf.set_font("Helvetica", size=10)
+    pdf.set_font("DejaVu Sans", size=10)
     
     # Adicionar interpretação do modelo com seleção
     for line in generate_metrics_interpretation(selected_metrics, model_type):
@@ -3808,7 +3808,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     # Conclusão
     pdf.ln(10)
-    pdf.set_font("Helvetica", style="B", size=14)
+    pdf.set_font("DejaVu Sans", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Conclusão"), ln=True)
     
     # Determinar a melhor métrica com base no tipo de modelo
@@ -3817,7 +3817,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     selected_value = selected_metrics.get(main_metric, 0)
     
     # Texto da conclusão
-    pdf.set_font("Helvetica", size=10)
+    pdf.set_font("DejaVu Sans", size=10)
     conclusion_text = f"Com base na métrica principal ({main_metric}), o modelo {best_model} apresentou o melhor desempenho."
     pdf.multi_cell(0, 8, txt=clean_text(conclusion_text))
     
@@ -4193,11 +4193,11 @@ class CustomPDF(FPDF):
                 # Adicionar a imagem no cabeçalho
                 self.image(tmpfile_path, 10, 8, 20) 
         else:
-            self.set_font('Helvetica', 'B', 12)
+            self.set_font('DejaVu Sans', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
         
         # Definir fonte para o cabeçalho
-        self.set_font('Helvetica', 'B', 12)
+        self.set_font('DejaVu Sans', 'B', 12)
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
         self.ln(15)  # Espaço após o cabeçalho
 
@@ -4205,7 +4205,7 @@ class CustomPDF(FPDF):
         # Ir para 1.5 cm da parte inferior
         self.set_y(-15)
         # Definir fonte para o rodapé
-        self.set_font('Helvetica', 'I', 10)
+        self.set_font('DejaVu Sans', 'I', 10)
         # Data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
         # Adicionar rodapé com a data e número da página
@@ -4220,13 +4220,13 @@ from io import BytesIO
 
 class CustomPDF(FPDF):
     def header(self):
-        self.set_font("Helvetica", "B", 12)
+        self.set_font("DejaVu Sans", "B", 12)
         self.cell(0, 10, "Relatório de Clustering", 0, 1, "C")
         self.ln(10)
 
     def footer(self):
         self.set_y(-15)
-        self.set_font("Helvetica", "I", 8)
+        self.set_font("DejaVu Sans", "I", 8)
         self.cell(0, 10, f"Página {self.page_no()}", 0, 0, "C")
 
 def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_type, st_session):
@@ -4235,28 +4235,28 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     pdf.add_page()
 
     # Título
-    pdf.set_font("Helvetica", style="B", size=16)
+    pdf.set_font("DejaVu Sans", style="B", size=16)
     pdf.cell(0, 10, txt="Relatório Final de Clustering", ln=True, align="C")
     pdf.ln(10)
 
     # Modelo Selecionado
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(50, 10, txt="Modelo Selecionado:", ln=False)
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("DejaVu Sans", size=12)
     pdf.cell(0, 10, txt=st_session['selected_model_name'], ln=True)
     pdf.ln(5)
 
     # Melhor Modelo
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(50, 10, txt="Melhor Modelo Treinado:", ln=False)
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("DejaVu Sans", size=12)
     pdf.cell(0, 10, txt=best_model_type, ln=True)
     pdf.ln(10)
 
     # Adicionar métricas do treino inicial e re-treino
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt="Métricas Obtidas", ln=True)
-    pdf.set_font("Helvetica", size=9)
+    pdf.set_font("DejaVu Sans", size=9)
     pdf.set_fill_color(200, 220, 255)
 
     # Cabeçalho da tabela
@@ -4267,7 +4267,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     pdf.cell(col_widths[3], 10, "Calinski-Harabasz Score", 1, 1, 'C', True)
 
     # Dados da tabela
-    pdf.set_font("Helvetica", size=8)
+    pdf.set_font("DejaVu Sans", size=8)
     pdf.cell(col_widths[0], 10, "Treino Inicial", 1, 0, 'C')
     pdf.cell(col_widths[1], 10, f"{initial_metrics['Silhouette Score']:.2f}", 1, 0, 'C')
     pdf.cell(col_widths[2], 10, f"{initial_metrics['Davies-Bouldin Index']:.2f}", 1, 0, 'C')
@@ -4283,7 +4283,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
 
     # Adicionar interpretações
     def add_interpretation(metrics, treino_name):
-        pdf.set_font("Helvetica", size=10)
+        pdf.set_font("DejaVu Sans", size=10)
         pdf.cell(0, 10, txt=f"{treino_name}:", ln=True)
         pdf.multi_cell(0, 10, txt=f"  Silhouette Score: {metrics['Silhouette Score']:.2f} - "
                                   f"{'Excelente' if metrics['Silhouette Score'] > 0.75 else 'Bom' if metrics['Silhouette Score'] > 0.5 else 'Moderado' if metrics['Silhouette Score'] > 0.25 else 'Fraco'} separação entre clusters.")
@@ -4318,7 +4318,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
 
     # Inserir gráficos no PDF
     pdf.add_page()
-    pdf.set_font("Helvetica", style="B", size=12)
+    pdf.set_font("DejaVu Sans", style="B", size=12)
     pdf.cell(0, 10, txt="Gráficos das Métricas", ln=True)
     pdf.ln(10)
 
