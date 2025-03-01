@@ -2929,13 +2929,13 @@ def train_with_selected_features_page():
         st.success("Treinamento concluído!")
         
         st.subheader("Métricas do Modelo com Features Selecionadas")
-        metrics_df = pd.DataFrame(list(selected_metrics.items()), columns=["Métrica", "Valor"])
-        metrics_df["Valor"] = metrics_df["Valor"].apply(lambda x: f"{x:.4f}" if isinstance(x, (int, float)) else x)
+        metrics_df = pd.DataFrame([selected_metrics])
         st.table(metrics_df)
     
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
+
 
 #Função para Treinar e Armazenar as metricas
 
