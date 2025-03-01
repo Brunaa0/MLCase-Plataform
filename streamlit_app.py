@@ -3387,9 +3387,6 @@ from io import BytesIO
 class CustomPDF(FPDF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Definir as margens para garantir espaço para cabeçalho e rodapé
-        self.set_margins(20, 25, 20)  # left, top, right
-        
         # Baixar o logo no início para reutilizá-lo
         self.logo_path = None
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
@@ -3403,36 +3400,33 @@ class CustomPDF(FPDF):
             print(f"Erro ao baixar o logo: {e}")
 
     def header(self):
-        """Método para o cabeçalho da página"""
-        # Salvar posição atual
+        # Posicionar o cabeçalho no topo da página
         self.set_y(10)
         
         # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
         if self.logo_path:
-            self.image(self.logo_path, 10, 10, 20)  # Posição fixa para o logo
+            self.image(self.logo_path, 10, 10, 25)
         
         # Configurar fonte para o título
         self.set_font('Arial', 'B', 12)
-        self.set_text_color(0, 0, 0)  # Texto preto
         
-        # Centralizar o título (ajuste para o espaço do logo)
-        self.cell(20)  # Espaço para o logo
-        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 1, 'C')
+        # Adicionar o título centralizado
+        # Deixar espaço para o logo
+        self.cell(25)  # Espaço para o logo
+        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 0, 'C')
         
-        # Linha separadora
-        self.line(10, 25, 200, 25)
-        
-        # Espaço após o cabeçalho
+        # Adicionar uma linha horizontal após o cabeçalho
         self.ln(15)
+        self.line(10, 25, 200, 25)
+        self.ln(5)  # Espaço após o cabeçalho
 
     def footer(self):
-        """Método para o rodapé da página"""
         # Ir para 1.5 cm da parte inferior
         self.set_y(-20)
         
-        # Linha separadora
+        # Adicionar uma linha horizontal antes do rodapé
         self.line(10, self.get_y(), 200, self.get_y())
-        self.ln(1)
+        self.ln(3)
         
         # Definir fonte para o rodapé
         self.set_font('Arial', 'I', 8)
@@ -3442,7 +3436,6 @@ class CustomPDF(FPDF):
         
         # Adicionar rodapé com a data e número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', 0, 0, 'C')
-
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
         """
@@ -3535,9 +3528,9 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
 
     # Inicialização do PDF com cabeçalho e rodapé
     pdf = CustomPDF(format='A4')
-    pdf.set_auto_page_break(auto=True, margin=55)
-    pdf.add_page()  # Chama o header aqui
-    
+    pdf.set_margins(10, 30, 10)  # left, top, right
+    pdf.set_auto_page_break(auto=True, margin=30)  # Margem inferior para o rodapé
+    pdf.add_page()
     
     # Função para limpar texto para compatibilidade com codificação Latin-1
     def clean_text(text):
@@ -3667,49 +3660,58 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.ln(10)
     
     # Gráficos de Métricas
-    # Para cada métrica, criar um gráfico de barras
-
     for metric in metric_columns:
         if metric in comparison_df.columns:
-            # Criar o gráfico
-            plt.figure(figsize=(10, 6))  # Aumentar a altura do gráfico
+            # Criar o gráfico com tamanho ajustado
+            plt.figure(figsize=(10, 6))
             
             # Dados para o gráfico
             models = comparison_df['Modelo'].tolist()
             values = comparison_df[metric].tolist()
             
-            # Criar barras
-            plt.bar(models, values, color=['#90EE90', '#006400'])
+            # Criar barras com espaçamento adequado
+            plt.bar(models, values, color=['#90EE90', '#006400'], width=0.4)
             
             # Adicionar valores sobre as barras
             for i, v in enumerate(values):
                 if isinstance(v, (int, float)):
                     plt.text(i, v + 0.01, f"{v:.4f}", ha='center', fontsize=10)
             
-            # Estilização
-            plt.title(f"Comparação de {metric}", fontsize=14)
+            # MUDANÇA PRINCIPAL: Configuração do eixo X sem rotação
+            plt.xticks(rotation=0, ha='center', fontsize=8)  # Mudar rotation=45 para rotation=0
+            
+            # Estilização com mais espaço
+            plt.title(f"Comparação de {metric}", fontsize=14, pad=15)  # Aumentar pad para dar mais espaço
             plt.ylabel(metric, fontsize=12)
-            plt.xticks(rotation=45, ha='right', fontsize=10)
+            
+            # Garantir espaço para o conteúdo
+            plt.subplots_adjust(bottom=0.2, left=0.15)  # Aumentar margem inferior
             
             # Ajustar a altura do gráfico para evitar corte
             plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20%
             
             plt.tight_layout()  # Ajusta automaticamente o layout
             
-            # Salvar o gráfico em um arquivo temporário
+            # Salvar o gráfico em um arquivo temporário com DPI maior
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(temp_file.name, bbox_inches='tight')  # Garante que nada seja cortado
+            plt.savefig(temp_file.name, bbox_inches='tight', dpi=150)  # Aumentar DPI e garantir que nada seja cortado
             plt.close()
         
-            # Adicionar o gráfico ao PDF
+            # Adicionar o gráfico ao PDF - AJUSTADO
             pdf.add_page()
             pdf.set_font("Arial", style="B", size=14)
             pdf.cell(0, 10, txt=clean_text(f"Gráfico de Comparação - {metric}"), ln=True, align="C")
-            pdf.image(temp_file.name, x=10, y=40, w=190)
+            
+            # Posicionar o gráfico mais para baixo para evitar sobreposição com o cabeçalho
+            pdf.image(temp_file.name, x=10, y=45, w=180)  # Posição Y aumentada
             
             # Fechar e remover o arquivo temporário
             temp_file.close()
-    
+            try:
+                os.remove(temp_file.name)
+            except:
+                pass  # Ignorar erros ao remover arquivos temporários
+        
     # Interpretação das Métricas
     pdf.add_page()
     pdf.set_font("Arial", style="B", size=14)
@@ -4191,36 +4193,57 @@ def final_page():
 ############ Relatório Final para Clustering ###################
 # Classe personalizada para PDF
 class CustomPDF(FPDF):
-    def header(self):
-        # Baixar a imagem do logo e salvar localmente
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Baixar o logo no início para reutilizá-lo
+        self.logo_path = None
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
-        response = requests.get(logo_url)
-        if response.status_code == 200:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
-                tmpfile.write(response.content)
-                tmpfile_path = tmpfile.name
-                # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
-        else:
-            self.set_font('Arial', 'B', 12)
-            self.cell(0, 10, "Logo não disponível", align='C')
+        try:
+            response = requests.get(logo_url)
+            if response.status_code == 200:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
+                    tmpfile.write(response.content)
+                    self.logo_path = tmpfile.name
+        except Exception as e:
+            print(f"Erro ao baixar o logo: {e}")
+
+    def header(self):
+        # Posicionar o cabeçalho no topo da página
+        self.set_y(10)
         
-        # Definir fonte para o cabeçalho
+        # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
+        if self.logo_path:
+            self.image(self.logo_path, 10, 10, 25)
+        
+        # Configurar fonte para o título
         self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
-        self.ln(15)  # Espaço após o cabeçalho
+        
+        # Adicionar o título centralizado
+        # Deixar espaço para o logo
+        self.cell(25)  # Espaço para o logo
+        self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 0, 'C')
+        
+        # Adicionar uma linha horizontal após o cabeçalho
+        self.ln(15)
+        self.line(10, 25, 200, 25)
+        self.ln(5)  # Espaço após o cabeçalho
 
     def footer(self):
         # Ir para 1.5 cm da parte inferior
-        self.set_y(-15)
+        self.set_y(-20)
+        
+        # Adicionar uma linha horizontal antes do rodapé
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(3)
+        
         # Definir fonte para o rodapé
-        self.set_font('Arial', 'I', 10)
+        self.set_font('Arial', 'I', 8)
+        
         # Data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
+        
         # Adicionar rodapé com a data e número da página
-        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
-
-
+        self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', 0, 0, 'C')
 # Função para gerar o relatório PDF
 import os
 import matplotlib.pyplot as plt
