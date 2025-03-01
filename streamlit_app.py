@@ -3535,7 +3535,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
 
     # Inicialização do PDF com cabeçalho e rodapé
     pdf = CustomPDF(format='A4')
-    pdf.set_auto_page_break(auto=True, margin=65)
+    pdf.set_auto_page_break(auto=True, margin=55)
     pdf.add_page()  # Chama o header aqui
     
     
