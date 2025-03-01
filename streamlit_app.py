@@ -4719,9 +4719,6 @@ def main():
     # Inicialização das variáveis de estado da sessão
     initialize_session_state()
 
-    # Verificar o estado atual da etapa
-    #st.write(f"Estado inicial: {st.session_state.step}")
-
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
         upload_file()
@@ -4731,27 +4728,23 @@ def main():
         handle_missing_values()
     elif st.session_state.step == 'outlier_detection':
         outlier_detection()
-    elif 'outlier_treatment_state' not in st.session_state:
-        st.session_state.outlier_treatment_state = {}  # Inicializa como dicionário vazio
     elif st.session_state.step == 'data_summary':
         data_summary()
     elif st.session_state.step == 'model_selection':
-        model_selection()  # Chamando a seleção de modelos
-    elif st.session_state.step == 'feature_selection':  # Etapa de seleção de features
+        model_selection()
+    elif st.session_state.step == 'feature_selection':
         feature_selection()
-    elif 'scoring_confirmed' not in st.session_state:
-        st.session_state.scoring_confirmed = False
-    elif st.session_state.step == 'train_and_store_metrics':  # Nova etapa adicionada
-        evaluate_and_compare_models()  # Chama a função para comparar os modelos
-    elif st.session_state.step == 'clustering_final_page':  # Página final do clustering
-        clustering_final_page()
-    elif st.session_state.step == 'final_page':  # Página final
+    elif st.session_state.step == 'train_with_selected_features':  # Adicionado
+        train_with_selected_features_page()
+    elif st.session_state.step == 'model_comparison':
+        evaluate_and_compare_models()
+    elif st.session_state.step == 'final_page':
         final_page()
     else:
-        st.error("Etapa desconhecida. Reiniciando a aplicação.")
+        st.error(f"Etapa desconhecida: {st.session_state.step}. Reiniciando a aplicação.")
         st.session_state.step = 'file_upload'
         st.rerun()
-
+        
     # Exibir o estado após a execução para depuração
     #st.write(f"Estado final: {st.session_state.step}")
 
