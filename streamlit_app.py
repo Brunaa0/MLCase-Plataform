@@ -3158,83 +3158,6 @@ def evaluate_and_compare_models():
         st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento.")
         return
 
-    # Obter dados originais
-    try:
-        X_train_original = st.session_state.X_train.copy()
-        X_test_original = st.session_state.X_test.copy()
-        y_train = st.session_state.y_train.copy()
-        y_test = st.session_state.y_test.copy()
-    except AttributeError:
-        st.error("Dados de treino e teste não encontrados. Por favor, volte à etapa de preparação dos dados.")
-        return
-    
-    # 1. Remover features correlacionadas
-    corr_matrix = X_train_original.corr().abs()
-    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    to_drop = [column for column in upper.columns if any(upper[column] > 0.9)]
-    
-    if to_drop:
-        st.warning(f"⚠️ Removendo features altamente correlacionadas: {to_drop}")
-        X_train_original.drop(columns=to_drop, inplace=True)
-        X_test_original.drop(columns=to_drop, inplace=True)
-    
-    # 2. Preparar features selecionadas
-    selected_features = st.session_state.selected_features
-    
-    # Garantir que todas as features selecionadas existem no DataFrame
-    valid_features = [f for f in selected_features if f in X_train_original.columns]
-    
-    if not valid_features:
-        st.error("Nenhuma feature selecionada é válida. Por favor, volte à etapa de seleção de features.")
-        return
-
-    # Selecionar apenas as features válidas
-    X_train_selected = X_train_original[valid_features]
-    X_test_selected = X_test_original[valid_features]
-    
-    # Normalizar com StandardScaler
-    scaler = StandardScaler()
-    X_train_scaled_selected = pd.DataFrame(
-        scaler.fit_transform(X_train_selected), 
-        columns=valid_features, 
-        index=X_train_selected.index
-    )
-    X_test_scaled_selected = pd.DataFrame(
-        scaler.transform(X_test_selected), 
-        columns=valid_features, 
-        index=X_test_selected.index
-    )
-    
-    # Treinar modelo com features selecionadas
-    model.fit(X_train_scaled_selected, y_train)
-    y_pred_selected = model.predict(X_test_scaled_selected)
-    
-    # Recuperar parâmetros do modelo original e com seleção
-    original_params = st.session_state.get('best_params', {})
-    selected_params = st.session_state.get('best_params_selected', {})
-    
-    # Calcular métricas para o modelo com features selecionadas
-    if model_type == "Classificação":
-        selected_metrics = {
-            "Modelo": model_name,
-            "Accuracy": accuracy_score(y_test, y_pred_selected),
-            "Precision": precision_score(y_test, y_pred_selected, average='weighted'),
-            "Recall": recall_score(y_test, y_pred_selected, average='weighted'),
-            "F1-Score": f1_score(y_test, y_pred_selected, average='weighted'),
-            "Best Parameters": selected_params
-        }
-    elif model_type == "Regressão":
-        selected_metrics = {
-            "Modelo": model_name,
-            "R²": r2_score(y_test, y_pred_selected),
-            "MAE": mean_absolute_error(y_test, y_pred_selected),
-            "MSE": mean_squared_error(y_test, y_pred_selected),
-            "Best Parameters": selected_params
-        }
-    
-    # Atualizar métricas com seleção de features
-    st.session_state['resultado_com_selecao'] = selected_metrics
-    
     # Criar DataFrame de comparação
     comparison_df = pd.DataFrame({
         'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
@@ -3242,7 +3165,7 @@ def evaluate_and_compare_models():
         'Precision': [original_metrics.get('Precision', 0), selected_metrics.get('Precision', 0)],
         'Recall': [original_metrics.get('Recall', 0), selected_metrics.get('Recall', 0)],
         'F1-Score': [original_metrics.get('F1-Score', 0), selected_metrics.get('F1-Score', 0)],
-        'Best Parameters': [original_params, selected_params]
+        'Best Parameters': [original_metrics.get('Best Parameters', 'N/A'), selected_metrics.get('Best Parameters', 'N/A')]
     })
 
     # Exibir tabela de comparação
@@ -3252,9 +3175,6 @@ def evaluate_and_compare_models():
         'Precision': '{:.4f}', 
         'Recall': '{:.4f}', 
         'F1-Score': '{:.4f}',
-        'R²': '{:.4f}',
-        'MAE': '{:.4f}',
-        'MSE': '{:,.4f}'
     })))
     
     # Gráfico de comparação usando a métrica escolhida pelo usuário (scoring)
@@ -3265,27 +3185,27 @@ def evaluate_and_compare_models():
     y1 = comparison_df[scoring_metric].iloc[0]  # Primeiro modelo (com seleção)
     y2 = comparison_df[scoring_metric].iloc[1]  # Segundo modelo (sem seleção)
 
-    # Agora vamos criar as barras para os dois modelos
-    bars1 = ax.barh(x[0], y1, height=0.4, label="Com Seleção de Features", color='green', align='center')
-    bars2 = ax.barh(x[1], y2, height=0.4, label="Sem Seleção de Features", color='darkgreen', align='center')
+    # Agora vamos criar as barras para os dois modelos (barras verticais)
+    bars1 = ax.bar(x[0], y1, width=0.4, label="Com Seleção de Features", color='green', align='center')
+    bars2 = ax.bar(x[1], y2, width=0.4, label="Sem Seleção de Features", color='darkgreen', align='center')
 
     # Adicionar rótulos de valor nas barras
     for bar in bars1:
-        width = bar.get_width()
-        ax.annotate(f'{width:.4f}',  # Ajuste para exibir valores com 4 casas decimais
-                    xy=(width, bar.get_y() + bar.get_height() / 2),
-                    xytext=(5, 0),  # Ajustando a posição do texto
+        height = bar.get_height()
+        ax.annotate(f'{height:.4f}',  # Ajuste para exibir valores com 4 casas decimais
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # Ajustando a posição do texto
                     textcoords="offset points",
-                    ha='left', va='center',
+                    ha='center', va='bottom',
                     fontsize=12, color='white')
 
     for bar in bars2:
-        width = bar.get_width()
-        ax.annotate(f'{width:.4f}',  # Ajuste para exibir valores com 4 casas decimais
-                    xy=(width, bar.get_y() + bar.get_height() / 2),
-                    xytext=(5, 0),  # Ajustando a posição do texto
+        height = bar.get_height()
+        ax.annotate(f'{height:.4f}',  # Ajuste para exibir valores com 4 casas decimais
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # Ajustando a posição do texto
                     textcoords="offset points",
-                    ha='left', va='center',
+                    ha='center', va='bottom',
                     fontsize=12, color='white')
 
     # Melhorando o título e as labels
@@ -3305,7 +3225,7 @@ def evaluate_and_compare_models():
 
     # Exibir o gráfico
     st.pyplot(fig)
-    
+
     # Botão para próxima etapa
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
