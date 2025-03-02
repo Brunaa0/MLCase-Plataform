@@ -4666,7 +4666,7 @@ def initialize_session_state():
             "K-Nearest Neighbors (KNN)": KNeighborsClassifier(),
             "Random Forest": RandomForestClassifier(),
             "KMeans": KMeans(),
-            "Clustering Hierárquico": AgglomerativeClustering(linkage='ward')
+            "Clustering Hierárquico": AgglomerativeClustering(linkage='ward'),
             "Regressão Linear Simples (RLS)": LinearRegression(),
             "Regressão por Vetores de Suporte (SVR)": SVR(),
         },
