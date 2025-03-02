@@ -4782,11 +4782,11 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     pdf.cell(50, 10, txt="Modelo Selecionado:", ln=False)
     pdf.set_font("Arial", size=12)
     model_info = st_session['selected_model_name']
-
-    # Adicionar informação de componentes para Clustering Hierárquico
-    if st_session['selected_model_name'] == "Clustering Hierárquico":
+    
+    # Adicionar informação de componentes para KMeans e Clustering Hierárquico
+    if st_session['selected_model_name'] in ["KMeans", "Clustering Hierárquico"]:
         model_info += f" (PCA: {st_session.get('pca_n_components', 'N/A')} componentes)"
-
+    
     pdf.cell(0, 10, txt=model_info, ln=True)
     pdf.ln(5)
 
@@ -4899,10 +4899,10 @@ def clustering_final_page():
     st.write(f"**Modelo:** {st.session_state.selected_model_name}")
 
     # Adicionar informação sobre o número de componentes
-    if st.session_state.selected_model_name == "Clustering Hierárquico":
+    if st.session_state.selected_model_name in ["KMeans", "Clustering Hierárquico"]:
         st.write(f"**Número de Componentes PCA:** {st.session_state.get('pca_n_components', 'N/A')}")
-
-    # Exibir métricas do treino inicial
+    
+# Exibir métricas do treino inicial
     st.subheader("Métricas do Treino Inicial")
     st.table(fix_dataframe_types(pd.DataFrame([st.session_state.initial_metrics])))
 
