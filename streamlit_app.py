@@ -1965,16 +1965,21 @@ def model_selection():
 
     # Função para a configuração de Clustering
     import pandas as pd
+    from sklearn.decomposition import PCA
+    import numpy as np
 
     # Inicializar a variável `best_n_clusters_retrain` com um valor padrão
     best_n_clusters_retrain = None
 
+    # Inicializar estados se não existirem
+    if 'pca_configured' not in st.session_state:
+        st.session_state.pca_configured = False
+    if 'ready_for_clustering' not in st.session_state:
+        st.session_state.ready_for_clustering = False
+
     # Função para a configuração de Clustering
     if st.session_state.model_type == "Clustering" and st.session_state.selected_model_name:
         st.write("### Configuração para Clustering")
-
-        # Escolher o intervalo de clusters
-        num_clusters_range = st.slider("Intervalo de clusters para explorar (para análise)", 2, 20, (2, 10))
 
         # Dados categóricos codificados
         X = pd.get_dummies(st.session_state.data)
@@ -1983,24 +1988,281 @@ def model_selection():
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
+        
+        # ETAPA 1: Configuração do PCA para Clustering Hierárquico
+        if st.session_state.selected_model_name == "Clustering Hierárquico" and not st.session_state.pca_configured:
+            st.write("### Redução de Dimensionalidade com PCA para Clustering Hierárquico")
+            
+            # Verificar se o dataset é grande o suficiente para um aviso
+            if X.shape[0] > 1000 or X.shape[1] > 10:
+                st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é necessária para Clustering Hierárquico.")
+            
+            # Permitir ao usuário escolher o número de componentes ou usar valor automático
+            use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True, key="auto_comp_hierarch")
+            
+            if use_auto_components:
+                # Calcular o PCA para determinar a variância explicada
+                pca_full = PCA().fit(X_scaled)
+                explained_variance_ratio = pca_full.explained_variance_ratio_
+                cumulative_variance = np.cumsum(explained_variance_ratio)
+                
+                # Encontrar o número de componentes que explicam pelo menos 90% da variância
+                n_components = np.argmax(cumulative_variance >= 0.9) + 1
+                n_components = min(n_components, 10)  # Limitar a no máximo 10 componentes
+                
+                st.write(f"Número de componentes selecionados automaticamente: {n_components} (explica aproximadamente {cumulative_variance[n_components-1]*100:.1f}% da variância)")
+                
+                # Mostrar gráfico de variância explicada
+                fig, ax = plt.subplots(figsize=(8, 4))
+                ax.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='-')
+                ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variância Explicada')
+                ax.axvline(x=n_components, color='g', linestyle='--', label=f'{n_components} Componentes')
+                ax.set_xlabel('Número de Componentes')
+                ax.set_ylabel('Variância Explicada Acumulada')
+                ax.set_title('Variância Explicada por Componentes do PCA')
+                ax.legend()
+                st.pyplot(fig)
+                plt.clf()
+            else:
+                # Permitir que o usuário escolha o número de componentes
+                max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
+                n_components = st.slider("Número de componentes PCA para Hierárquico", 2, max_components, value=min(3, max_components), key="n_comp_hierarch")
+            
+            # Botão para confirmar a configuração do PCA
+            if st.button("Confirmar Configuração do PCA para Clustering Hierárquico"):
+                # Aplicar PCA com o número de componentes escolhido
+                pca = PCA(n_components=n_components)
+                X_pca = pca.fit_transform(X_scaled)
+                
+                # Salvar no estado da sessão
+                st.session_state.X_pca = X_pca
+                st.session_state.pca_n_components = n_components
+                st.session_state.pca_configured = True
+                st.session_state.pca_model = pca
+                st.session_state.explained_variance = pca.explained_variance_ratio_
+                
+                st.success(f"PCA configurado com sucesso! Dimensionalidade reduzida de {X_scaled.shape[1]} para {X_pca.shape[1]} componentes.")
+                
+                # Visualização 2D dos dados com PCA se tivermos pelo menos 2 componentes
+                if n_components >= 2:
+                    st.write("### Visualização dos Dados Após PCA")
+                    
+                    # Permitir que o usuário escolha quais componentes visualizar
+                    available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
+                    
+                    component_x = st.selectbox(
+                        "Escolha o componente para o eixo X:",
+                        options=list(range(available_components)),
+                        format_func=lambda x: f"Componente {x+1}",
+                        index=0,
+                        key="comp_x_hierarch"
+                    )
+                    
+                    component_y = st.selectbox(
+                        "Escolha o componente para o eixo Y:",
+                        options=list(range(available_components)),
+                        format_func=lambda x: f"Componente {x+1}",
+                        index=1 if available_components > 1 else 0,
+                        key="comp_y_hierarch"
+                    )
+                    
+                    # Criar a visualização 2D baseada nos componentes escolhidos
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    scatter = ax.scatter(X_pca[:, component_x], X_pca[:, component_y], alpha=0.7)
+                    ax.set_xlabel(f'Componente Principal {component_x+1}', fontsize=12)
+                    ax.set_ylabel(f'Componente Principal {component_y+1}', fontsize=12)
+                    ax.set_title(f'Visualização 2D dos Componentes PCA {component_x+1} e {component_y+1}', fontsize=14, fontweight='bold')
+                    ax.grid(True, linestyle='--', alpha=0.7)
+                    
+                    # Mostrar a variância explicada por estes componentes
+                    if hasattr(pca, 'explained_variance_ratio_'):
+                        var_x = pca.explained_variance_ratio_[component_x] * 100
+                        var_y = pca.explained_variance_ratio_[component_y] * 100
+                        ax.set_xlabel(f'Componente Principal {component_x+1} ({var_x:.1f}% variância)', fontsize=12)
+                        ax.set_ylabel(f'Componente Principal {component_y+1} ({var_y:.1f}% variância)', fontsize=12)
+                    
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.clf()
 
-        # Análise de clusters
-        st.write("### Análise para Determinação do Número de Clusters")
-        silhouette_scores = []
-        davies_bouldin_scores = []
-        calinski_harabasz_scores = []
+            # Botão para avançar para a configuração do clustering (fora do if anterior)
+                if st.button("Prosseguir para Clustering"):
+                    st.session_state.ready_for_clustering = True
+                    st.rerun()
+            
+        # ETAPA 1: Configuração do PCA para KMeans
+        if st.session_state.selected_model_name == "KMeans" and not st.session_state.pca_configured:
+            st.write("### Redução de Dimensionalidade com PCA")
+            
+            # Verificar se o dataset é grande o suficiente para um aviso
+            if X.shape[0] > 1000 or X.shape[1] > 10:
+                st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é altamente recomendada.")
+            
+            # Permitir ao usuário escolher o número de componentes ou usar valor automático
+            use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True)
+            
+            if use_auto_components:
+                # Calcular o PCA para determinar a variância explicada
+                pca_full = PCA().fit(X_scaled)
+                explained_variance_ratio = pca_full.explained_variance_ratio_
+                cumulative_variance = np.cumsum(explained_variance_ratio)
+                
+                # Encontrar o número de componentes que explicam pelo menos 90% da variância
+                n_components = np.argmax(cumulative_variance >= 0.9) + 1
+                n_components = min(n_components, 10)  # Limitar a no máximo 10 componentes
+                
+                st.write(f"Número de componentes selecionados automaticamente: {n_components} (explica aproximadamente {cumulative_variance[n_components-1]*100:.1f}% da variância)")
+                
+                # Mostrar gráfico de variância explicada
+                fig, ax = plt.subplots(figsize=(8, 4))
+                ax.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='-')
+                ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variância Explicada')
+                ax.axvline(x=n_components, color='g', linestyle='--', label=f'{n_components} Componentes')
+                ax.set_xlabel('Número de Componentes')
+                ax.set_ylabel('Variância Explicada Acumulada')
+                ax.set_title('Variância Explicada por Componentes do PCA')
+                ax.legend()
+                st.pyplot(fig)
+                plt.clf()
+            else:
+                # Permitir que o usuário escolha o número de componentes
+                max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
+                n_components = st.slider("Número de componentes PCA", 2, max_components, value=min(3, max_components))
+            
+            # Botão para confirmar a configuração do PCA
+            if st.button("Confirmar Configuração do PCA"):
+                # Aplicar PCA com o número de componentes escolhido
+                pca = PCA(n_components=n_components)
+                X_pca = pca.fit_transform(X_scaled)
+                
+                # Salvar no estado da sessão
+                st.session_state.X_pca = X_pca
+                st.session_state.pca_n_components = n_components
+                st.session_state.pca_configured = True
+                st.session_state.pca_model = pca
+                st.session_state.explained_variance = pca.explained_variance_ratio_
+                
+                st.success(f"PCA configurado com sucesso! Dimensionalidade reduzida de {X_scaled.shape[1]} para {X_pca.shape[1]} componentes.")
+                
+                # Visualização 2D e 3D simultânea dos dados com PCA se tivermos pelo menos 2 componentes
+                if n_components >= 2:
+                    st.write("### Visualização dos Dados Após PCA")
+                    
+                    # Permitir que o usuário escolha quais componentes visualizar
+                    available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
+                    
+                    component_x = st.selectbox(
+                        "Escolha o componente para o eixo X:",
+                        options=list(range(available_components)),
+                        format_func=lambda x: f"Componente {x+1}",
+                        index=0
+                    )
+                    
+                    component_y = st.selectbox(
+                        "Escolha o componente para o eixo Y:",
+                        options=list(range(available_components)),
+                        format_func=lambda x: f"Componente {x+1}",
+                        index=1 if available_components > 1 else 0
+                    )
+                    
+                    # Criar a visualização 2D baseada nos componentes escolhidos
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    scatter = ax.scatter(X_pca[:, component_x], X_pca[:, component_y], alpha=0.7)
+                    ax.set_xlabel(f'Componente Principal {component_x+1}', fontsize=12)
+                    ax.set_ylabel(f'Componente Principal {component_y+1}', fontsize=12)
+                    ax.set_title(f'Visualização 2D dos Componentes PCA {component_x+1} e {component_y+1}', fontsize=14, fontweight='bold')
+                    ax.grid(True, linestyle='--', alpha=0.7)
+                    
+                    # Mostrar a variância explicada por estes componentes (se disponível)
+                    if hasattr(pca, 'explained_variance_ratio_'):
+                        var_x = pca.explained_variance_ratio_[component_x] * 100
+                        var_y = pca.explained_variance_ratio_[component_y] * 100
+                        ax.set_xlabel(f'Componente Principal {component_x+1} ({var_x:.1f}% variância)', fontsize=12)
+                        ax.set_ylabel(f'Componente Principal {component_y+1} ({var_y:.1f}% variância)', fontsize=12)
+                    
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.clf()
 
-        # Condicional para KMeans
-        if st.session_state.selected_model_name == "KMeans":
-            for n_clusters in range(num_clusters_range[0], num_clusters_range[1] + 1):
-                temp_model = KMeans(n_clusters=n_clusters, random_state=42)
-                temp_model.fit(X)
-                labels = temp_model.labels_
+                # Botão para avançar para a configuração do clustering
+                if st.button("Prosseguir para Clustering"):
+                    st.session_state.ready_for_clustering = True
+                    st.rerun()
+        
+        # ETAPA 2: Configuração do Clustering (após o PCA para Hierarchical ou diretamente para K-means)
+        elif st.session_state.selected_model_name == "KMeans" or (st.session_state.selected_model_name == "Clustering Hierárquico" and st.session_state.pca_configured):
+            # Escolher o intervalo de clusters (reduzido de 2-20 para 2-10 por padrão para ser menos pesado)
+            num_clusters_range = st.slider("Intervalo de clusters para explorar (para análise)", 2, 10, (2, 6))
+            
+            # Preparar dados para análise
+            if st.session_state.selected_model_name == "Clustering Hierárquico":
+                # Para clustering hierárquico, usar dados com PCA
+                training_data = st.session_state.X_pca
+            else:
+                # Para K-means, usar dados originais
+                training_data = X_scaled
+            
+            # Opção para usar amostragem para análise mais rápida
+            use_sampling = st.checkbox("Usar amostragem dos dados para análise mais rápida", value=True)
+            if use_sampling:
+                sample_size = st.slider("Tamanho da amostra", 
+                                    min_value=min(100, training_data.shape[0]),
+                                    max_value=min(2000, training_data.shape[0]),
+                                    value=min(1000, training_data.shape[0]))
+                # Realizar amostragem
+                np.random.seed(42)  # Para reprodutibilidade
+                sample_indices = np.random.choice(training_data.shape[0], sample_size, replace=False)
+                analysis_data = training_data[sample_indices]
+                st.info(f"Usando {sample_size} pontos ({sample_size/training_data.shape[0]:.1%} dos dados) para análise.")
+            else:
+                analysis_data = training_data
+            
+            # Análise de clusters
+            st.write("### Análise para Determinação do Número de Clusters")
+            silhouette_scores = []
+            davies_bouldin_scores = []
+            calinski_harabasz_scores = []
 
-                # Calcular as métricas e armazená-las
-                silhouette_scores.append(silhouette_score(X, labels))
-                davies_bouldin_scores.append(davies_bouldin_score(X, labels))
-                calinski_harabasz_scores.append(calinski_harabasz_score(X, labels))
+            # Adicionar barra de progresso
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            # Calcular métricas para cada número de clusters
+            total_iterations = num_clusters_range[1] - num_clusters_range[0] + 1
+
+            # Condicional para KMeans e Clustering Hierárquico
+            for i, n_clusters in enumerate(range(num_clusters_range[0], num_clusters_range[1] + 1)):
+                # Atualizar barra de progresso
+                progress = (i + 1) / total_iterations
+                progress_bar.progress(progress)
+                status_text.text(f"Analisando com {n_clusters} clusters... ({i+1}/{total_iterations})")
+                
+                try:
+                    if st.session_state.selected_model_name == "KMeans":
+                        # Otimização: Reduzir n_init e max_iter para KMeans
+                        temp_model = KMeans(n_clusters=n_clusters, random_state=42, n_init=5, max_iter=100)
+                    else:  # Clustering Hierárquico
+                        temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
+                    
+                    # Treinar modelo com dados amostrados
+                    temp_model.fit(analysis_data)
+                    labels = temp_model.labels_
+                    
+                    # Calcular as métricas
+                    silhouette_scores.append(silhouette_score(analysis_data, labels))
+                    davies_bouldin_scores.append(davies_bouldin_score(analysis_data, labels))
+                    calinski_harabasz_scores.append(calinski_harabasz_score(analysis_data, labels))
+                    
+                except Exception as e:
+                    st.error(f"Erro ao processar {n_clusters} clusters: {str(e)}")
+                    # Adicionar valores neutros para manter o array no tamanho correto
+                    silhouette_scores.append(0)
+                    davies_bouldin_scores.append(float('inf'))
+                    calinski_harabasz_scores.append(0)
+            
+            # Limpar barra de progresso e status
+            status_text.empty()
+            progress_bar.empty()
 
             # Criar DataFrame com os resultados
             metrics_df = pd.DataFrame({
@@ -2009,7 +2271,7 @@ def model_selection():
                 "Davies-Bouldin Index": davies_bouldin_scores,
                 "Calinski-Harabasz Score": calinski_harabasz_scores,
             })
-
+            
             # Exibir a tabela no Streamlit
             st.write("#### Tabela de Métricas por Número de Clusters")
             st.dataframe(fix_dataframe_types(metrics_df.style.format({
@@ -2049,208 +2311,315 @@ def model_selection():
                 st.pyplot(plt.gcf())
                 plt.clf()
 
-            # Escolher o melhor número de clusters com base no Silhouette Score (ou qualquer outra métrica escolhida)
-            best_n_clusters = metrics_df.loc[metrics_df["Silhouette Score"].idxmax(), "Número de Clusters"]
-            st.write(f"**Melhor Número de Clusters** (com base no Silhouette Score): {best_n_clusters}")
-
-        # Condicional para Clustering Hierárquico
-        elif st.session_state.selected_model_name == "Clustering Hierárquico":
-            try:
-                # Padronizar os dados
-                from sklearn.preprocessing import StandardScaler
-                scaler = StandardScaler()
-                X_scaled = scaler.fit_transform(X)
-                
-                # Processar cada número de cluster com tratamento de erros
-                for n_clusters in range(num_clusters_range[0], num_clusters_range[1] + 1):
-                    try:
-                        # Usar linkage='ward' explicitamente
-                        temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
-                        temp_model.fit(X_scaled)
-                        labels = temp_model.labels_
-                        
-                        # Calcular as métricas com dados padronizados
-                        silhouette_scores.append(silhouette_score(X_scaled, labels))
-                        davies_bouldin_scores.append(davies_bouldin_score(X_scaled, labels))
-                        calinski_harabasz_scores.append(calinski_harabasz_score(X_scaled, labels))
-                        
-                    except Exception as e:
-                        st.error(f"Erro ao processar {n_clusters} clusters: {str(e)}")
-                        # Adicionar valores neutros para manter o array no tamanho correto
-                        silhouette_scores.append(0)
-                        davies_bouldin_scores.append(0)
-                        calinski_harabasz_scores.append(0)
-                
-                # Criar DataFrame com os resultados
-                metrics_df = pd.DataFrame({
-                    "Número de Clusters": range(num_clusters_range[0], num_clusters_range[1] + 1),
-                    "Silhouette Score": silhouette_scores,
-                    "Davies-Bouldin Index": davies_bouldin_scores,
-                    "Calinski-Harabasz Score": calinski_harabasz_scores,
-                })
-                
-                # Exibir a tabela no Streamlit
-                st.write("#### Tabela de Métricas por Número de Clusters")
-                st.dataframe(fix_dataframe_types(metrics_df.style.format({
-                    "Silhouette Score": "{:.2f}",
-                    "Davies-Bouldin Index": "{:.2f}",
-                    "Calinski-Harabasz Score": "{:.2f}",
-                })))
-
-                # Exibir gráficos para as métricas
-                st.write("#### Gráficos das Métricas por Número de Clusters")
-                col1, col2, col3 = st.columns(3)
-
-                with col1:
-                    plt.figure(figsize=(6, 4))
-                    plt.plot(metrics_df["Número de Clusters"], metrics_df["Silhouette Score"], marker='o')
-                    plt.title("Silhouette Score por Número de Clusters")
-                    plt.xlabel("Número de Clusters")
-                    plt.ylabel("Silhouette Score")
-                    st.pyplot(plt.gcf())
-                    plt.clf()
-
-                with col2:
-                    plt.figure(figsize=(6, 4))
-                    plt.plot(metrics_df["Número de Clusters"], metrics_df["Davies-Bouldin Index"], marker='o')
-                    plt.title("Davies-Bouldin Index por Número de Clusters")
-                    plt.xlabel("Número de Clusters")
-                    plt.ylabel("Davies-Bouldin Index")
-                    st.pyplot(plt.gcf())
-                    plt.clf()
-
-                with col3:
-                    plt.figure(figsize=(6, 4))
-                    plt.plot(metrics_df["Número de Clusters"], metrics_df["Calinski-Harabasz Score"], marker='o')
-                    plt.title("Calinski-Harabasz Score por Número de Clusters")
-                    plt.xlabel("Número de Clusters")
-                    plt.ylabel("Calinski-Harabasz Score")
-                    st.pyplot(plt.gcf())
-                    plt.clf()
-
-                # Escolher o melhor número de clusters com base no Silhouette Score (ou outra métrica)
+            # Escolher o melhor número de clusters com base no Silhouette Score
+            if silhouette_scores and any(score > 0 for score in silhouette_scores):
                 best_n_clusters = metrics_df.loc[metrics_df["Silhouette Score"].idxmax(), "Número de Clusters"]
                 st.write(f"**Melhor Número de Clusters** (com base no Silhouette Score): {best_n_clusters}")
-
-                # Inicializar `best_n_clusters_retrain` com o valor automático, caso aplicável
                 best_n_clusters_retrain = best_n_clusters
-            
-            except Exception as e:
-                st.error(f"Erro geral ao processar clustering hierárquico: {str(e)}")
-                # Definir valores padrão para evitar erros subsequentes
-                silhouette_scores = [0] * (num_clusters_range[1] - num_clusters_range[0] + 1)
-                davies_bouldin_scores = [0] * (num_clusters_range[1] - num_clusters_range[0] + 1)
-                calinski_harabasz_scores = [0] * (num_clusters_range[1] - num_clusters_range[0] + 1)
 
-        # Escolher abordagem para número de clusters
-        st.write("### Escolha a Abordagem para Determinar o Número de Clusters")
-        method = st.radio("Selecione a abordagem:", ["Automático", "Manual"], key="initial_training_method")
+            # Escolher abordagem para número de clusters
+            st.write("### Escolha a Abordagem para Determinar o Número de Clusters")
+            method = st.radio("Selecione a abordagem:", ["Automático", "Manual"], key="initial_training_method")
 
-        if method == "Automático":
-            # Escolher o melhor número de clusters com base no Silhouette Score
-            best_n_clusters = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
-            best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
+            if method == "Automático":
+                # Escolher o melhor número de clusters com base no Silhouette Score
+                if silhouette_scores and any(score > 0 for score in silhouette_scores):
+                    best_n_clusters = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
+                    best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
+                else:
+                    st.error("Não foi possível determinar automaticamente o número de clusters. Por favor, selecione manualmente.")
+                    best_n_clusters_retrain = 3  # Valor padrão
 
-        elif method == "Manual":
-            best_n_clusters = st.slider("Escolha o número de clusters", num_clusters_range[0], num_clusters_range[1], value=3)
-            best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
+            elif method == "Manual":
+                best_n_clusters = st.slider("Escolha o número de clusters", num_clusters_range[0], num_clusters_range[1], value=3)
+                best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
 
-        # Garantir que `best_n_clusters_retrain` tenha um valor válido antes de usar
-        if best_n_clusters_retrain is None:
-            st.warning("Por favor, selecione uma abordagem para determinar o número de clusters.")
-        else:
-            # Treinar modelo inicial
-            if st.button(f"Treinar Modelo Inicial"):
-                model = st.session_state.models[st.session_state.selected_model_name]
-                
-                # Padronizar os dados novamente para consistência
-                from sklearn.preprocessing import StandardScaler
-                scaler = StandardScaler()
-                X_scaled = scaler.fit_transform(X)
-                
-                model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
-                model.fit(X_scaled)  # Use X_scaled em vez de X
-                st.session_state.clustering_labels = model.labels_
-                st.session_state.initial_metrics = {
-                    "Número de Clusters": best_n_clusters_retrain,
-                    "Silhouette Score": silhouette_score(X_scaled, st.session_state.clustering_labels),
-                    "Davies-Bouldin Index": davies_bouldin_score(X_scaled, st.session_state.clustering_labels),
-                    "Calinski-Harabasz Score": calinski_harabasz_score(X_scaled, st.session_state.clustering_labels)
-                }
-                st.success(f"Modelo inicial treinado com sucesso usando {best_n_clusters_retrain} clusters!")
-                st.session_state.training_completed = True  # Marcar como concluído
-                
-        # Exibir métricas e próxima ação apenas após o treino
-        if st.session_state.get("training_completed", False):
-            st.write("### Métricas do Treino Inicial")
-            st.table(fix_dataframe_types(pd.DataFrame([st.session_state.initial_metrics])))
+            # Garantir que `best_n_clusters_retrain` tenha um valor válido antes de usar
+            if best_n_clusters_retrain is None:
+                st.warning("Por favor, selecione uma abordagem para determinar o número de clusters.")
+            else:
+                # Treinar modelo inicial
+                if st.button(f"Treinar Modelo Inicial"):
+                    # Configurar e treinar o modelo (usando todos os dados para treino final)
+                    if st.session_state.selected_model_name == "Clustering Hierárquico":
+                        model = st.session_state.models["Clustering Hierárquico"]
+                        model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
+                    else:  # KMeans
+                        model = st.session_state.models["KMeans"]
+                        # Otimizar KMeans para maior velocidade no treino final
+                        model.set_params(n_clusters=best_n_clusters_retrain, n_init=5, max_iter=300)
+                    
+                    # Barra de progresso para o treino
+                    with st.spinner(f"Treinando o modelo com {best_n_clusters_retrain} clusters..."):
+                        model.fit(training_data)
+                        st.session_state.clustering_labels = model.labels_
+                    
+                    # Calcular métricas
+                    st.session_state.initial_metrics = {
+                        "Número de Clusters": best_n_clusters_retrain,
+                        "Silhouette Score": silhouette_score(training_data, st.session_state.clustering_labels),
+                        "Davies-Bouldin Index": davies_bouldin_score(training_data, st.session_state.clustering_labels),
+                        "Calinski-Harabasz Score": calinski_harabasz_score(training_data, st.session_state.clustering_labels)
+                    }
+                    
+                    # Salvar informações importantes no estado da sessão
+                    st.session_state.training_data = training_data
+                    st.session_state.training_completed = True
+                    st.session_state.trained_model = model  # Salvar o modelo treinado
+                    
+                    # Mostrar mensagem de sucesso
+                    if st.session_state.selected_model_name == "Clustering Hierárquico":
+                        st.success(f"Modelo hierárquico treinado com sucesso usando {best_n_clusters_retrain} clusters e {st.session_state.pca_n_components} componentes PCA!")
+                    else:
+                        st.success(f"Modelo K-means treinado com sucesso usando {best_n_clusters_retrain} clusters!")
 
-            # Escolher ação seguinte
-            next_action = st.selectbox(
-                "Selecione a próxima ação:",
-                ["Re-Treinar o Modelo", "Finalizar"]
-            )
+            # Exibir métricas e próxima ação apenas após o treino
+            if st.session_state.get("training_completed", False):
+                st.write("### Métricas do Treino Inicial")
+                st.table(fix_dataframe_types(pd.DataFrame([st.session_state.initial_metrics])))
 
-            # Botão de confirmação da escolha
-            if st.button("Confirmar Escolha"):
-                if next_action == "Finalizar":
-                    st.session_state.step = 'clustering_final_page'
-                    st.rerun()
-                elif next_action == "Re-Treinar o Modelo":
-                    st.session_state.retrain_mode = True
+                # Visualização dos clusters
+                if 'clustering_labels' in st.session_state:
+                    st.write("### Visualização dos Clusters")
+                                        
+                    # Para KMeans podemos mostrar os centroides
+                    if st.session_state.selected_model_name == "KMeans":
+                        if "trained_model" in st.session_state and hasattr(st.session_state.trained_model, 'cluster_centers_'):
+                            st.write("#### Centroides dos Clusters")
+                            centroids = st.session_state.trained_model.cluster_centers_
+                            if centroids.shape[1] > 10:
+                                st.write(f"(Mostrando apenas as primeiras 10 dimensões de {centroids.shape[1]})")
+                                centroids_df = pd.DataFrame(centroids[:, :10])
+                            else:
+                                centroids_df = pd.DataFrame(centroids)
+                            
+                            st.dataframe(fix_dataframe_types(centroids_df))
+                    
+                    # Preparar dados para visualização
+                    if st.session_state.selected_model_name == "Clustering Hierárquico":
+                        # Para hierárquico, já temos os dados PCA
+                        plot_data = st.session_state.X_pca
+                    else:
+                        # Para K-means, podemos reduzir os dados para visualização se necessário
+                        if X_scaled.shape[1] > 3:
+                            pca_viz = PCA(n_components=3)
+                            plot_data = pca_viz.fit_transform(X_scaled)
+                            st.write("(Dados reduzidos via PCA para visualização)")
+                        else:
+                            plot_data = X_scaled
 
-        # Re-Treinar o Modelo (só aparece se a escolha foi confirmada)
-        if st.session_state.get("retrain_mode", False):
-            retrain_method = st.radio(
-                "Escolha a Abordagem para Determinar o Número de Clusters no novo treino:",
-                ["Automático", "Manual"]
-            )
+                    # Obter número total de componentes
+                    total_components = plot_data.shape[1]
 
-            if retrain_method == "Manual":
-                st.session_state.num_clusters = st.slider(
-                    "Selecione o número de clusters para o re-treino",
-                    min_value=2,
-                    max_value=20,
-                    value=st.session_state.num_clusters if "num_clusters" in st.session_state else 3
+                    # Permitir escolha de componentes para x e y
+                    st.write("### Escolha os Componentes para Visualização")
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        x_component = st.selectbox(
+                            "Componente para o Eixo X", 
+                            list(range(total_components)), 
+                            index=0,
+                            format_func=lambda x: f"Componente {x+1}",
+                            key="initial_x_component"  # Chave única adicionada
+                        )
+
+                    with col2:
+                        y_component = st.selectbox(
+                            "Componente para o Eixo Y", 
+                            list(range(total_components)), 
+                            index=1 if total_components > 1 else 0,
+                            format_func=lambda x: f"Componente {x+1}",
+                            key="initial_y_component"  # Chave única adicionada
+                        )
+
+                    # Verificar se componentes são diferentes
+                    if x_component == y_component:
+                        st.warning("Por favor, selecione componentes diferentes para X e Y.")
+                    else:
+                        # Visualização 2D com componentes selecionados
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        scatter = ax.scatter(
+                            plot_data[:, x_component], 
+                            plot_data[:, y_component], 
+                            c=st.session_state.clustering_labels, 
+                            cmap='viridis', 
+                            alpha=0.7
+                        )
+                        ax.set_title(f'Visualização 2D dos Clusters ({best_n_clusters_retrain} clusters)')
+                        ax.set_xlabel(f'Componente {x_component+1}')
+                        ax.set_ylabel(f'Componente {y_component+1}')
+                        legend = ax.legend(*scatter.legend_elements(), title="Clusters")
+                        ax.add_artist(legend)
+                        st.pyplot(fig)
+                        plt.clf()
+
+                # Escolher ação seguinte
+                next_action = st.selectbox(
+                    "Selecione a próxima ação:",
+                    ["Re-Treinar o Modelo", "Finalizar"]
                 )
-                best_n_clusters_retrain = st.session_state.num_clusters
 
-            elif retrain_method == "Automático":
-                # Determinar o melhor número de clusters com base no Silhouette Score
-                best_n_clusters_retrain = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
+                # Botão de confirmação da escolha
+                if st.button("Confirmar Escolha"):
+                    if next_action == "Finalizar":
+                        st.session_state.step = 'clustering_final_page'
+                        st.rerun()
+                    elif next_action == "Re-Treinar o Modelo":
+                        st.session_state.retrain_mode = True
 
-            # Botão para executar o re-treino
-            if st.button("Treinar Novamente"):
-                model = st.session_state.models[st.session_state.selected_model_name]
+            # Re-Treinar o Modelo (só aparece se a escolha foi confirmada)
+            if st.session_state.get("retrain_mode", False):
+                st.write("### Re-Treino do Modelo")
                 
-                # Padronizar os dados
-                from sklearn.preprocessing import StandardScaler
-                scaler = StandardScaler()
-                X_scaled = scaler.fit_transform(X)
-                
-                model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
-                model.fit(X_scaled)  # Use X_scaled em vez de X
-                st.session_state.retrain_metrics = {
-                    "Número de Clusters": best_n_clusters_retrain,
-                    "Silhouette Score": silhouette_score(X_scaled, model.labels_),
-                    "Davies-Bouldin Index": davies_bouldin_score(X_scaled, model.labels_),
-                    "Calinski-Harabasz Score": calinski_harabasz_score(X_scaled, model.labels_)
-                }
-                st.session_state.retrain_completed = True
-                st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters!")
-                
-            # Exibir métricas do re-treino após a execução
-            if st.session_state.get("retrain_completed", False):
-                st.write("### Métricas do Re-Treino")
-                st.table(fix_dataframe_types(pd.DataFrame([st.session_state.retrain_metrics])))
+                # Escolha do método para determinar o número de clusters
+                retrain_method = st.radio(
+                    "Escolha a Abordagem para Determinar o Número de Clusters no novo treino:",
+                    ["Automático", "Manual"]
+                )
 
-            # Finalizar após o re-treino
-            if st.session_state.get("retrain_completed", False):
-                st.write("## Concluir o Processo de Clustering.")
-                if st.button("Seguir para o Relatório"):
-                    st.session_state.step = 'clustering_final_page'
-                    st.rerun()
+                if retrain_method == "Manual":
+                    st.session_state.num_clusters = st.slider(
+                        "Selecione o número de clusters para o re-treino",
+                        min_value=2,
+                        max_value=20,
+                        value=st.session_state.num_clusters if "num_clusters" in st.session_state else 3
+                    )
+                    best_n_clusters_retrain = st.session_state.num_clusters
 
+                elif retrain_method == "Automático":
+                    # Determinar o melhor número de clusters com base no Silhouette Score
+                    if silhouette_scores and any(score > 0 for score in silhouette_scores):
+                        best_n_clusters_retrain = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
+                    else:
+                        st.error("Não foi possível determinar automaticamente o número de clusters. Por favor, selecione manualmente.")
+                        best_n_clusters_retrain = 3  # Valor padrão
+                        
+                # Botão para executar o re-treino
+                if st.button("Treinar Novamente"):
+                    model = st.session_state.models[st.session_state.selected_model_name]
+                    
+                    # Preparar modelo
+                    if st.session_state.selected_model_name == "Clustering Hierárquico":
+                        model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
+                    else:
+                        model.set_params(n_clusters=best_n_clusters_retrain, n_init=5, max_iter=300)
+                    
+                    # Treinar o modelo com uma barra de progresso
+                    with st.spinner(f"Realizando re-treino com {best_n_clusters_retrain} clusters..."):
+                        model.fit(st.session_state.training_data)
+                    
+                    # Calcular métricas
+                    st.session_state.retrain_metrics = {
+                        "Número de Clusters": best_n_clusters_retrain,
+                        "Silhouette Score": silhouette_score(st.session_state.training_data, model.labels_),
+                        "Davies-Bouldin Index": davies_bouldin_score(st.session_state.training_data, model.labels_),
+                        "Calinski-Harabasz Score": calinski_harabasz_score(st.session_state.training_data, model.labels_)
+                    }
+                    
+                    # Atualizar rótulos dos clusters
+                    st.session_state.retrain_labels = model.labels_
+                    st.session_state.retrain_completed = True
+                    
+                    # Mensagem de sucesso
+                    if st.session_state.selected_model_name == "Clustering Hierárquico":
+                        st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters e {st.session_state.pca_n_components} componentes PCA!")
+                    else:
+                        st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters!")
+                    
+                # Exibir métricas do re-treino após a execução
+                if st.session_state.get("retrain_completed", False):
+                    st.write("### Métricas do Re-Treino")
+                    st.table(fix_dataframe_types(pd.DataFrame([st.session_state.retrain_metrics])))
+                    
+                    # Recuperar o modelo do estado da sessão
+                    current_model = st.session_state.models[st.session_state.selected_model_name]
+
+                    # Verificar centroides para KMeans
+                    if st.session_state.selected_model_name == "KMeans":
+                        if hasattr(current_model, 'cluster_centers_'):
+                            st.write("#### Centroides dos Clusters")
+                            centroids = current_model.cluster_centers_
+                            if centroids.shape[1] > 10:
+                                st.write(f"(Mostrando apenas as primeiras 10 dimensões de {centroids.shape[1]})")
+                                centroids_df = pd.DataFrame(centroids[:, :10])
+                            else:
+                                centroids_df = pd.DataFrame(centroids)
+                            
+                            st.dataframe(fix_dataframe_types(centroids_df))
+    
+                    # Visualização dos clusters do re-treino
+                    if 'retrain_labels' in st.session_state:
+                        st.write("### Visualização dos Clusters do Re-Treino")
+                        
+                        # Preparar dados para visualização
+                        if st.session_state.selected_model_name == "Clustering Hierárquico":
+                            # Para hierárquico, já temos os dados PCA
+                            plot_data = st.session_state.X_pca
+                        else:
+                            # Para K-means, aplicamos um novo PCA para visualização
+                            # Use os dados originais ou X_scaled
+                            X_for_viz = X_scaled  # ou outro conjunto de dados apropriado
+                            if X_for_viz.shape[1] > 3:
+                                pca_viz = PCA(n_components=3)
+                                plot_data = pca_viz.fit_transform(X_for_viz)
+                                st.write("(Dados reduzidos via PCA para visualização)")
+                            else:
+                                plot_data = X_for_viz
+                        
+                        # Obter número total de componentes
+                        total_components = plot_data.shape[1]
+                        
+                        # Permitir escolha de componentes para x e y
+                        st.write("### Escolha os Componentes para Visualização")
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            x_component = st.selectbox(
+                                "Componente para o Eixo X", 
+                                list(range(total_components)), 
+                                index=0,
+                                format_func=lambda x: f"Componente {x+1}",
+                                key="retrain_x_component"  # Chave única adicionada
+                            )
+                        
+                        with col2:
+                            y_component = st.selectbox(
+                                "Componente para o Eixo Y", 
+                                list(range(total_components)), 
+                                index=1 if total_components > 1 else 0,
+                                format_func=lambda x: f"Componente {x+1}",
+                                key="retrain_y_component"  # Chave única adicionada
+                            )
+                        
+                        # Verificar se componentes são diferentes
+                        if x_component == y_component:
+                            st.warning("Por favor, selecione componentes diferentes para X e Y.")
+                        else:
+                            # Visualização 2D com componentes selecionados
+                            fig, ax = plt.subplots(figsize=(10, 6))
+                            scatter = ax.scatter(
+                                plot_data[:, x_component], 
+                                plot_data[:, y_component], 
+                                c=st.session_state.retrain_labels, 
+                                cmap='viridis', 
+                                alpha=0.7
+                            )
+                            ax.set_title(f'Visualização 2D dos Clusters do Re-Treino ({best_n_clusters_retrain} clusters)')
+                            ax.set_xlabel(f'Componente {x_component+1}')
+                            ax.set_ylabel(f'Componente {y_component+1}')
+                            legend = ax.legend(*scatter.legend_elements(), title="Clusters")
+                            ax.add_artist(legend)
+                            st.pyplot(fig)
+                            plt.clf()
+                            
+                # Finalizar após o re-treino
+                if st.session_state.get("retrain_completed", False):
+                    st.write("## Concluir o Processo de Clustering")
+                    if st.button("Seguir para o Relatório"):
+                        st.session_state.step = 'clustering_final_page'
+                        st.rerun()
+                    
     # 3. Seleção da Coluna Alvo
     from sklearn.preprocessing import LabelEncoder
     import pandas as pd
@@ -4412,7 +4781,13 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(50, 10, txt="Modelo Selecionado:", ln=False)
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, txt=st_session['selected_model_name'], ln=True)
+    model_info = st_session['selected_model_name']
+
+    # Adicionar informação de componentes para Clustering Hierárquico
+    if st_session['selected_model_name'] == "Clustering Hierárquico":
+        model_info += f" (PCA: {st_session.get('pca_n_components', 'N/A')} componentes)"
+
+    pdf.cell(0, 10, txt=model_info, ln=True)
     pdf.ln(5)
 
     # Melhor Modelo
@@ -4429,6 +4804,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     pdf.set_fill_color(200, 220, 255)
 
     # Cabeçalho da tabela
+    pdf.set_fill_color(144, 238, 144)  # Verde claro (light green)
     col_widths = [40, 40, 40, 40]
     pdf.cell(col_widths[0], 10, "Treino", 1, 0, 'C', True)
     pdf.cell(col_widths[1], 10, "Silhouette Score", 1, 0, 'C', True)
@@ -4488,7 +4864,7 @@ def gerar_relatorio_clustering_pdf(initial_metrics, retrain_metrics, best_model_
     # Inserir gráficos no PDF
     pdf.add_page()
     pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(0, 10, txt="Gráficos das Métricas", ln=True)
+    pdf.cell(0, 10, txt="Gráficos das Métricas", ln=True, align='C')
     pdf.ln(10)
 
     x_offset = 10
@@ -4521,6 +4897,10 @@ def clustering_final_page():
     # Mostrar o modelo selecionado
     st.subheader("Modelo Selecionado")
     st.write(f"**Modelo:** {st.session_state.selected_model_name}")
+
+    # Adicionar informação sobre o número de componentes
+    if st.session_state.selected_model_name == "Clustering Hierárquico":
+        st.write(f"**Número de Componentes PCA:** {st.session_state.get('pca_n_components', 'N/A')}")
 
     # Exibir métricas do treino inicial
     st.subheader("Métricas do Treino Inicial")
