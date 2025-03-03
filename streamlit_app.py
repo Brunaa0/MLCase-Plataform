@@ -2925,10 +2925,7 @@ def model_selection():
                 X_test = st.session_state.X_test
                 y_test = st.session_state.y_test
 
-                #Remover features altamente correlacionadas
-                X_train, X_test = remove_highly_correlated_features(X_train, X_test)
-                
-        # **Remover parâmetros inválidos antes do treino**
+                # **Remover parâmetros inválidos antes do treino**
                 if 'manual_params' in st.session_state:
                     if manual_params.get('kernel') == 'linear' and 'gamma' in manual_params:
                         del manual_params['gamma']  # Remove o parâmetro local
@@ -3197,50 +3194,33 @@ def select_scoring():
         st.success("Escolha salva com sucesso!")
 
 
-# Função para remover features altamente correlacionadas
-import pandas as pd
-import numpy as np
-import streamlit as st
-
+# Função para remover features correlacionadas
 def remove_highly_correlated_features(df, threshold=0.9):
     """
-    Remove features altamente correlacionadas com base na matriz de correlação.
-    """
-    if df.empty:
-        st.error("Erro: O DataFrame está vazio.")
-        return df
-
-    # Selecionar apenas colunas numéricas
-    numeric_df = df.select_dtypes(include=[np.number])
+    Remove features altamente correlacionadas.
     
-    if numeric_df.shape[1] < 2:
-        st.warning("Poucas colunas numéricas disponíveis para análise de correlação.")
-        return df  # Retorna sem alterações
-
-    # Preencher valores NaN com a média (para evitar erros)
-    numeric_df = numeric_df.fillna(numeric_df.mean())
-
-    # Calcular a matriz de correlação
-    corr_matrix = numeric_df.corr().abs()
-
-    # Criar a matriz triangular superior para evitar duplicatas
-    upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-
-    # Encontrar colunas altamente correlacionadas
-    to_drop = [column for column in upper_tri.columns if any(upper_tri[column] > threshold)]
-
-    # Exibir feedback no Streamlit
+    Parâmetros:
+    - df: DataFrame de entrada
+    - threshold: Limiar de correlação (padrão 0.9)
+    
+    Retorna:
+    - DataFrame com features não correlacionadas
+    """
+    # Calcular matriz de correlação absoluta
+    corr_matrix = df.corr().abs()
+    
+    # Obter a matriz triangular superior
+    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    
+    # Identificar colunas a serem removidas
+    to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
+    
+    # Informar quais features serão removidas (opcional)
     if to_drop:
-        st.write(f"Features removidas devido à alta correlação (threshold = {threshold}): {to_drop}")
-        return df.drop(columns=to_drop, axis=1)
-    else:
-        st.success("Nenhuma feature altamente correlacionada foi removida.")
-        return df
-
-# Aplicar no dataset tratado
-if 'data' in st.session_state:
-    st.session_state.data = remove_highly_correlated_features(st.session_state.data)
-
+        st.info(f"Features removidas por alta correlação: {to_drop}")
+    
+    # Retornar DataFrame sem as features correlacionadas
+    return df.drop(columns=to_drop)
 
 
 # Função para selecionar features importantes com RandomForest
@@ -3314,9 +3294,8 @@ def feature_selection():
             st.session_state.method_selection = method_selection
             st.success(f"Método {method_selection} confirmado!")
 
-        # Usar X_train e X_test que já tiveram features correlacionadas removidas
-        X_train, X_test = st.session_state.X_train, st.session_state.X_test
-        y_train, y_test = st.session_state.y_train, st.session_state.y_test
+        X_train, X_test, y_train, y_test = st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test
+        
         if method_selection == "Automático":
             feature_selector = RandomForestClassifier(n_estimators=100, random_state=42) if model_type == "Classificação" else RandomForestRegressor(n_estimators=100, random_state=42)
             feature_selector.fit(X_train, y_train)
