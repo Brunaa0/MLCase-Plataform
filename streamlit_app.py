@@ -3198,36 +3198,23 @@ def select_scoring():
 
 
 # Função para remover features altamente correlacionadas
-def remove_highly_correlated_features(X_train, X_test, threshold=0.9):
+def remove_highly_correlated_features(df, threshold=0.9):
     """
-    Remove features altamente correlacionadas.
-    
-    Parâmetros:
-    - X_train: DataFrame de treino
-    - X_test: DataFrame de teste
-    - threshold: Limiar de correlação (padrão 0.9)
-    
-    Retorna:
-    - X_train, X_test sem as features correlacionadas
+    Remove features altamente correlacionadas com base na matriz de correlação.
     """
-    # Calcular matriz de correlação absoluta
-    corr_matrix = X_train.corr().abs()
-    
-    # Obter a matriz triangular superior
-    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    
-    # Identificar colunas a serem removidas
-    to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
-    
-    # Informar quais features serão removidas
-    if to_drop:
-        st.info(f"Removendo features altamente correlacionadas: {to_drop}")
-    
-    # Remover as features correlacionadas de ambos os conjuntos
-    X_train_filtered = X_train.drop(columns=to_drop)
-    X_test_filtered = X_test.drop(columns=to_drop)
-    
-    return X_train_filtered, X_test_filtered
+    corr_matrix = df.corr().abs()
+    upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+
+    # Encontrar colunas com alta correlação
+    to_drop = [column for column in upper_tri.columns if any(upper_tri[column] > threshold)]
+
+    st.write(f"Features removidas devido à alta correlação (threshold = {threshold}): {to_drop}")
+
+    return df.drop(columns=to_drop, axis=1)
+
+# Aplicar no dataset tratado
+st.session_state.data = remove_highly_correlated_features(st.session_state.data)
+
 
 # Função para selecionar features importantes com RandomForest
 def select_important_features(X, y, threshold=0.01, model_type=None):
