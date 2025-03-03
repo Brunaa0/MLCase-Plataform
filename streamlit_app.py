@@ -2925,7 +2925,10 @@ def model_selection():
                 X_test = st.session_state.X_test
                 y_test = st.session_state.y_test
 
-                # **Remover parâmetros inválidos antes do treino**
+                #Remover features altamente correlacionadas
+                X_train, X_test = remove_highly_correlated_features(X_train, X_test)
+                
+        # **Remover parâmetros inválidos antes do treino**
                 if 'manual_params' in st.session_state:
                     if manual_params.get('kernel') == 'linear' and 'gamma' in manual_params:
                         del manual_params['gamma']  # Remove o parâmetro local
