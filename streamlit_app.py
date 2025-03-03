@@ -3198,22 +3198,49 @@ def select_scoring():
 
 
 # Função para remover features altamente correlacionadas
+import pandas as pd
+import numpy as np
+import streamlit as st
+
 def remove_highly_correlated_features(df, threshold=0.9):
     """
     Remove features altamente correlacionadas com base na matriz de correlação.
     """
-    corr_matrix = df.corr().abs()
+    if df.empty:
+        st.error("Erro: O DataFrame está vazio.")
+        return df
+
+    # Selecionar apenas colunas numéricas
+    numeric_df = df.select_dtypes(include=[np.number])
+    
+    if numeric_df.shape[1] < 2:
+        st.warning("Poucas colunas numéricas disponíveis para análise de correlação.")
+        return df  # Retorna sem alterações
+
+    # Preencher valores NaN com a média (para evitar erros)
+    numeric_df = numeric_df.fillna(numeric_df.mean())
+
+    # Calcular a matriz de correlação
+    corr_matrix = numeric_df.corr().abs()
+
+    # Criar a matriz triangular superior para evitar duplicatas
     upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
 
-    # Encontrar colunas com alta correlação
+    # Encontrar colunas altamente correlacionadas
     to_drop = [column for column in upper_tri.columns if any(upper_tri[column] > threshold)]
 
-    st.write(f"Features removidas devido à alta correlação (threshold = {threshold}): {to_drop}")
-
-    return df.drop(columns=to_drop, axis=1)
+    # Exibir feedback no Streamlit
+    if to_drop:
+        st.write(f"Features removidas devido à alta correlação (threshold = {threshold}): {to_drop}")
+        return df.drop(columns=to_drop, axis=1)
+    else:
+        st.success("Nenhuma feature altamente correlacionada foi removida.")
+        return df
 
 # Aplicar no dataset tratado
-st.session_state.data = remove_highly_correlated_features(st.session_state.data)
+if 'data' in st.session_state:
+    st.session_state.data = remove_highly_correlated_features(st.session_state.data)
+
 
 
 # Função para selecionar features importantes com RandomForest
