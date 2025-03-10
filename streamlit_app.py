@@ -3563,28 +3563,29 @@ def model_selection():
         st.write(f"### Coluna Alvo Confirmada: {st.session_state.target_column}")
         st.write(f"Tipo: {st.session_state.get('target_column_type', 'Não definido')}")  # Mostrar tipo da variável alvo
 
-        # 4. GridSearch
-        # Modelos sem hiperparâmetros ajustáveis
+        # 4. GridSearch - Ajuste de Hiperparâmetros
+        # **Função para limpar parâmetros inválidos no session_state**
         def limpar_parametros_invalidos():
             """Remove parâmetros inválidos do session_state."""
             if 'manual_params' in st.session_state:
                 if 'gamma' in st.session_state['manual_params']:
                     del st.session_state['manual_params']['gamma']  # Remove 'gamma' se presente
-
-        # Inicializa modelos sem hiperparâmetros ajustáveis
+        
+        # **Definir modelos que não possuem hiperparâmetros ajustáveis**
         NO_HYPERPARAM_MODELS = ["Regressão Linear Simples (RLS)"]
-
-        # Verifica se o modelo foi selecionado
+        
+        # **Verificar se o modelo foi selecionado e se o GridSearch ainda não foi confirmado**
         if st.session_state.selected_model_name and not st.session_state.grid_search_confirmed:
-
-            # Verificar se o modelo não possui hiperparâmetros ajustáveis
+        
+            # **Caso o modelo não tenha hiperparâmetros ajustáveis**
             if st.session_state.selected_model_name in NO_HYPERPARAM_MODELS:
                 st.write(f"O modelo {st.session_state.selected_model_name} não possui hiperparâmetros ajustáveis.")
                 st.session_state.use_grid_search = "Não"
                 param_grid = {}  # Nenhum parâmetro para ajustar
                 st.session_state.grid_search_confirmed = True
+        
             else:
-                # Perguntar ao utilizador se quer usar GridSearch
+                # **Perguntar ao utilizador se quer usar GridSearch**
                 use_grid_search = st.radio(
                     "Usar GridSearch?", 
                     ["Sim", "Não"], 
@@ -3592,12 +3593,12 @@ def model_selection():
                     index=0 if st.session_state.get('use_grid_search', "Sim") == "Sim" else 1
                 )
                 st.session_state.use_grid_search = use_grid_search
-
-                # Inicializar param_grid como vazio
+        
+                # **Inicializar param_grid como vazio**
                 param_grid = {}  # Evita erros de variável não definida
-
+        
                 if use_grid_search == "Sim":
-                    # Perguntar como os parâmetros devem ser escolhidos
+                    # **Perguntar como os parâmetros devem ser escolhidos**
                     param_choice = st.radio(
                         "Escolher os parâmetros de GridSearch?",
                         ["Utilizar os melhores parâmetros", "Escolher manualmente os parâmetros de GridSearch"],
@@ -3605,43 +3606,41 @@ def model_selection():
                         index=0 if st.session_state.get('param_choice', "Utilizar os melhores parâmetros") == "Utilizar os melhores parâmetros" else 1
                     )
                     st.session_state.param_choice = param_choice
-
-                    # Inicializar parâmetros manuais
+        
+                    # **Inicializar parâmetros manuais**
                     if 'manual_params' not in st.session_state:
                         st.session_state.manual_params = {}
-
+        
                     manual_params = st.session_state.manual_params
-
-                    # Configuração manual dos parâmetros
+        
+                    # **Configuração manual dos parâmetros**
                     if param_choice == "Escolher manualmente os parâmetros de GridSearch":
-                        # Recuperar o modelo selecionado
+                        # **Recuperar o modelo selecionado**
                         model_key = st.session_state.selected_model_name
-                    
-                        # Inicializar os parâmetros padrão do modelo selecionado
+        
+                        # **Obter os parâmetros padrão para o modelo selecionado**
                         param_grid = get_default_param_grid(model_key)
-                    
-                        # Se não houver parâmetros padrão, informar o utilizador
+        
+                        # **Se não houver parâmetros padrão, informar o utilizador**
                         if not param_grid:
                             st.warning(f"Parâmetros padrão não definidos para o modelo {model_key}.")
                             param_grid = {}
-                    
-                        # Exibir os parâmetros para o utilizador ajustar manualmente
+        
+                        # **Exibir os parâmetros para o utilizador ajustar manualmente**
                         manual_params = {}
                         for param, values in param_grid.items():
-                            # **Lógica Especial para o Kernel**
+                            # **Tratar parâmetros específicos como 'kernel'**
                             if param == "kernel":
-                                # Selecionar o kernel
                                 manual_params[param] = st.selectbox(
                                     f"Escolha o valor para '{param}':",
                                     values,  # Lista de valores permitidos
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-                    
+        
                             # **Mostrar 'gamma' apenas se o kernel for 'rbf'**
                             elif param == "gamma":
                                 if "kernel" in manual_params and manual_params["kernel"] == "rbf":
-                                    # Mostrar gamma apenas para 'rbf'
                                     manual_params[param] = st.selectbox(
                                         f"Escolha o valor para '{param}':",
                                         values,  # Lista de valores permitidos
@@ -3649,29 +3648,26 @@ def model_selection():
                                         key=f"{model_key}_{param}"
                                     )
                                 else:
-                                    # Remover 'gamma' do estado global e local
+                                    # **Remover 'gamma' se não for necessário**
                                     manual_params.pop(param, None)
                                     if 'manual_params' in st.session_state and param in st.session_state['manual_params']:
                                         del st.session_state['manual_params'][param]
-                    
-                            # **Tratar parâmetros numéricos**
+        
+                            # **Tratar parâmetros numéricos (ex.: C, epsilon)**
                             elif isinstance(values[0], (int, float)):
-                                # Mostrar os valores disponíveis para o parâmetro
                                 st.write(f"Parâmetro: **{param}** | Intervalo disponível: [{min(values)}, {max(values)}]")
-                            
-                                # Verificar o tipo de dado (float ou int) para parametrização
+        
                                 param_type = float if any(isinstance(v, float) for v in values) else int
-                            
-                                # Criar o número interativo
+        
                                 manual_params[param] = st.number_input(
                                     f"Escolha o valor para '{param}':",
                                     min_value=float(min(values)) if param_type == float else int(min(values)),
                                     max_value=float(max(values)) if param_type == float else int(max(values)),
                                     value=float(values[0]) if param_type == float else int(values[0]),
-                                    step=0.1 if param_type == float else 1,  # Ajuste o step dinamicamente
+                                    step=0.1 if param_type == float else 1,  
                                     key=f"{model_key}_{param}"
                                 )
-                            
+        
                             # **Tratar `max_depth` separadamente como um selectbox**
                             elif param == "max_depth":
                                 st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
@@ -3681,123 +3677,128 @@ def model_selection():
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-                    
+        
                             # **Tratar parâmetros categóricos (ex.: 'weights')**
                             elif isinstance(values[0], str):
-                                # Mostrar os valores disponíveis para o parâmetro
                                 st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
-                            
-                                # Criar o selectbox interativo
                                 manual_params[param] = st.selectbox(
                                     f"Escolha o valor para '{param}':",
                                     values,  # Lista de valores permitidos
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-                    
-                        # Salvar os parâmetros manuais no estado global
+        
+                        # **Salvar os parâmetros manuais no estado global**
                         st.session_state['manual_params'] = manual_params
                         st.write("Parâmetros manuais salvos:", manual_params)
-
-
-
-                # Confirmar configurações do GridSearch
+        
+                # **Botão para confirmar configurações do GridSearch**
                 if st.button("Confirmar GridSearch"):
                     st.session_state.grid_search_confirmed = True
                     st.success("Configuração do GridSearch confirmada!")
-
-                    # Parâmetros padrão até o treino
+        
+                    # **Se o utilizador escolheu "Utilizar os melhores parâmetros", armazenar um dicionário vazio**
                     if st.session_state.use_grid_search == "Sim" and st.session_state.param_choice == "Utilizar os melhores parâmetros":
                         st.session_state['manual_params'] = {}
                         st.session_state['best_params_str'] = "{}"
                         st.session_state['best_params'] = param_grid
                         st.session_state['best_params_selected'] = param_grid
-                        
-
+                                
         # 5. Escolha do Método de Validação
-        # O método de validação agora aparece somente após confirmação do GridSearch
+        
+        # O método de validação só aparece após a confirmação do GridSearch
         if st.session_state.grid_search_confirmed and st.session_state.selected_model_name and not st.session_state.validation_method:
-            st.write("Escolha o Método de Validação")
+            
+            st.write("### Escolha o Método de Validação")
+            
+            # Lista dos métodos disponíveis
             validation_methods = ["Divisão em Treino e Teste", "Holdout"]
+        
+            # Escolha do método pelo utilizador
             validation_method = st.radio(
-                "Escolha o método de validação",
+                "Selecione o método de validação",
                 validation_methods,
                 key='validation_method_radio'
             )
-
+        
             # Configurações específicas para cada método de validação
             if validation_method == "Divisão em Treino e Teste":
+                # O utilizador escolhe a proporção do conjunto de teste
                 test_size = st.slider(
                     "Proporção do conjunto de teste",
                     min_value=0.1, max_value=0.9, value=0.3, step=0.1
                 )
                 st.session_state.test_size = test_size
-
+        
             elif validation_method == "Holdout":
+                # O utilizador escolhe a proporção do conjunto de treino
                 train_size = st.slider(
                     "Proporção do conjunto de treino",
                     min_value=0.1, max_value=0.9, value=0.7, step=0.1
                 )
                 st.session_state.train_size = train_size
-
-            # Botão de confirmação para o método de validação
+        
+            # **Botão para confirmar a escolha do método de validação**
             if st.button("Confirmar Validação"):
-                st.session_state.validation_method = validation_method  # Armazena o método de validação escolhido
-
-                # Preparação de dados para validação
+                # Guardar o método de validação escolhido
+                st.session_state.validation_method = validation_method  
+        
+                # **Preparação dos dados**
+                # Remover a coluna alvo do conjunto de características
                 X = data.drop(columns=[st.session_state.target_column])
                 y = data[st.session_state.target_column]
-
-                # Conversão de variáveis categóricas para numéricas
-                X = pd.get_dummies(X)
-
+        
+                # **Conversão de variáveis categóricas para numéricas**
+                X = pd.get_dummies(X)  # Criação de variáveis dummy para colunas categóricas
+        
                 try:
-                    # Tratamento de diferentes métodos de validação
+                    # **Divisão dos dados com base no método escolhido**
                     if st.session_state.validation_method == "Divisão em Treino e Teste":
-                        # Divisão simples em treino e teste
+                        # Divisão clássica em treino e teste
                         st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test = train_test_split(
                             X, y, test_size=st.session_state.test_size, random_state=42
                         )
                         st.success("Divisão dos dados realizada com sucesso!")
-
+        
                     elif st.session_state.validation_method == "Holdout":
-                        # Holdout: outra forma de divisão de treino e teste
+                        # Outro método de divisão treino-teste, baseado na proporção de treino
                         st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test = train_test_split(
                             X, y, train_size=st.session_state.train_size, random_state=42
                         )
                         st.success("Divisão dos dados realizada com sucesso!")
-
-                    # Confirma a validação
+        
+                    # **Confirma que a validação foi concluída**
                     st.session_state.validation_confirmed = True
-
+        
                 except Exception as e:
                     st.error(f"Erro na divisão dos dados: {e}")
-
-                # Exibir método de validação confirmado
+        
+                # **Exibir o método de validação confirmado**
                 if st.session_state.validation_confirmed:
-                    st.write(f"Método de Validação Confirmado: {st.session_state.validation_method}")
+                    st.write(f"**Método de Validação Confirmado:** {st.session_state.validation_method}")
 
-        # Exibir o botão para treinar o modelo **apenas após a validação ser confirmada**
         # 6. Treino do Modelo
+        
+        # **Exibir o botão para treinar o modelo apenas após a validação ser confirmada**
         if st.session_state.validation_confirmed:
             if st.button("Treinar o Modelo"):
-                st.session_state.validation_confirmed = False  # Resetando após o treino
+                st.session_state.validation_confirmed = False  # Resetar a validação após o treino
                 st.success("Treino iniciado com sucesso!")
-
-                # Recuperar o modelo selecionado
+        
+                # **Recuperar o modelo selecionado**
                 model_name = st.session_state.selected_model_name
                 model = st.session_state.models.get(st.session_state.selected_model_name)
-
-                # Verificar se o modelo foi encontrado
+        
+                # **Verificar se o modelo foi encontrado**
                 if model is None:
                     st.error(f"Modelo {st.session_state.selected_model_name} não encontrado.")
-                    return  # Interrompe o fluxo caso o modelo não seja encontrado
-
-                # Inicializar 'treinos_realizados' se necessário
+                    return  # Interrompe a execução caso o modelo não seja encontrado
+        
+                # **Inicializar 'treinos_realizados' no estado global caso ainda não exista**
                 if 'treinos_realizados' not in st.session_state:
                     st.session_state['treinos_realizados'] = []
-
-                # Coletar as informações armazenadas no session_state
+        
+                # **Recolher as informações necessárias do estado global**
                 target_column = st.session_state.target_column
                 validation_method = st.session_state.validation_method
                 use_grid_search = st.session_state.use_grid_search
@@ -3806,237 +3807,289 @@ def model_selection():
                 y_train = st.session_state.y_train
                 X_test = st.session_state.X_test
                 y_test = st.session_state.y_test
-
+        
                 # **Remover parâmetros inválidos antes do treino**
                 if 'manual_params' in st.session_state:
                     if manual_params.get('kernel') == 'linear' and 'gamma' in manual_params:
-                        del manual_params['gamma']  # Remove o parâmetro local
+                        del manual_params['gamma']  # Remover parâmetro inválido localmente
                     if 'gamma' in st.session_state['manual_params']:
-                        del st.session_state['manual_params']['gamma']  # Remove do estado global
-
-                # **Adicionar tratamento de valores ausentes**
+                        del st.session_state['manual_params']['gamma']  # Remover do estado global
+        
+                # **Tratar valores ausentes antes do treino**
                 from sklearn.impute import SimpleImputer
-
-                imputer = SimpleImputer(strategy="mean")  # Ou "median" conforme necessário
-                X_train = imputer.fit_transform(X_train)  # Tratamento no conjunto de treino
-                X_test = imputer.transform(X_test)        # Tratamento no conjunto de teste
-
-                # Exibir resumo das escolhas feitas antes do treino
+                imputer = SimpleImputer(strategy="mean")  # Estratégia de imputação ("mean" pode ser alterado para "median")
+                X_train = imputer.fit_transform(X_train)  # Aplicar imputação no conjunto de treino
+                X_test = imputer.transform(X_test)        # Aplicar imputação no conjunto de teste
+        
+                # **Exibir resumo das escolhas feitas pelo utilizador**
                 st.write("### Resumo das Escolhas Feitas:")
                 st.write(f"**Modelo Selecionado**: {model_name}")
                 st.write(f"**Coluna Alvo**: {target_column}")
                 st.write(f"**Método de Validação**: {validation_method}")
-                st.write(f"GridSearch Ativado? {use_grid_search}")  # Debug para verificar a escolha do utilizador
-
-                # Treino de um único modelo
+                st.write(f"**GridSearch Ativado?** {use_grid_search}")  # Informação adicional para depuração
+        
+                # **Iniciar o treino do modelo**
                 param_grid = get_default_param_grid(model_name) if use_grid_search == "Sim" else {}
                 resultado = train_and_evaluate(
                     model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params
                 )
-
-                # **Salvar apenas os parâmetros válidos no estado global após o treino**
+        
+                # **Guardar os melhores parâmetros no estado global após o treino**
                 if 'Best Parameters' in resultado:
-                    st.session_state['best_params'] = resultado['Best Parameters']  # Para treino inicial
-                    st.session_state['best_params_selected'] = resultado['Best Parameters']  # Para seleção de features
+                    st.session_state['best_params'] = resultado['Best Parameters']
+                    st.session_state['best_params_selected'] = resultado['Best Parameters']
                     st.session_state['best_params_str'] = json.dumps(st.session_state['best_params'], indent=2)
                     st.write("Parâmetros salvos no estado global:", st.session_state['best_params'])
                 else:
                     st.warning("Nenhum parâmetro encontrado para salvar.")
-
-                # Após o primeiro treino
-                # Após o primeiro treino
+        
+                # **Guardar os resultados após o primeiro treino**
                 if resultado:
-                    # Armazena os resultados iniciais para comparação futura
-                    st.session_state['resultado_sem_selecao'] = resultado  # Salva os resultados sem seleção
+                    st.session_state['resultado_sem_selecao'] = resultado  # Salvar resultado sem seleção de features
                     st.session_state['treinos_realizados'].append(resultado)
-                    
-                    # Criar o DataFrame com as métricas
+        
+                    # **Criar um DataFrame com as métricas do modelo treinado**
                     df_resultado = pd.DataFrame([resultado])
-                
-                    # Corrigir os tipos antes de formatar
+        
+                    # **Corrigir os tipos de dados antes de exibir**
                     df_corrigido = fix_dataframe_types(df_resultado)
-                    
-                    # Aplicar formatação depois de corrigir os tipos
-                    st.write("Métricas do modelo treinado:")
+        
+                    # **Exibir métricas do modelo**
+                    st.write("### Métricas do Modelo Treinado:")
                     formatted_display = df_corrigido.style.format(
                         {col: "{:.4f}" for col in df_corrigido.select_dtypes(include=['float', 'float64']).columns}
                     )
                     st.dataframe(formatted_display)
-                
-                    # Gráfico das métricas
+        
+                    # **Gerar gráfico com as métricas do modelo**
                     plot_metrics(df_corrigido)
-                
-                    # Marcar o treino como concluído
+        
+                    # **Marcar o treino como concluído**
                     st.session_state['treino_concluido'] = True
                 else:
                     st.error("O treino do modelo falhou.")
-
-        # Avançar para Seleção de Features SOMENTE após o gráfico de métricas ser mostrado
+        
+        # **Avançar para Seleção de Features APENAS após a exibição das métricas**
         if st.session_state.get('treino_concluido', False):
             st.write("### Avançar para Seleção de Features")
-
-            # Garantir que há treinos realizados
+        
+            # **Verificar se há treinos realizados**
             if 'treinos_realizados' in st.session_state and st.session_state['treinos_realizados']:
-                # Depuração: Exibir treinos realizados
-                #st.write("Treinos realizados:", st.session_state['treinos_realizados'])
-
-                # Identificar o tipo de problema para usar a métrica apropriada
+                
+                # **Identificar o melhor modelo com base na métrica apropriada**
                 if st.session_state.model_type == "Classificação":
                     melhores_metricas = sorted(
                         st.session_state['treinos_realizados'], 
-                        key=lambda x: x.get('Accuracy', 0),  # Usar Accuracy para classificação
+                        key=lambda x: x.get('Accuracy', 0),  # Ordenação pela métrica Accuracy
                         reverse=True
-                    )[0]  # Escolher o melhor modelo
+                    )[0]  # Seleciona o melhor modelo
                 elif st.session_state.model_type == "Regressão":
                     melhores_metricas = sorted(
                         st.session_state['treinos_realizados'], 
-                        key=lambda x: x.get('R²', 0),  # Usar R² para regressão
+                        key=lambda x: x.get('R²', 0),  # Ordenação pela métrica R²
                         reverse=True
-                    )[0]  # Escolher o melhor modelo
-
-                # Seleção de modelo manual ou manter o melhor automaticamente
+                    )[0]  # Seleciona o melhor modelo
+        
+                # **Permitir ao utilizador escolher um modelo manualmente ou manter o melhor**
                 model_options = [resultado['Modelo'] for resultado in st.session_state['treinos_realizados']]
                 default_index = model_options.index(melhores_metricas['Modelo']) if melhores_metricas['Modelo'] in model_options else 0
-
+        
                 selected_model_temp = st.selectbox(
                     "Escolha um modelo para avançar para a Seleção de Features:",
                     options=model_options,
                     index=default_index
                 )
-
-                # Botão para avançar
+        
+                # **Botão para avançar para a próxima etapa**
                 if st.button("Avançar para Seleção de Features"):
-                    # Atualizar o modelo selecionado no session_state apenas ao clicar no botão
-                    st.session_state.selected_model_name = selected_model_temp
-                    st.session_state.step = 'feature_selection'
-                    st.session_state['treino_concluido'] = False
+                    st.session_state.selected_model_name = selected_model_temp  # Atualiza o modelo selecionado
+                    st.session_state.step = 'feature_selection'  # Atualiza a etapa do fluxo
+                    st.session_state['treino_concluido'] = False  # Reseta o estado do treino
                     st.rerun()
             else:
                 st.error("Nenhum modelo foi treinado. Execute o treino primeiro.")
 
-
 # Função para treinar e avaliar os modelos de clustering
 def train_clustering_model(model, X_data, model_name):
+    """
+    Treina um modelo de clustering (KMeans ou Clustering Hierárquico) e armazena os rótulos dos clusters.
+
+    Parâmetros:
+    - model: Modelo de clustering selecionado (KMeans ou Clustering Hierárquico).
+    - X_data: Dados de entrada para treino do modelo.
+    - model_name: Nome do modelo a ser treinado.
+
+    """
     try:
-        # Padronizar os dados
+        # **Padronizar os dados para melhor desempenho dos modelos**
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X_data)
-        
+        X_scaled = scaler.fit_transform(X_data)  # Normaliza os dados
+
+        # **Treinar o modelo conforme o tipo de clustering selecionado**
         if model_name == "KMeans":
-            model.set_params(n_clusters=st.session_state.kmeans_clusters)
-            model.fit(X_scaled)
-            st.session_state['labels'] = model.labels_
+            model.set_params(n_clusters=st.session_state.kmeans_clusters)  # Definir o número de clusters
+            model.fit(X_scaled)  # Ajustar o modelo aos dados normalizados
+            st.session_state['labels'] = model.labels_  # Armazenar os rótulos dos clusters
         
         elif model_name == "Clustering Hierárquico":
-            # Configurar explicitamente todos os parâmetros necessários
+            # Configurar todos os parâmetros necessários para o modelo Hierárquico
             model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage="ward")
-            model.fit(X_scaled)
-            st.session_state['labels'] = model.labels_
+            model.fit(X_scaled)  # Ajustar o modelo aos dados
+            st.session_state['labels'] = model.labels_  # Armazenar os rótulos dos clusters
         
-        st.write(f"Clusterização realizada com {model_name}")
-        
+        # **Exibir mensagem de sucesso**
+        st.write(f"Clusterização realizada com sucesso usando o modelo {model_name}!")
+
     except Exception as e:
+        # **Capturar e exibir erros, caso ocorram**
         st.error(f"Erro ao treinar o modelo {model_name}: {str(e)}")
-# Visualização dos Clusters usando PCA
+
+
+# Função para visualização dos clusters usando PCA
 def visualize_clusters(X_data):
-    if 'labels' in st.session_state:
+    """
+    Gera uma visualização dos clusters em 2D usando PCA para reduzir a dimensionalidade dos dados.
+
+    Parâmetros:
+    - X_data: Dados de entrada que serão projetados em 2D para visualização dos clusters.
+
+    """
+    if 'labels' in st.session_state:  # Verifica se os rótulos dos clusters já foram gerados
+        # **Aplicar PCA para reduzir os dados para 2 dimensões**
         pca = PCA(n_components=2)
         X_pca = pca.fit_transform(X_data)
 
+        # **Criar gráfico de dispersão dos clusters**
         plt.figure(figsize=(8, 6))
-        plt.scatter(X_pca[:, 0], X_pca[:, 1], c=st.session_state['labels'], cmap='viridis')
+        plt.scatter(X_pca[:, 0], X_pca[:, 1], c=st.session_state['labels'], cmap='viridis', alpha=0.7)
         plt.xlabel('Componente Principal 1')
         plt.ylabel('Componente Principal 2')
         plt.title('Visualização dos Clusters em 2D')
+
+        # **Exibir o gráfico no Streamlit**
         st.pyplot(plt.gcf())
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR, SVC
+from sklearn.linear_model import LinearRegression
 
 def evaluate_regression_model(y_true, y_pred):
+    """
+    Avalia um modelo de regressão com base em três métricas principais:
+    - R²: Coeficiente de determinação (quanto maior, melhor).
+    - MAE: Erro absoluto médio (quanto menor, melhor).
+    - MSE: Erro quadrático médio (quanto menor, melhor).
+
+    Parâmetros:
+    - y_true: Valores reais da variável de saída.
+    - y_pred: Valores previstos pelo modelo.
+
+    Retorna:
+    - Um dicionário com as métricas calculadas.
+    """
     r2 = r2_score(y_true, y_pred)
     mae = mean_absolute_error(y_true, y_pred)
     mse = mean_squared_error(y_true, y_pred)
-    return {"R²": r2, "MAE": mae,"MSE": mse }
+    return {"R²": r2, "MAE": mae, "MSE": mse}
 
 def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params=None):
-    try:
-        # Verificações para tipos de modelos
-        is_svr = isinstance(model, SVR)
-        is_svc = isinstance(model, SVC)  # Adicionar verificação para SVC
-        is_regression = is_svr or isinstance(model, LinearRegression)
+    """
+    Treina e avalia um modelo de Machine Learning utilizando GridSearch para otimização dos hiperparâmetros.
 
-        # Escalonamento para SVR
+    Parâmetros:
+    - model: O modelo de Machine Learning a ser treinado (ex.: SVR, SVC, LinearRegression).
+    - param_grid: Dicionário contendo os parâmetros para GridSearchCV (se ativado).
+    - X_train: Conjunto de treino para as variáveis preditoras.
+    - y_train: Conjunto de treino para a variável alvo.
+    - X_test: Conjunto de teste para as variáveis preditoras.
+    - y_test: Conjunto de teste para a variável alvo.
+    - use_grid_search: Booleano que indica se o GridSearchCV deve ser utilizado.
+    - manual_params: Parâmetros fornecidos manualmente pelo utilizador (se houver).
+
+    Retorna:
+    - Um dicionário com as métricas de avaliação do modelo treinado.
+    """
+    try:
+        # **Verificar o tipo de modelo**
+        is_svr = isinstance(model, SVR)  # Identifica se o modelo é uma regressão por vetores de suporte (SVR)
+        is_svc = isinstance(model, SVC)  # Identifica se o modelo é um classificador SVC
+        is_regression = is_svr or isinstance(model, LinearRegression)  # Identifica se o modelo é de regressão
+
+        # **Escalonamento dos dados apenas para SVR (necessário para otimizar o desempenho)**
         if is_svr:
             scaler = StandardScaler()
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
 
-        # GridSearch otimizado
+        # **Configuração do GridSearchCV**
         if use_grid_search:
-            cv = KFold(n_splits=5, shuffle=True, random_state=42)
-            scoring = 'r2' if is_regression else 'accuracy'
+            cv = KFold(n_splits=5, shuffle=True, random_state=42)  # Validação cruzada com 5 divisões
+            scoring = 'r2' if is_regression else 'accuracy'  # Define a métrica de avaliação conforme o tipo de problema
             
-            # Tratamento especial para SVC (muito mais rápido)
+            # **Otimização para modelos SVC (Classificação por Vetores de Suporte)**
             if is_svc:
-                # Grid reduzido para SVC
+                # Reduz o número de parâmetros testados para acelerar o GridSearch
                 simplified_grid = {
                     'C': [1],            # Apenas um valor para C
                     'kernel': ['rbf'],   # Apenas um tipo de kernel
                     'gamma': ['scale']   # Apenas uma configuração de gamma
                 }
                 
-                # Aplicar parâmetros manuais, se fornecidos
+                # **Aplicar parâmetros manuais, se fornecidos pelo utilizador**
                 if manual_params:
                     for param, value in manual_params.items():
-                        simplified_grid[param] = [value]
-                        
-                # Usar o grid simplificado
-                actual_grid = simplified_grid
+                        simplified_grid[param] = [value]  # Garante que os valores sejam listas para GridSearch
                 
-                # Reduzir número de folds para SVC
-                cv = KFold(n_splits=3, shuffle=True, random_state=42)
+                actual_grid = simplified_grid  # Usa o grid simplificado para SVC
+                cv = KFold(n_splits=3, shuffle=True, random_state=42)  # Reduz o número de folds para otimizar tempo
+                
             else:
-                # Para outros modelos, usar o grid original
-                actual_grid = param_grid
+                actual_grid = param_grid  # Para outros modelos, usa o grid normal
                 
-                # Incorporar parâmetros manuais
+                # **Se o utilizador forneceu parâmetros manuais, incorporá-los ao grid**
                 if manual_params:
                     actual_grid.update({k: [v] for k, v in manual_params.items()})
-            
-            # Executar GridSearch com os parâmetros apropriados
+
+            # **Executar o GridSearch para encontrar os melhores hiperparâmetros**
             grid_search = GridSearchCV(
                 model, 
                 actual_grid,
                 cv=cv,
                 scoring=scoring,
-                n_jobs=-1  # Utilizar todos os cores disponíveis
+                n_jobs=-1  # Usa todos os núcleos disponíveis para acelerar a busca
             )
             grid_search.fit(X_train, y_train)
             
-            best_model = grid_search.best_estimator_
-            best_params = grid_search.best_params_
+            best_model = grid_search.best_estimator_  # Melhor modelo encontrado pelo GridSearch
+            best_params = grid_search.best_params_  # Melhores hiperparâmetros identificados
+
         else:
-            # Treinar sem GridSearch
+            # **Se não usar GridSearch, aplicar os parâmetros manualmente (se fornecidos)**
             if manual_params:
                 model.set_params(**manual_params)
-            
-            model.fit(X_train, y_train)
-            best_model = model
-            best_params = manual_params or {}
 
-        # Predições
+            model.fit(X_train, y_train)  # Treinar o modelo com os dados de treino
+            best_model = model  # O modelo treinado sem otimização
+            best_params = manual_params or {}  # Se não houver parâmetros manuais, define um dicionário vazio
+
+        # **Fazer previsões com o modelo treinado**
         y_pred = best_model.predict(X_test)
 
-        # Métricas baseadas no tipo de modelo
+        # **Calcular métricas de desempenho**
         metrics = {
             "Modelo": model.__class__.__name__,
             **(
+                # **Se for um modelo de regressão**
                 {
                     "R²": r2_score(y_test, y_pred),
                     "MAE": mean_absolute_error(y_test, y_pred),
                     "MSE": mean_squared_error(y_test, y_pred)
                 } if is_regression else 
+                # **Se for um modelo de classificação**
                 {
                     "Accuracy": accuracy_score(y_test, y_pred),
                     "Precision": precision_score(y_test, y_pred, average='weighted'),
@@ -4047,61 +4100,75 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
             "Best Parameters": best_params
         }
 
-        return metrics
+        return metrics  # Retorna as métricas do modelo treinado
 
     except Exception as e:
+        # **Capturar erros e exibir no Streamlit**
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
-# Função para selecionar o scoring
+# **Função para selecionar o método de avaliação (Scoring)**
 def select_scoring():
-    # Verifica se 'selected_scoring' já existe, caso contrário, inicializa com 'f1' como padrão
-    if 'selected_scoring' not in st.session_state:
-        st.session_state.selected_scoring = 'F1-Score'  # Definir 'f1' como valor padrão
+    """
+    Permite ao utilizador selecionar a métrica de avaliação a ser usada na seleção de features.
+    A escolha é armazenada no session_state para ser utilizada posteriormente.
 
-    # Agora o selectbox usa o valor já armazenado em 'selected_scoring'
+    - Se o utilizador já tiver feito uma escolha anteriormente, ela será mantida.
+    - Se for a primeira vez, a métrica padrão será "F1-Score".
+    - A escolha pode ser guardada num ficheiro para persistência.
+
+    Retorna:
+    - Nenhum valor explícito, mas a métrica escolhida é armazenada no session_state.
+    """
+    # Verifica se a métrica já foi selecionada; se não, define "F1-Score" como padrão
+    if 'selected_scoring' not in st.session_state:
+        st.session_state.selected_scoring = 'F1-Score'
+
+    # Criar a caixa de seleção para escolha da métrica
     st.session_state.selected_scoring = st.selectbox(
         "Escolha o scoring para a seleção de features:",
         ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
         index=['Accuracy', 'Precision', 'Recall', 'F1-Score'].index(st.session_state.selected_scoring)
     )
 
-    # Exibir a escolha armazenada
+    # Exibir a escolha feita
     st.write("Scoring selecionado:", st.session_state.selected_scoring)
 
-    # Salvar em um arquivo ou variável para persistência adicional
+    # Opção para guardar a escolha num ficheiro
     if st.button("Salvar escolha"):
         with open("scoring_choice.txt", "w") as file:
-            file.write(st.session_state.selected_scoring)
+            file.write(st.session_state.selected_scoring)  # Grava a escolha no ficheiro
         st.success("Escolha salva com sucesso!")
 
 
-# Função para remover features correlacionadas
+# **Função para remover features altamente correlacionadas**
 def remove_highly_correlated_features(df, threshold=0.9):
     """
-    Remove features altamente correlacionadas.
-    
+    Remove colunas do DataFrame que apresentam uma correlação superior a um determinado limiar.
+
     Parâmetros:
-    - df: DataFrame de entrada
-    - threshold: Limiar de correlação (padrão 0.9)
-    
+    - df (DataFrame): Conjunto de dados de entrada.
+    - threshold (float): Limiar de correlação acima do qual as colunas serão removidas (padrão: 0.9).
+
     Retorna:
-    - DataFrame com features não correlacionadas
+    - DataFrame sem as colunas altamente correlacionadas.
     """
-    # Calcular matriz de correlação absoluta
-    corr_matrix = df.corr().abs()
-    
-    # Obter a matriz triangular superior
+    # **1. Calcular a matriz de correlação absoluta**
+    corr_matrix = df.corr().abs()  # Calcula os coeficientes de correlação absolutos
+
+    # **2. Criar uma matriz triangular superior**
+    # Esta matriz exclui a diagonal principal e os valores abaixo dela, para evitar redundâncias
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    
-    # Identificar colunas a serem removidas
+
+    # **3. Identificar as colunas a serem removidas**
+    # Se qualquer valor na matriz for superior ao threshold, removemos a coluna correspondente
     to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
-    
-    # Informar quais features serão removidas (opcional)
+
+    # **4. Informar ao utilizador quais colunas foram removidas**
     if to_drop:
         st.info(f"Features removidas por alta correlação: {to_drop}")
-    
-    # Retornar DataFrame sem as features correlacionadas
+
+    # **5. Retornar o DataFrame sem as colunas altamente correlacionadas**
     return df.drop(columns=to_drop)
 
 
