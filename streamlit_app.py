@@ -2072,27 +2072,54 @@ def get_default_param_grid(model_name):
     else:
         return {}  # Se o modelo não for reconhecido, retorna um dicionário vazio
 
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAÇÃO MANUAL DOS PARÂMETROS DOS MODELOS
+# -------------------------------------
+
+import streamlit as st
+import json
+
 def configure_manual_params(model_key, param_grid, manual_params):
     """
-    Configura manualmente os parâmetros para o modelo selecionado com intervalos personalizados exibidos.
+    Permite a configuração manual dos hiperparâmetros para o modelo selecionado, 
+    exibindo intervalos personalizados para os parâmetros numéricos.
+
+    Parâmetros:
+    - model_key: Nome do modelo a ser ajustado.
+    - param_grid: Dicionário com os hiperparâmetros e opções disponíveis.
+    - manual_params: Dicionário onde os valores dos hiperparâmetros serão armazenados.
+
+    Retorno:
+    - manual_params atualizado com os valores configurados pelo utilizador.
     """
+
     st.write(f"Configurações manuais para o modelo: {model_key}")
 
-    # **Limpar parâmetros inválidos no estado global ANTES de criar os widgets**
-    if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
-        del st.session_state['manual_params']['gamma']  # Remove 'gamma' do estado global
+    # -------------------------------------
+    # 📌 Limpar Parâmetros Inválidos no Estado Global
+    # -------------------------------------
 
-    # Intervalos específicos para parâmetros
+    # Remover 'gamma' do estado global se ele estiver presente
+    if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
+        del st.session_state['manual_params']['gamma']
+
+    # -------------------------------------
+    # 📌 Definição de Intervalos Personalizados para Parâmetros Numéricos
+    # -------------------------------------
+
     param_ranges = {
-        'C': {'min': 0.1, 'max': 100.0, 'step': 0.1, 'default': 1.0},
-        'epsilon': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
-        'gamma': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
-        'degree': {'min': 1, 'max': 5, 'step': 1, 'default': 3},
+        'C': {'min': 0.1, 'max': 100.0, 'step': 0.1, 'default': 1.0},  # Controle de penalização do erro
+        'epsilon': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},  # Tolerância ao erro em SVR
+        'gamma': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},  # Parâmetro do kernel 'rbf'
+        'degree': {'min': 1, 'max': 5, 'step': 1, 'default': 3},  # Apenas para kernel 'poly'
     }
 
-    # Criar widgets para parâmetros
+    # -------------------------------------
+    # 📌 Criar Widgets para Configuração de Parâmetros
+    # -------------------------------------
+
     for param in param_grid:
-        # Parâmetros categóricos
+        # Se o parâmetro for categórico (exemplo: 'kernel', 'weights')
         if isinstance(param_grid[param][0], str):
             manual_params[param] = st.selectbox(
                 f"{param} (Opções: {', '.join(param_grid[param])}):",
@@ -2100,27 +2127,29 @@ def configure_manual_params(model_key, param_grid, manual_params):
                 index=0,
                 key=f"{model_key}_{param}"
             )
-        # Parâmetros numéricos
+
+        # Se o parâmetro for numérico (inteiro ou float)
         elif isinstance(param_grid[param][0], (int, float)):
             param_type = float if any(isinstance(x, float) for x in param_grid[param]) else int
 
-            # Verificar se existe intervalo personalizado
+            # Verificar se o parâmetro tem um intervalo personalizado definido
             if param in param_ranges:
                 config = param_ranges[param]
 
-                # Mostrar intervalo aceito como dica para o utilizador
+                # Exibir informação sobre o intervalo aceito
                 st.write(f"**{param}** (Intervalo: {config['min']} a {config['max']})")
 
-                # Configuração interativa
-                if param == 'max_depth':  # Verifica se o parâmetro é 'max_depth'
+                # Se for 'max_depth' (pode ser `None`), criar um selectbox
+                if param == 'max_depth':
                     manual_params[param] = st.selectbox(
                         f"{param}:",
-                        options=[None] + list(range(1, 21)),  # Inclusão de None
+                        options=[None] + list(range(1, 21)),  # Permite selecionar `None`
                         index=0 if config['default'] is None else list(range(1, 21)).index(config['default']),
                         key=f"{model_key}_{param}"
                     )
+
                 else:
-                    # Para outros parâmetros numéricos
+                    # Criar um input numérico para outros parâmetros
                     manual_params[param] = st.number_input(
                         f"{param}:",
                         min_value=config['min'],
@@ -2130,7 +2159,11 @@ def configure_manual_params(model_key, param_grid, manual_params):
                         key=f"{model_key}_{param}"
                     )
 
-    # **Configuração dinâmica para 'gamma' com base no kernel**
+    # -------------------------------------
+    # 📌 Configuração Dinâmica do Parâmetro 'gamma'
+    # -------------------------------------
+
+    # O parâmetro 'gamma' só deve ser configurado se o kernel for 'rbf'
     if 'kernel' in manual_params and manual_params['kernel'] == 'rbf':
         config = param_ranges['gamma']
         st.write(f"**gamma** (Intervalo: {config['min']} a {config['max']})")
@@ -2143,90 +2176,150 @@ def configure_manual_params(model_key, param_grid, manual_params):
             key=f"{model_key}_gamma"
         )
     else:
-        # **Remover 'gamma' do manual_params e do estado global se o kernel não for 'rbf'**
+        # Se o kernel não for 'rbf', remover 'gamma' do estado global e do dicionário de parâmetros
         manual_params.pop('gamma', None)
         if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
-            del st.session_state['manual_params']['gamma']  # Remove também do estado global
+            del st.session_state['manual_params']['gamma']
 
-    # Atualizar estado global com os parâmetros finais
+    # -------------------------------------
+    # 📌 Atualizar Estado Global com Parâmetros Configurados
+    # -------------------------------------
+
     st.session_state['manual_params'] = manual_params
-    st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)
+    st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)  # Armazena como JSON formatado
 
-    # Diagnóstico: Exibir parâmetros salvos
+    # Exibir os parâmetros configurados
     st.write("Parâmetros manuais salvos:", st.session_state['manual_params'])
 
     return manual_params
 
+# -------------------------------------
+# 📌 DICIONÁRIO DE PARÂMETROS VÁLIDOS PARA CADA MODELO
+# -------------------------------------
 
-
-
-# Dicionário que mapeia modelos aos seus parâmetros válidos
 VALID_PARAMS = {
-    "Random Forest": ["n_estimators", "max_depth"],
+    "Random Forest": ["n_estimators", "max_depth"],  # Ajustáveis para Random Forest
     "Support Vector Classification (SVC)": ["C", "kernel", "gamma"],  # Agora inclui "gamma"
-    "K-Nearest Neighbors (KNN)": ["n_neighbors", "weights"],
+    "K-Nearest Neighbors (KNN)": ["n_neighbors", "weights"],  # Número de vizinhos e peso das distâncias
     "Regressão Linear Simples (RLS)": [],  # Sem hiperparâmetros ajustáveis
-    "Regressão por Vetores de Suporte (SVR)": ["C", "epsilon", "kernel"],  # Parâmetros ajustáveis para SVR
+    "Regressão por Vetores de Suporte (SVR)": ["C", "epsilon", "kernel"],  # Hiperparâmetros típicos do SVR
 }
 
 
-# Função para configurar a validação cruzada com base na escolha do utilizador
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAR A VALIDAÇÃO CRUZADA COM BASE NA ESCOLHA DO UTILIZADOR
+# -------------------------------------
+
 def get_cv_strategy(cv_choice, X_train, y_train):
+    """
+    Retorna a estratégia de validação cruzada com base na escolha do utilizador.
+
+    Parâmetros:
+    - cv_choice: Tipo de validação cruzada selecionado pelo utilizador.
+    - X_train: Dados de treino.
+    - y_train: Labels do conjunto de treino.
+
+    Retorno:
+    - Objeto da estratégia de validação cruzada correspondente.
+    """
+    
     if cv_choice == "K-Fold":
-        return KFold(n_splits=5, shuffle=True, random_state=42)
+        return KFold(n_splits=5, shuffle=True, random_state=42)  # Divide os dados em 5 partes aleatórias
+
     elif cv_choice == "Leave-One-Out":
-        return LeaveOneOut()
+        return LeaveOneOut()  # Usa cada amostra individualmente como conjunto de teste
+
     elif cv_choice == "Divisão em Treino e Teste":
-        # Exemplo de divisão simples em treino e teste
+        # Divide os dados de treino em 70% treino e 30% teste
         return train_test_split(X_train, y_train, test_size=0.3, random_state=42)
+
     elif cv_choice == "Holdout":
-        # Pode ser uma abordagem similar ao treino-teste com outro conjunto
+        # Funciona de forma semelhante ao treino-teste, com um conjunto adicional
         return train_test_split(X_train, y_train, test_size=0.3, random_state=42)
+
     else:
-        return KFold(n_splits=5, shuffle=True, random_state=42)  # Default é K-Fold
+        # Se a escolha for inválida, usa K-Fold como padrão
+        return KFold(n_splits=5, shuffle=True, random_state=42)
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAR MANUALMENTE O SVR (SUPPORT VECTOR REGRESSION)
+# -------------------------------------
 
 def configure_svr(model_key, manual_params):
-    st.write("Configuração de parâmetros para Support Vector Regression (SVR)")
-    
-    # Configurar parâmetros comuns
-    c = st.number_input("Parâmetro C (Regularização)", min_value=0.1, max_value=100.0, step=0.1, value=1.0)
-    epsilon = st.number_input("Parâmetro epsilon", min_value=0.0, max_value=1.0, step=0.1, value=0.1)
-    kernel = st.selectbox("Kernel", options=["linear", "rbf", "poly", "sigmoid"], index=0)
+    """
+    Configuração manual dos parâmetros para o modelo Support Vector Regression (SVR).
 
-    # Salvar os valores no dicionário de parâmetros
+    Parâmetros:
+    - model_key: Nome do modelo (SVR).
+    - manual_params: Dicionário para armazenar os hiperparâmetros configurados pelo utilizador.
+
+    Retorno:
+    - Dicionário manual_params atualizado com os valores escolhidos pelo utilizador.
+    """
+    
+    st.write("Configuração de parâmetros para Support Vector Regression (SVR)")
+
+    # Configuração dos hiperparâmetros principais
+    c = st.number_input(
+        "Parâmetro C (Regularização)", min_value=0.1, max_value=100.0, step=0.1, value=1.0
+    )
+    epsilon = st.number_input(
+        "Parâmetro epsilon", min_value=0.0, max_value=1.0, step=0.1, value=0.1
+    )
+    kernel = st.selectbox(
+        "Escolha o kernel", options=["linear", "rbf", "poly", "sigmoid"], index=0
+    )
+
+    # Guardar os valores no dicionário de parâmetros
     manual_params['C'] = c
     manual_params['epsilon'] = epsilon
     manual_params['kernel'] = kernel
 
-    # Configuração adicional para kernels específicos
+    # Configuração extra para o kernel 'rbf'
     if kernel == "rbf":
-        gamma = st.number_input("Parâmetro gamma", min_value=0.0, max_value=1.0, step=0.1, value=0.1)
+        gamma = st.number_input(
+            "Parâmetro gamma", min_value=0.0, max_value=1.0, step=0.1, value=0.1
+        )
         manual_params['gamma'] = gamma
 
     return manual_params
 
-def configure_svc(model_key, manual_params):
-    """Configura os parâmetros para o modelo SVC."""
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAR MANUALMENTE O SVC (SUPPORT VECTOR CLASSIFICATION)
+# -------------------------------------
 
-    # Diagnóstico: Mostrar parâmetros antes da seleção manual
+def configure_svc(model_key, manual_params):
+    """
+    Configuração manual dos parâmetros para o modelo Support Vector Classification (SVC).
+
+    Parâmetros:
+    - model_key: Nome do modelo (SVC).
+    - manual_params: Dicionário para armazenar os hiperparâmetros configurados pelo utilizador.
+
+    Retorno:
+    - Dicionário manual_params atualizado com os valores escolhidos pelo utilizador.
+    """
+
+    # Exibir o estado inicial dos parâmetros (para depuração)
     st.write("Estado inicial dos parâmetros:", st.session_state.get('manual_params', {}))
 
-    # Seleção do kernel
+    # Seleção do tipo de kernel
     kernel_value = st.selectbox(
         "Escolha o valor para 'kernel'",
-        options=["linear", "rbf"],
+        options=["linear", "rbf"],  # Opções disponíveis
         index=0,  # Define 'linear' como padrão
         key="kernel_selectbox"
     )
 
-    # Configurar 'C' (sempre exibido)
+    # Definição do valor de 'C' (Parâmetro de regularização)
     C_value = st.number_input(
         "Defina o valor para 'C'",
         min_value=0.01, step=0.01, value=1.0,
         key="C_input"
     )
 
-    # Inicializa manual_params com 'C' e 'kernel'
+    # Inicializar manual_params com os valores escolhidos
     manual_params = {
         "C": C_value,
         "kernel": kernel_value
@@ -2236,281 +2329,409 @@ def configure_svc(model_key, manual_params):
     if kernel_value == "rbf":
         gamma_value = st.selectbox(
             "Escolha o valor para 'gamma'",
-            options=["scale", "auto"],
+            options=["scale", "auto"],  # Opções disponíveis
             index=0,
             key="gamma_selectbox"
         )
-        manual_params["gamma"] = gamma_value  # Adiciona gamma se necessário
+        manual_params["gamma"] = gamma_value  # Adiciona 'gamma' se necessário
+
     else:
         # **Remover 'gamma' se o kernel for 'linear'**
         # Remover do manual_params local
         manual_params.pop('gamma', None)
-        # Remover do estado global
+        
+        # Remover do estado global (caso tenha sido armazenado anteriormente)
         if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
             del st.session_state['manual_params']['gamma']  # Remove globalmente
-        if 'best_params_str' in st.session_state:  # Remove dos parâmetros salvos
+            
+        if 'best_params_str' in st.session_state:  # Remove dos parâmetros guardados
             st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)
 
-    # Diagnóstico: Mostrar parâmetros após a seleção manual
+    # Exibir os parâmetros atualizados após a seleção manual
     st.write("Parâmetros atualizados:", manual_params)
 
-    # Salvar no estado global apenas parâmetros válidos
+    # **Guardar os parâmetros configurados no estado global**
     st.session_state['manual_params'] = manual_params
     st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)
 
-    # Exibir os parâmetros salvos para depuração
+    # Exibir os parâmetros guardados para depuração
     st.write("Parâmetros manuais salvos:", st.session_state['manual_params'])
 
     return manual_params
 
+
 import pickle
 import os
 
+# -------------------------------------
+# 📌 FUNÇÕES PARA GUARDAR E CARREGAR OS MELHORES PARÂMETROS
+# -------------------------------------
+
 def save_best_params(params):
-    """Salva os melhores parâmetros encontrados em um arquivo."""
+    """
+    Guarda os melhores hiperparâmetros encontrados num ficheiro pickle.
+
+    Parâmetros:
+    - params (dict): Dicionário contendo os melhores hiperparâmetros.
+    
+    Retorno:
+    - Nenhum (apenas salva os dados).
+    """
     with open('best_params.pkl', 'wb') as f:
         pickle.dump(params, f)
 
 def load_best_params():
-    """Carrega os melhores parâmetros salvos, se existirem."""
+    """
+    Carrega os melhores hiperparâmetros previamente guardados, se existirem.
+
+    Retorno:
+    - dict: Dicionário contendo os melhores hiperparâmetros, ou None se não existirem parâmetros guardados.
+    """
     if os.path.exists('best_params.pkl'):
         with open('best_params.pkl', 'rb') as f:
             return pickle.load(f)
     return None
 
-# Treina um modelo de Regressão por Vetores de Suporte (SVR) com GridSearch opcional
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA TREINAR UM MODELO SVR COM OU SEM GRID SEARCH
+# -------------------------------------
+
 def train_svr_with_gridsearch(X_train, y_train, X_test, y_test, use_grid_search=True, manual_params=None):
     """
-    Train Support Vector Regression (SVR) model with optional GridSearchCV
-    
-    Parameters:
+    Treina um modelo de Support Vector Regression (SVR) com ou sem otimização de hiperparâmetros via GridSearchCV.
+
+    Parâmetros:
     -----------
-    X_train : array-like
-        Training feature matrix
-    y_train : array-like
-        Training target vector
-    X_test : array-like
-        Testing feature matrix
-    y_test : array-like
-        Testing target vector
-    use_grid_search : bool, optional (default=True)
-        Whether to use GridSearchCV for hyperparameter tuning
-    manual_params : dict, optional
-        Manually specified parameters to override GridSearch
-    
-    Returns:
+    - X_train : array-like
+        Matriz de features do conjunto de treino.
+    - y_train : array-like
+        Vetor de rótulos do conjunto de treino.
+    - X_test : array-like
+        Matriz de features do conjunto de teste.
+    - y_test : array-like
+        Vetor de rótulos do conjunto de teste.
+    - use_grid_search : bool (padrão=True)
+        Define se será utilizada a busca de hiperparâmetros via GridSearchCV.
+    - manual_params : dict (opcional)
+        Parâmetros especificados manualmente para substituir o GridSearch.
+
+    Retorno:
     --------
-    dict
-        Dictionary containing model performance metrics and details
+    - dict:
+        Dicionário contendo as métricas de desempenho do modelo treinado e os melhores hiperparâmetros encontrados.
     """
     try:
-        # Standardize the features
+        # -------------------------------------
+        # 📌 1. Padronizar os dados de entrada (necessário para SVR)
+        # -------------------------------------
         scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
-        
-        # Base SVR model
+        X_train_scaled = scaler.fit_transform(X_train)  # Ajusta e transforma os dados de treino
+        X_test_scaled = scaler.transform(X_test)  # Apenas transforma os dados de teste com os mesmos parâmetros
+
+        # -------------------------------------
+        # 📌 2. Definir o modelo base SVR
+        # -------------------------------------
         svr = SVR()
-        
-        # Default parameter grid for SVR
+
+        # -------------------------------------
+        # 📌 3. Definir o grid de hiperparâmetros padrão para SVR
+        # -------------------------------------
         param_grid = {
-            'C': [0.1, 1, 10, 100],
-            'epsilon': [0.01, 0.1, 0.2],
-            'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']
+            'C': [0.1, 1, 10, 100],  # Parâmetro de regularização
+            'epsilon': [0.01, 0.1, 0.2],  # Margem de erro permitida
+            'kernel': ['linear', 'rbf'],  # Tipos de kernel suportados
+            'gamma': ['scale', 'auto']  # Ajuste da largura da função kernel
         }
-        
-        # If manual parameters are provided, update the param_grid
+
+        # Se o utilizador forneceu parâmetros manuais, substituir os valores no grid
         if manual_params:
             for param, value in manual_params.items():
-                # Ensure the value is a list for GridSearchCV
+                # Garante que o valor seja uma lista para compatibilidade com o GridSearchCV
                 param_grid[param] = [value] if not isinstance(value, list) else value
-        
-        # Cross-validation strategy
-        cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-        
+
+        # -------------------------------------
+        # 📌 4. Definir a estratégia de validação cruzada
+        # -------------------------------------
+        cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)  # Divide os dados em 5 partes
+
+        # -------------------------------------
+        # 📌 5. Escolher entre GridSearchCV ou parâmetros manuais
+        # -------------------------------------
         if use_grid_search:
-            # Perform GridSearchCV
+            # Executar GridSearchCV para encontrar os melhores hiperparâmetros
             grid_search = GridSearchCV(
                 estimator=svr, 
                 param_grid=param_grid, 
                 cv=cv_strategy, 
-                scoring='neg_mean_squared_error', 
-                n_jobs=-1
+                scoring='neg_mean_squared_error',  # Critério de avaliação (erro quadrático médio negativo)
+                n_jobs=-1  # Utilizar todos os processadores disponíveis
             )
             grid_search.fit(X_train_scaled, y_train)
-            
-            # Best model from GridSearch
+
+            # Melhor modelo encontrado pelo GridSearch
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
+        
         else:
-            # Use manual or default parameters
+            # Aplicar parâmetros manuais, caso existam
             if manual_params:
                 svr.set_params(**manual_params)
-            
+
+            # Treinar o modelo diretamente sem GridSearch
             best_model = svr.fit(X_train_scaled, y_train)
             best_params = manual_params or {}
-        
-        # Make predictions
+
+        # -------------------------------------
+        # 📌 6. Fazer previsões no conjunto de teste
+        # -------------------------------------
         y_pred = best_model.predict(X_test_scaled)
-        
-        # Calculate metrics
-        mse = mean_squared_error(y_test, y_pred)
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        
-        # Prepare metrics dictionary
+
+        # -------------------------------------
+        # 📌 7. Calcular métricas de desempenho
+        # -------------------------------------
+        mse = mean_squared_error(y_test, y_pred)  # Erro Quadrático Médio
+        mae = mean_absolute_error(y_test, y_pred)  # Erro Absoluto Médio
+        r2 = r2_score(y_test, y_pred)  # R² Score (coeficiente de determinação)
+
+        # -------------------------------------
+        # 📌 8. Criar um dicionário com as métricas do modelo
+        # -------------------------------------
         metrics = {
             "Modelo": "Support Vector Regression (SVR)",
             "R²": r2,
             "MAE": mae,
             "MSE": mse,
-            "Best Parameters": best_params
+            "Best Parameters": best_params  # Hiperparâmetros utilizados
         }
-        
-        return metrics
+
+        return metrics  # Retorna as métricas para análise
     
     except Exception as e:
-        st.error(f"Erro ao treinar o modelo SVR: {str(e)}")
+        st.error(f"Erro ao treinar o modelo SVR: {str(e)}")  # Exibir erro no Streamlit caso ocorra
         return None
 
+
 def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_search, manual_params=None, cv_choice="K-Fold"):
+    """
+    Treina um modelo de Machine Learning com ou sem otimização de hiperparâmetros via GridSearchCV.
+
+    Parâmetros:
+    -----------
+    - model : objeto do modelo
+        Modelo de Machine Learning a ser treinado (ex: RandomForest, SVC, SVR, etc.).
+    - param_grid : dict
+        Dicionário contendo os hiperparâmetros a serem ajustados.
+    - X_train : array-like
+        Matriz de features do conjunto de treino.
+    - y_train : array-like
+        Vetor de rótulos do conjunto de treino.
+    - use_grid_search : bool
+        Define se será utilizada a busca de hiperparâmetros via GridSearchCV.
+    - manual_params : dict (opcional)
+        Parâmetros especificados manualmente para substituir o GridSearch.
+    - cv_choice : str (padrão="K-Fold")
+        Método de validação cruzada a ser utilizado.
+
+    Retorno:
+    --------
+    - best_model : objeto do modelo treinado
+        Melhor modelo encontrado após o treino.
+    - best_params : dict
+        Dicionário com os melhores hiperparâmetros utilizados.
+    """
     try:
-        # Inicializar parâmetros manuais como vazio, se não fornecido
+        # -------------------------------------
+        # 📌 1. Inicializar parâmetros manuais, caso não tenham sido fornecidos
+        # -------------------------------------
         if manual_params is None:
             manual_params = {}
 
         # Obter o nome do modelo
         model_name = type(model).__name__
 
-        # Logs para diagnóstico - Parâmetros no estado global antes do treino
-        st.write("Parâmetros no estado global antes do treino:")
-        st.write("best_params:", st.session_state.get('best_params', {}))
-        st.write("manual_params:", st.session_state.get('manual_params', {}))
+        # Diagnóstico: Exibir parâmetros no estado global antes do treino
+        st.write("🔍 Parâmetros no estado global antes do treino:")
+        st.write("✅ best_params:", st.session_state.get('best_params', {}))
+        st.write("✅ manual_params:", st.session_state.get('manual_params', {}))
 
-        # Carregar parâmetros salvos do estado global
+        # -------------------------------------
+        # 📌 2. Carregar parâmetros previamente guardados, se existirem
+        # -------------------------------------
         saved_params = st.session_state.get('best_params', None)
 
-        # Aplicar parâmetros salvos, se existirem e não usar GridSearch
+        # Se houver parâmetros guardados e GridSearch não for utilizado, aplicar os parâmetros salvos
         if saved_params and not use_grid_search:
-            st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
+            st.info(f"ℹ️ Aplicando parâmetros salvos ao modelo: {saved_params}")
             model.set_params(**saved_params)
 
-        # Remover 'gamma' se o kernel for 'linear'
+        # -------------------------------------
+        # 📌 3. Ajustar manualmente parâmetros incompatíveis
+        # -------------------------------------
+        # Se o modelo for SVM e o kernel for 'linear', o parâmetro 'gamma' não é necessário
         if manual_params.get("kernel") == "linear" and "gamma" in manual_params:
             del manual_params["gamma"]
+
+            # Remover 'gamma' do estado global, se presente
             if 'gamma' in st.session_state.get('manual_params', {}):
                 del st.session_state['manual_params']['gamma']
 
-        # Se usar GridSearch
+        # -------------------------------------
+        # 📌 4. Treinar modelo com GridSearchCV (se ativado)
+        # -------------------------------------
         if use_grid_search:
-            # Atualizar grid com parâmetros manuais fornecidos
+            # Atualizar o grid de hiperparâmetros com os valores fornecidos manualmente
             if manual_params:
                 for param, value in manual_params.items():
-                    if not isinstance(value, list):
+                    if not isinstance(value, list):  # Garantir que o valor seja uma lista para compatibilidade com GridSearch
                         manual_params[param] = [value]
                 param_grid.update(manual_params)
 
-            # Configurar validação cruzada
+            # Definir estratégia de validação cruzada
             cv_strategy = get_cv_strategy(cv_choice, X_train, y_train)
+
+            # Definir métrica de avaliação (R² para regressão, accuracy para classificação)
             scoring = 'r2' if model_name == "SVR" else 'accuracy'
 
-            # Treinar com GridSearch
-            grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_strategy, scoring=scoring, n_jobs=-1)
+            # Configurar GridSearchCV para encontrar os melhores hiperparâmetros
+            grid_search = GridSearchCV(
+                estimator=model, 
+                param_grid=param_grid, 
+                cv=cv_strategy, 
+                scoring=scoring, 
+                n_jobs=-1  # Utilizar todos os processadores disponíveis
+            )
             grid_search.fit(X_train, y_train)
 
-            # Melhor modelo e parâmetros
+            # Extrair melhor modelo e hiperparâmetros encontrados
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
+
+            # Guardar os melhores parâmetros no estado global
             st.session_state['best_params'] = best_params
-            st.success(f"Melhores parâmetros encontrados: {best_params}")
+            st.success(f"🎯 Melhores parâmetros encontrados: {best_params}")
 
             return best_model, best_params
 
+        # -------------------------------------
+        # 📌 5. Treinar modelo sem GridSearch (caso desativado)
+        # -------------------------------------
         else:
-            # Se não usar GridSearch, aplicar manualmente os parâmetros
+            # Filtrar apenas os parâmetros válidos para o modelo
             valid_params = model.get_params().keys()
             manual_params = {k: v for k, v in manual_params.items() if k in valid_params}
+
+            # Aplicar os parâmetros escolhidos manualmente
             model.set_params(**manual_params)
 
-            # Treinar diretamente
+            # Treinar o modelo diretamente sem GridSearch
             model.fit(X_train, y_train)
 
-            # Salvar parâmetros manuais no estado global
+            # Guardar os parâmetros manuais no estado global
             st.session_state['manual_params'] = manual_params
-            st.success(f"Parâmetros manuais salvos: {manual_params}")
+            st.success(f"📝 Parâmetros manuais salvos: {manual_params}")
 
             return model, manual_params
 
+    # -------------------------------------
+    # 📌 6. Capturar e exibir erros, caso ocorram
+    # -------------------------------------
     except Exception as e:
-        st.error(f"Ocorreu um erro ao treinar o modelo: {str(e)}")
+        st.error(f"❌ Ocorreu um erro ao treinar o modelo: {str(e)}")
         return None, None
+
 
 # Função para calcular o Gap Statistic para o Clustering Hierárquico
 def calculate_gap_statistic_hierarchical(X, n_clusters_range, n_ref=10):
     """
-    Calcula o Gap Statistic para o AgglomerativeClustering.
-    
+    Calcula a estatística de Gap (Gap Statistic) para o algoritmo AgglomerativeClustering.
+
     Parâmetros:
-        X (ndarray): Dados de entrada (n_samples x n_features).
-        n_clusters_range (tuple): Intervalo de números de clusters para avaliar.
-        n_ref (int): Número de amostras de referência aleatórias a serem geradas.
-    
-    Retorna:
-        gap_scores (list): Gap statistics para cada número de clusters.
+    -----------
+    - X (ndarray): Dados de entrada no formato (n_samples x n_features).
+    - n_clusters_range (tuple): Intervalo de números de clusters a serem avaliados, ex: (2, 10).
+    - n_ref (int, padrão=10): Número de amostras de referência aleatórias geradas para cálculo do Gap.
+
+    Retorno:
+    --------
+    - gap_scores (list): Lista com os valores de Gap Statistic para cada número de clusters avaliado.
     """
-    # Normalizar os dados
+    # -------------------------------------
+    # 📌 1. Normalizar os dados antes do clustering
+    # -------------------------------------
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    
-    # Armazenar os Gap Statistic Scores
+
+    # Lista para armazenar os valores de Gap Statistic
     gap_scores = []
-    
+
+    # -------------------------------------
+    # 📌 2. Avaliar diferentes números de clusters
+    # -------------------------------------
     for n_clusters in range(n_clusters_range[0], n_clusters_range[1] + 1):
-        # Ajustar o modelo AgglomerativeClustering aos dados reais
+        # **Ajustar o modelo AgglomerativeClustering aos dados reais**
         model = AgglomerativeClustering(n_clusters=n_clusters)
         model.fit(X_scaled)
         labels = model.labels_
-        
-        # Calcular a soma das distâncias dos pontos aos seus respectivos clusters
-        intra_cluster_dist = sum([np.sum(np.linalg.norm(X_scaled[labels == i] - X_scaled[labels == i].mean(axis=0), axis=1)) for i in range(n_clusters)])
-        
-        # Gerar amostras de referência aleatórias e calcular as distâncias dentro dos clusters aleatórios
+
+        # **Calcular a soma das distâncias intra-cluster**
+        intra_cluster_dist = sum([
+            np.sum(np.linalg.norm(X_scaled[labels == i] - X_scaled[labels == i].mean(axis=0), axis=1))
+            for i in range(n_clusters)
+        ])
+
+        # -------------------------------------
+        # 📌 3. Criar conjuntos de dados de referência aleatórios
+        # -------------------------------------
         ref_inertias = []
         for _ in range(n_ref):
+            # Gerar dados aleatórios no mesmo espaço dimensional
             random_data = np.random.random_sample(size=X_scaled.shape)
+
+            # Aplicar AgglomerativeClustering nos dados aleatórios
             random_model = AgglomerativeClustering(n_clusters=n_clusters)
             random_model.fit(random_data)
             ref_labels = random_model.labels_
-            ref_inertia = sum([np.sum(np.linalg.norm(random_data[ref_labels == i] - random_data[ref_labels == i].mean(axis=0), axis=1)) for i in range(n_clusters)])
+
+            # **Calcular a soma das distâncias intra-cluster para os dados aleatórios**
+            ref_inertia = sum([
+                np.sum(np.linalg.norm(random_data[ref_labels == i] - random_data[ref_labels == i].mean(axis=0), axis=1))
+                for i in range(n_clusters)
+            ])
             ref_inertias.append(ref_inertia)
-        
-        # Calcular a média e o desvio padrão das inércias nos dados aleatórios
+
+        # -------------------------------------
+        # 📌 4. Calcular a estatística de Gap
+        # -------------------------------------
+        # Média e desvio padrão das inércias dos clusters aleatórios
         ref_inertia_mean = np.mean(ref_inertias)
         ref_inertia_std = np.std(ref_inertias)
-        
+
         # Gap Statistic: diferença entre a inércia real e a média das inércias aleatórias
         gap = np.log(ref_inertia_mean) - np.log(intra_cluster_dist)
         gap_scores.append(gap)
-    
-    return gap_scores
 
+    return gap_scores
 
 
 # Função para a seleção e treino de modelos
 def model_selection():
-    st.subheader("Seleção e treino de Modelos")
+    """
+    Esta função permite ao utilizador selecionar e treinar um modelo de Machine Learning 
+    através da interface do Streamlit.
+    """
+    st.subheader("Seleção e Treino de Modelos")
 
-    # Verificar se os dados estão disponíveis
+    # 📌 1. Verificação se os dados estão disponíveis
     if 'data' not in st.session_state or st.session_state.data is None:
         st.error("Dados não encontrados. Por favor, carregue os dados primeiro.")
         return
 
-    # Usa diretamente st.session_state.data
+    # Obter os dados e as colunas disponíveis
     data = st.session_state.data
     columns = data.columns.tolist()
-    
-    # Inicializar variáveis de estado se não estiverem presentes
+
+    # 📌 2. Inicializar variáveis de estado caso não existam
     if 'target_column' not in st.session_state:
         st.session_state.target_column = None
     if 'target_column_confirmed' not in st.session_state:
@@ -2534,11 +2755,10 @@ def model_selection():
     if 'feature_selection_done' not in st.session_state:
         st.session_state.feature_selection_done = False
 
-    # Configurações
+    # 📌 3. Configurações gerais
     st.write("### Configurações")
 
-
-    # 1. Escolha do Tipo de Modelo
+    # 📌 4. Escolha do Tipo de Modelo
     if not st.session_state.model_type_confirmed:
         st.write("Escolha o Tipo de Modelo")
         model_types = ["Classificação", "Regressão", "Clustering"]
@@ -2548,11 +2768,11 @@ def model_selection():
             st.session_state.model_type_confirmed = True
             st.success("Tipo de modelo confirmado!")
 
-    # 2. Escolha do Modelo Específico
+    # 📌 5. Escolha do Modelo Específico
     if st.session_state.model_type_confirmed and not st.session_state.selected_model_name:
         st.write("Selecione o(s) Modelo(s)")
 
-        # Modelos disponíveis com base no tipo selecionado
+        # Dicionário com os modelos disponíveis para cada tipo
         if st.session_state.model_type == "Classificação":
             models = {
                 "Support Vector Classification (SVC)": SVC(),
@@ -2570,21 +2790,16 @@ def model_selection():
                 "Clustering Hierárquico": AgglomerativeClustering(linkage='ward'),
             }
 
-        # Armazena os modelos no session_state para uso posterior
+        # Armazena os modelos no estado da sessão para uso posterior
         st.session_state.models = models
-        
 
-        # Condicional para exibir ou não a opção "Treinar todos os modelos"
-        if st.session_state.model_type != "Clustering":
-            model_options = list(models.keys()) 
-        else:
-            model_options = list(models.keys())  # Apenas os modelos de clustering
+        # 📌 6. Criar lista de opções de modelos disponíveis
+        model_options = list(models.keys())  # Lista com os nomes dos modelos
 
-        default_model_name = st.session_state["model_name"]
-        if default_model_name not in model_options:
-            default_model_name = model_options[0]  # Corrigir para um valor válido
+        # Definir o modelo predefinido para evitar erro de índice
+        default_model_name = st.session_state.get("model_name", model_options[0])
 
-        # Configurar o selectbox
+        # Criar menu de seleção do modelo
         model_name = st.selectbox(
             "Selecione o modelo", 
             options=model_options, 
@@ -2592,11 +2807,11 @@ def model_selection():
             index=model_options.index(default_model_name)
         )
 
-        # Atualizar o estado do modelo selecionado
+        # Atualizar o estado global do modelo selecionado
         st.session_state["model_name"] = model_name
         st.session_state.model_name = model_name
 
-        # Botão para confirmar o modelo
+        # 📌 7. Botão para confirmar o modelo selecionado
         if st.button("Confirmar Modelo"):
             if model_name:  # Verifica se um modelo foi selecionado
                 st.session_state.selected_model_name = model_name
@@ -2604,29 +2819,28 @@ def model_selection():
             else:
                 st.warning("Selecione um modelo antes de continuar.")
 
-
     # Função para a configuração de Clustering
     import pandas as pd
     from sklearn.decomposition import PCA
     import numpy as np
-
-    # Inicializar a variável `best_n_clusters_retrain` com um valor padrão
+    
+    # Inicializar a variável best_n_clusters_retrain com um valor padrão
     best_n_clusters_retrain = None
-
-    # Inicializar estados se não existirem
+    
+    # Inicializar estados se ainda não existirem
     if 'pca_configured' not in st.session_state:
         st.session_state.pca_configured = False
     if 'ready_for_clustering' not in st.session_state:
         st.session_state.ready_for_clustering = False
-
-    # Função para a configuração de Clustering
+    
+    # Verifica se o modelo selecionado é de Clustering e se há um modelo escolhido
     if st.session_state.model_type == "Clustering" and st.session_state.selected_model_name:
         st.write("### Configuração para Clustering")
-
-        # Dados categóricos codificados
+    
+        # Codificar variáveis categóricas para representação numérica
         X = pd.get_dummies(st.session_state.data)
-
-        # Padronizar os dados
+    
+        # Padronizar os dados para melhorar a eficácia dos algoritmos de clustering
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
@@ -2635,11 +2849,11 @@ def model_selection():
         if st.session_state.selected_model_name == "Clustering Hierárquico" and not st.session_state.pca_configured:
             st.write("### Redução de Dimensionalidade com PCA para Clustering Hierárquico")
             
-            # Verificar se o dataset é grande o suficiente para um aviso
+            # Verificar se o dataset é grande o suficiente para exigir PCA
             if X.shape[0] > 1000 or X.shape[1] > 10:
-                st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é necessária para Clustering Hierárquico.")
+                st.warning(f"Atenção: O seu dataset tem {X.shape[0]} registos e {X.shape[1]} dimensões. A aplicação de PCA pode ser necessária para otimizar o desempenho do Clustering Hierárquico.")
             
-            # Permitir ao utilizador escolher o número de componentes ou usar valor automático
+            # Permitir ao utilizador escolher o número de componentes ou utilizar um valor automático
             use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True, key="auto_comp_hierarch")
             
             if use_auto_components:
@@ -2648,13 +2862,13 @@ def model_selection():
                 explained_variance_ratio = pca_full.explained_variance_ratio_
                 cumulative_variance = np.cumsum(explained_variance_ratio)
                 
-                # Encontrar o número de componentes que explicam pelo menos 90% da variância
+                # Determinar o número de componentes que explicam pelo menos 90% da variância
                 n_components = np.argmax(cumulative_variance >= 0.9) + 1
                 n_components = min(n_components, 10)  # Limitar a no máximo 10 componentes
                 
                 st.write(f"Número de componentes selecionados automaticamente: {n_components} (explica aproximadamente {cumulative_variance[n_components-1]*100:.1f}% da variância)")
                 
-                # Mostrar gráfico de variância explicada
+                # Criar um gráfico para visualizar a variância explicada
                 fig, ax = plt.subplots(figsize=(8, 4))
                 ax.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='-')
                 ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variância Explicada')
@@ -2666,7 +2880,7 @@ def model_selection():
                 st.pyplot(fig)
                 plt.clf()
             else:
-                # Permitir que o utilizador escolha o número de componentes
+                # Permitir que o utilizador escolha manualmente o número de componentes
                 max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
                 n_components = st.slider("Número de componentes PCA para Hierárquico", 2, max_components, value=min(3, max_components), key="n_comp_hierarch")
             
@@ -2676,7 +2890,7 @@ def model_selection():
                 pca = PCA(n_components=n_components)
                 X_pca = pca.fit_transform(X_scaled)
                 
-                # Salvar no estado da sessão
+                # Guardar os dados transformados e as configurações no estado da sessão
                 st.session_state.X_pca = X_pca
                 st.session_state.pca_n_components = n_components
                 st.session_state.pca_configured = True
@@ -2685,11 +2899,11 @@ def model_selection():
                 
                 st.success(f"PCA configurado com sucesso! Dimensionalidade reduzida de {X_scaled.shape[1]} para {X_pca.shape[1]} componentes.")
                 
-                # Visualização 2D dos dados com PCA se tivermos pelo menos 2 componentes
+                # Visualizar os dados após a aplicação do PCA se tivermos pelo menos 2 componentes
                 if n_components >= 2:
                     st.write("### Visualização dos Dados Após PCA")
                     
-                    # Permitir que o utilizador escolha quais componentes visualizar
+                    # Permitir ao utilizador escolher os componentes a visualizar
                     available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
                     
                     component_x = st.selectbox(
@@ -2708,7 +2922,7 @@ def model_selection():
                         key="comp_y_hierarch"
                     )
                     
-                    # Criar a visualização 2D baseada nos componentes escolhidos
+                    # Criar um gráfico de dispersão com os componentes escolhidos
                     fig, ax = plt.subplots(figsize=(10, 6))
                     scatter = ax.scatter(X_pca[:, component_x], X_pca[:, component_y], alpha=0.7)
                     ax.set_xlabel(f'Componente Principal {component_x+1}', fontsize=12)
@@ -2716,7 +2930,7 @@ def model_selection():
                     ax.set_title(f'Visualização 2D dos Componentes PCA {component_x+1} e {component_y+1}', fontsize=14, fontweight='bold')
                     ax.grid(True, linestyle='--', alpha=0.7)
                     
-                    # Mostrar a variância explicada por estes componentes
+                    # Mostrar a variância explicada por cada componente escolhido
                     if hasattr(pca, 'explained_variance_ratio_'):
                         var_x = pca.explained_variance_ratio_[component_x] * 100
                         var_y = pca.explained_variance_ratio_[component_y] * 100
@@ -2726,36 +2940,36 @@ def model_selection():
                     plt.tight_layout()
                     st.pyplot(fig)
                     plt.clf()
-
-            # Botão para avançar para a configuração do clustering (fora do if anterior)
-                if st.button("Prosseguir para Clustering"):
-                    st.session_state.ready_for_clustering = True
-                    st.rerun()
-            
+    
+            # Botão para avançar para a configuração do clustering
+            if st.button("Prosseguir para Clustering"):
+                st.session_state.ready_for_clustering = True
+                st.rerun()
+           
         # ETAPA 1: Configuração do PCA para KMeans
         if st.session_state.selected_model_name == "KMeans" and not st.session_state.pca_configured:
             st.write("### Redução de Dimensionalidade com PCA")
             
-            # Verificar se o dataset é grande o suficiente para um aviso
+            # Verificar se o dataset é grande e pode beneficiar do PCA
             if X.shape[0] > 1000 or X.shape[1] > 10:
-                st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é altamente recomendada.")
-            
-            # Permitir ao utilizador escolher o número de componentes ou usar valor automático
+                st.warning(f"Atenção: O seu dataset tem {X.shape[0]} registos e {X.shape[1]} dimensões. A aplicação de PCA é altamente recomendada para melhorar a eficiência do modelo.")
+        
+            # Permitir ao utilizador escolher entre uma determinação automática ou manual do número de componentes
             use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True)
-            
+        
             if use_auto_components:
-                # Calcular o PCA para determinar a variância explicada
+                # Calcular o PCA para determinar a variância explicada por cada componente
                 pca_full = PCA().fit(X_scaled)
                 explained_variance_ratio = pca_full.explained_variance_ratio_
                 cumulative_variance = np.cumsum(explained_variance_ratio)
-                
-                # Encontrar o número de componentes que explicam pelo menos 90% da variância
+        
+                # Determinar o número de componentes necessários para explicar pelo menos 90% da variância total
                 n_components = np.argmax(cumulative_variance >= 0.9) + 1
                 n_components = min(n_components, 10)  # Limitar a no máximo 10 componentes
-                
+        
                 st.write(f"Número de componentes selecionados automaticamente: {n_components} (explica aproximadamente {cumulative_variance[n_components-1]*100:.1f}% da variância)")
                 
-                # Mostrar gráfico de variância explicada
+                # Criar um gráfico para visualizar a variância explicada pelos componentes do PCA
                 fig, ax = plt.subplots(figsize=(8, 4))
                 ax.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='-')
                 ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variância Explicada')
@@ -2767,165 +2981,177 @@ def model_selection():
                 st.pyplot(fig)
                 plt.clf()
             else:
-                # Permitir que o utilizador escolha o número de componentes
+                # Permitir ao utilizador selecionar manualmente o número de componentes a utilizar
                 max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
                 n_components = st.slider("Número de componentes PCA", 2, max_components, value=min(3, max_components))
-            
+        
             # Botão para confirmar a configuração do PCA
             if st.button("Confirmar Configuração do PCA"):
-                # Aplicar PCA com o número de componentes escolhido
+                # Aplicar o PCA com o número de componentes escolhido
                 pca = PCA(n_components=n_components)
                 X_pca = pca.fit_transform(X_scaled)
-                
-                # Salvar no estado da sessão
+        
+                # Guardar os dados transformados e as configurações no estado da sessão
                 st.session_state.X_pca = X_pca
                 st.session_state.pca_n_components = n_components
                 st.session_state.pca_configured = True
                 st.session_state.pca_model = pca
                 st.session_state.explained_variance = pca.explained_variance_ratio_
-                
+        
                 st.success(f"PCA configurado com sucesso! Dimensionalidade reduzida de {X_scaled.shape[1]} para {X_pca.shape[1]} componentes.")
-                
-                # Visualização 2D e 3D simultânea dos dados com PCA se tivermos pelo menos 2 componentes
+        
+                # Visualização 2D dos dados após PCA, caso tenhamos pelo menos 2 componentes
                 if n_components >= 2:
                     st.write("### Visualização dos Dados Após PCA")
-                    
-                    # Permitir que o utilizador escolha quais componentes visualizar
+        
+                    # Permitir ao utilizador escolher os componentes a visualizar
                     available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
-                    
+        
                     component_x = st.selectbox(
                         "Escolha o componente para o eixo X:",
                         options=list(range(available_components)),
                         format_func=lambda x: f"Componente {x+1}",
                         index=0
                     )
-                    
+        
                     component_y = st.selectbox(
                         "Escolha o componente para o eixo Y:",
                         options=list(range(available_components)),
                         format_func=lambda x: f"Componente {x+1}",
                         index=1 if available_components > 1 else 0
                     )
-                    
-                    # Criar a visualização 2D baseada nos componentes escolhidos
+        
+                    # Criar um gráfico de dispersão com os componentes escolhidos
                     fig, ax = plt.subplots(figsize=(10, 6))
                     scatter = ax.scatter(X_pca[:, component_x], X_pca[:, component_y], alpha=0.7)
                     ax.set_xlabel(f'Componente Principal {component_x+1}', fontsize=12)
                     ax.set_ylabel(f'Componente Principal {component_y+1}', fontsize=12)
                     ax.set_title(f'Visualização 2D dos Componentes PCA {component_x+1} e {component_y+1}', fontsize=14, fontweight='bold')
                     ax.grid(True, linestyle='--', alpha=0.7)
-                    
-                    # Mostrar a variância explicada por estes componentes (se disponível)
+        
+                    # Exibir a variância explicada pelos componentes selecionados, se disponível
                     if hasattr(pca, 'explained_variance_ratio_'):
                         var_x = pca.explained_variance_ratio_[component_x] * 100
                         var_y = pca.explained_variance_ratio_[component_y] * 100
                         ax.set_xlabel(f'Componente Principal {component_x+1} ({var_x:.1f}% variância)', fontsize=12)
                         ax.set_ylabel(f'Componente Principal {component_y+1} ({var_y:.1f}% variância)', fontsize=12)
-                    
+        
                     plt.tight_layout()
                     st.pyplot(fig)
                     plt.clf()
-
+        
                 # Botão para avançar para a configuração do clustering
                 if st.button("Prosseguir para Clustering"):
                     st.session_state.ready_for_clustering = True
                     st.rerun()
-        
+    
         # ETAPA 2: Configuração do Clustering (após o PCA para Hierarchical ou diretamente para K-means)
         elif st.session_state.selected_model_name == "KMeans" or (st.session_state.selected_model_name == "Clustering Hierárquico" and st.session_state.pca_configured):
-            # Escolher o intervalo de clusters (reduzido de 2-20 para 2-10 por padrão para ser menos pesado)
-            num_clusters_range = st.slider("Intervalo de clusters para explorar (para análise)", 2, 10, (2, 6))
             
-            # Preparar dados para análise
+            # Escolher o intervalo de clusters a explorar (reduzido para 2-10 por padrão para evitar processamento excessivo)
+            num_clusters_range = st.slider("Intervalo de clusters para explorar (para análise)", 2, 10, (2, 6))
+        
+            # Definir os dados de treino conforme o método de clustering escolhido
             if st.session_state.selected_model_name == "Clustering Hierárquico":
-                # Para clustering hierárquico, usar dados com PCA
+                # Se for Clustering Hierárquico, usar os dados transformados pelo PCA
                 training_data = st.session_state.X_pca
             else:
-                # Para K-means, usar dados originais
+                # Se for K-Means, utilizar os dados normalizados sem PCA
                 training_data = X_scaled
-            
-            # Opção para usar amostragem para análise mais rápida
+        
+            # Opção para utilizar amostragem, permitindo uma análise mais rápida
             use_sampling = st.checkbox("Usar amostragem dos dados para análise mais rápida", value=True)
             if use_sampling:
+                # Permitir ao utilizador selecionar o tamanho da amostra para análise
                 sample_size = st.slider("Tamanho da amostra", 
-                                    min_value=min(100, training_data.shape[0]),
-                                    max_value=min(2000, training_data.shape[0]),
-                                    value=min(1000, training_data.shape[0]))
-                # Realizar amostragem
-                np.random.seed(42)  # Para reprodutibilidade
+                                        min_value=min(100, training_data.shape[0]),
+                                        max_value=min(2000, training_data.shape[0]),
+                                        value=min(1000, training_data.shape[0]))
+                
+                # Realizar a amostragem aleatória dos dados
+                np.random.seed(42)  # Para garantir reprodutibilidade dos resultados
                 sample_indices = np.random.choice(training_data.shape[0], sample_size, replace=False)
                 analysis_data = training_data[sample_indices]
                 st.info(f"Usando {sample_size} pontos ({sample_size/training_data.shape[0]:.1%} dos dados) para análise.")
             else:
+                # Caso a amostragem não seja ativada, utilizar todos os dados disponíveis
                 analysis_data = training_data
-            
-            # Análise de clusters
+        
+            # Início da análise para determinar o número ideal de clusters
             st.write("### Análise para Determinação do Número de Clusters")
+        
+            # Inicializar listas para armazenar as métricas de avaliação dos clusters
             silhouette_scores = []
             davies_bouldin_scores = []
             calinski_harabasz_scores = []
-
-            # Adicionar barra de progresso
+        
+            # Criar uma barra de progresso e um espaço para atualizar o status do processamento
             progress_bar = st.progress(0)
             status_text = st.empty()
-            
-            # Calcular métricas para cada número de clusters
+        
+            # Calcular métricas para cada número de clusters dentro do intervalo selecionado
             total_iterations = num_clusters_range[1] - num_clusters_range[0] + 1
-
-            # Condicional para KMeans e Clustering Hierárquico
+        
+            # Loop para testar diferentes quantidades de clusters
             for i, n_clusters in enumerate(range(num_clusters_range[0], num_clusters_range[1] + 1)):
-                # Atualizar barra de progresso
+                # Atualizar a barra de progresso
                 progress = (i + 1) / total_iterations
                 progress_bar.progress(progress)
                 status_text.text(f"Analisando com {n_clusters} clusters... ({i+1}/{total_iterations})")
-                
+        
                 try:
+                    # Verificar qual método de clustering foi escolhido
                     if st.session_state.selected_model_name == "KMeans":
-                        # Otimização: Reduzir n_init e max_iter para KMeans
+                        # Para KMeans, otimizar os hiperparâmetros reduzindo n_init e max_iter
                         temp_model = KMeans(n_clusters=n_clusters, random_state=42, n_init=5, max_iter=100)
-                    else:  # Clustering Hierárquico
+                    else:
+                        # Para Clustering Hierárquico, utilizar o método de ligação "ward"
                         temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
-                    
-                    # Treinar modelo com dados amostrados
+        
+                    # Treinar o modelo com os dados amostrados
                     temp_model.fit(analysis_data)
                     labels = temp_model.labels_
-                    
-                    # Calcular as métricas
+        
+                    # Calcular e armazenar as métricas de avaliação do clustering
                     silhouette_scores.append(silhouette_score(analysis_data, labels))
                     davies_bouldin_scores.append(davies_bouldin_score(analysis_data, labels))
                     calinski_harabasz_scores.append(calinski_harabasz_score(analysis_data, labels))
-                    
+        
                 except Exception as e:
+                    # Caso ocorra um erro durante a execução, mostrar mensagem ao utilizador
                     st.error(f"Erro ao processar {n_clusters} clusters: {str(e)}")
-                    # Adicionar valores neutros para manter o array no tamanho correto
+                    # Preencher com valores neutros para manter a estrutura do array
                     silhouette_scores.append(0)
                     davies_bouldin_scores.append(float('inf'))
                     calinski_harabasz_scores.append(0)
-            
-            # Limpar barra de progresso e status
+        
+            # Limpar barra de progresso e status após a conclusão
             status_text.empty()
             progress_bar.empty()
-
-            # Criar DataFrame com os resultados
+        
+            # Criar um DataFrame com os resultados das métricas calculadas
             metrics_df = pd.DataFrame({
                 "Número de Clusters": range(num_clusters_range[0], num_clusters_range[1] + 1),
                 "Silhouette Score": silhouette_scores,
                 "Davies-Bouldin Index": davies_bouldin_scores,
                 "Calinski-Harabasz Score": calinski_harabasz_scores,
             })
-            
-            # Exibir a tabela no Streamlit
+        
+            # Exibir a tabela de métricas no Streamlit
             st.write("#### Tabela de Métricas por Número de Clusters")
             st.dataframe(fix_dataframe_types(metrics_df.style.format({
                 "Silhouette Score": "{:.2f}",
                 "Davies-Bouldin Index": "{:.2f}",
                 "Calinski-Harabasz Score": "{:.2f}",
             })))
-
-            # Exibir gráficos para as métricas
+        
+            # Exibir gráficos das métricas para facilitar a interpretação visual
             st.write("#### Gráficos das Métricas por Número de Clusters")
+            
+            # Criar colunas para organizar a exibição dos gráficos
             col1, col2, col3 = st.columns(3)
-
+        
+            # Gráfico do Silhouette Score
             with col1:
                 plt.figure(figsize=(6, 4))
                 plt.plot(metrics_df["Número de Clusters"], metrics_df["Silhouette Score"], marker='o')
@@ -2934,7 +3160,8 @@ def model_selection():
                 plt.ylabel("Silhouette Score")
                 st.pyplot(plt.gcf())
                 plt.clf()
-
+        
+            # Gráfico do Davies-Bouldin Index
             with col2:
                 plt.figure(figsize=(6, 4))
                 plt.plot(metrics_df["Número de Clusters"], metrics_df["Davies-Bouldin Index"], marker='o')
@@ -2943,7 +3170,8 @@ def model_selection():
                 plt.ylabel("Davies-Bouldin Index")
                 st.pyplot(plt.gcf())
                 plt.clf()
-
+        
+            # Gráfico do Calinski-Harabasz Score
             with col3:
                 plt.figure(figsize=(6, 4))
                 plt.plot(metrics_df["Número de Clusters"], metrics_df["Calinski-Harabasz Score"], marker='o')
@@ -2958,134 +3186,138 @@ def model_selection():
                 best_n_clusters = metrics_df.loc[metrics_df["Silhouette Score"].idxmax(), "Número de Clusters"]
                 st.write(f"**Melhor Número de Clusters** (com base no Silhouette Score): {best_n_clusters}")
                 best_n_clusters_retrain = best_n_clusters
-
-            # Escolher abordagem para número de clusters
+            
+            # Permitir ao utilizador escolher a abordagem para determinar o número de clusters
             st.write("### Escolha a Abordagem para Determinar o Número de Clusters")
             method = st.radio("Selecione a abordagem:", ["Automático", "Manual"], key="initial_training_method")
-
+            
             if method == "Automático":
-                # Escolher o melhor número de clusters com base no Silhouette Score
+                # Determinar automaticamente o melhor número de clusters com base no Silhouette Score
                 if silhouette_scores and any(score > 0 for score in silhouette_scores):
                     best_n_clusters = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
                     best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
                 else:
+                    # Caso a determinação automática falhe, exibir erro e atribuir um valor padrão
                     st.error("Não foi possível determinar automaticamente o número de clusters. Por favor, selecione manualmente.")
                     best_n_clusters_retrain = 3  # Valor padrão
-
+            
             elif method == "Manual":
+                # Permitir ao utilizador escolher manualmente o número de clusters
                 best_n_clusters = st.slider("Escolha o número de clusters", num_clusters_range[0], num_clusters_range[1], value=3)
                 best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
-
-            # Garantir que `best_n_clusters_retrain` tenha um valor válido antes de usar
+            
+            # Garantir que `best_n_clusters_retrain` tenha um valor válido antes de continuar
             if best_n_clusters_retrain is None:
                 st.warning("Por favor, selecione uma abordagem para determinar o número de clusters.")
             else:
-                # Treinar modelo inicial
+                # Treinar o modelo inicial
                 if st.button(f"Treinar Modelo Inicial"):
-                    # Configurar e treinar o modelo (usando todos os dados para treino final)
+                    # Configurar o modelo de clustering escolhido
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         model = st.session_state.models["Clustering Hierárquico"]
                         model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
                     else:  # KMeans
                         model = st.session_state.models["KMeans"]
-                        # Otimizar KMeans para maior velocidade no treino final
+                        # Ajustar hiperparâmetros para otimização no treino final
                         model.set_params(n_clusters=best_n_clusters_retrain, n_init=5, max_iter=300)
-                    
-                    # Barra de progresso para o treino
+            
+                    # Barra de progresso para o treino do modelo
                     with st.spinner(f"Treinando o modelo com {best_n_clusters_retrain} clusters..."):
                         model.fit(training_data)
                         st.session_state.clustering_labels = model.labels_
-                    
-                    # Calcular métricas
+            
+                    # Calcular métricas de avaliação do clustering
                     st.session_state.initial_metrics = {
                         "Número de Clusters": best_n_clusters_retrain,
                         "Silhouette Score": silhouette_score(training_data, st.session_state.clustering_labels),
                         "Davies-Bouldin Index": davies_bouldin_score(training_data, st.session_state.clustering_labels),
                         "Calinski-Harabasz Score": calinski_harabasz_score(training_data, st.session_state.clustering_labels)
                     }
-                    
-                    # Salvar informações importantes no estado da sessão
+            
+                    # Guardar informações importantes no estado da sessão
                     st.session_state.training_data = training_data
                     st.session_state.training_completed = True
-                    st.session_state.trained_model = model  # Salvar o modelo treinado
-                    
-                    # Mostrar mensagem de sucesso
+                    st.session_state.trained_model = model  # Guardar o modelo treinado
+            
+                    # Exibir mensagem de sucesso conforme o método escolhido
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         st.success(f"Modelo hierárquico treinado com sucesso usando {best_n_clusters_retrain} clusters e {st.session_state.pca_n_components} componentes PCA!")
                     else:
-                        st.success(f"Modelo K-means treinado com sucesso usando {best_n_clusters_retrain} clusters!")
-
-            # Exibir métricas e próxima ação apenas após o treino
+                        st.success(f"Modelo K-Means treinado com sucesso usando {best_n_clusters_retrain} clusters!")
+            
+            # Exibir métricas e visualização apenas após o treino do modelo
             if st.session_state.get("training_completed", False):
                 st.write("### Métricas do Treino Inicial")
                 st.table(fix_dataframe_types(pd.DataFrame([st.session_state.initial_metrics])))
-
-                # Visualização dos clusters
+            
+                # Visualização dos clusters treinados
                 if 'clustering_labels' in st.session_state:
                     st.write("### Visualização dos Clusters")
-                                        
-                    # Para KMeans podemos mostrar os centroides
+            
+                    # Para K-Means, mostrar os centroides dos clusters
                     if st.session_state.selected_model_name == "KMeans":
                         if "trained_model" in st.session_state and hasattr(st.session_state.trained_model, 'cluster_centers_'):
                             st.write("#### Centroides dos Clusters")
                             centroids = st.session_state.trained_model.cluster_centers_
+                            
+                            # Exibir apenas as primeiras 10 dimensões, se existirem muitas dimensões
                             if centroids.shape[1] > 10:
                                 st.write(f"(Mostrando apenas as primeiras 10 dimensões de {centroids.shape[1]})")
                                 centroids_df = pd.DataFrame(centroids[:, :10])
                             else:
                                 centroids_df = pd.DataFrame(centroids)
-                            
+            
                             st.dataframe(fix_dataframe_types(centroids_df))
-                    
-                    # Preparar dados para visualização
+            
+                    # Preparar dados para visualização dos clusters
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
-                        # Para hierárquico, já temos os dados PCA
+                        # Para Clustering Hierárquico, utilizar os dados reduzidos pelo PCA
                         plot_data = st.session_state.X_pca
                     else:
-                        # Para K-means, podemos reduzir os dados para visualização se necessário
+                        # Para K-Means, reduzir dimensionalidade se necessário
                         if X_scaled.shape[1] > 3:
                             pca_viz = PCA(n_components=3)
                             plot_data = pca_viz.fit_transform(X_scaled)
                             st.write("(Dados reduzidos via PCA para visualização)")
                         else:
                             plot_data = X_scaled
-
-                    # Obter número total de componentes
+            
+                    # Obter o número total de componentes disponíveis para visualização
                     total_components = plot_data.shape[1]
-
-                    # Permitir escolha de componentes para x e y
+            
+                    # Permitir ao utilizador escolher os componentes para visualização
                     st.write("### Escolha os Componentes para Visualização")
                     col1, col2 = st.columns(2)
-
+            
                     with col1:
                         x_component = st.selectbox(
-                            "Componente para o Eixo X", 
-                            list(range(total_components)), 
+                            "Componente para o Eixo X",
+                            list(range(total_components)),
                             index=0,
                             format_func=lambda x: f"Componente {x+1}",
-                            key="initial_x_component"  # Chave única adicionada
+                            key="initial_x_component"
                         )
-
+            
                     with col2:
                         y_component = st.selectbox(
-                            "Componente para o Eixo Y", 
-                            list(range(total_components)), 
+                            "Componente para o Eixo Y",
+                            list(range(total_components)),
                             index=1 if total_components > 1 else 0,
                             format_func=lambda x: f"Componente {x+1}",
-                            key="initial_y_component"  # Chave única adicionada
+                            key="initial_y_component"
                         )
-
-                    # Verificar se componentes são diferentes
+            
+                    # Verificar se os componentes escolhidos são diferentes
                     if x_component == y_component:
                         st.warning("Por favor, selecione componentes diferentes para X e Y.")
                     else:
-                        # Visualização 2D com componentes selecionados
+                        # Criar gráfico de dispersão para visualização dos clusters
                         fig, ax = plt.subplots(figsize=(10, 6))
                         scatter = ax.scatter(
-                            plot_data[:, x_component], 
-                            plot_data[:, y_component], 
-                            c=st.session_state.clustering_labels, 
-                            cmap='viridis', 
+                            plot_data[:, x_component],
+                            plot_data[:, y_component],
+                            c=st.session_state.clustering_labels,
+                            cmap='viridis',
                             alpha=0.7
                         )
                         ax.set_title(f'Visualização 2D dos Clusters ({best_n_clusters_retrain} clusters)')
@@ -3095,14 +3327,14 @@ def model_selection():
                         ax.add_artist(legend)
                         st.pyplot(fig)
                         plt.clf()
-
-                # Escolher ação seguinte
+            
+                # Opção para o utilizador escolher a ação seguinte
                 next_action = st.selectbox(
                     "Selecione a próxima ação:",
                     ["Re-Treinar o Modelo", "Finalizar"]
                 )
-
-                # Botão de confirmação da escolha
+            
+                # Botão para confirmar a escolha do utilizador
                 if st.button("Confirmar Escolha"):
                     if next_action == "Finalizar":
                         st.session_state.step = 'clustering_final_page'
@@ -3110,17 +3342,18 @@ def model_selection():
                     elif next_action == "Re-Treinar o Modelo":
                         st.session_state.retrain_mode = True
 
-            # Re-Treinar o Modelo (só aparece se a escolha foi confirmada)
+            # Re-Treinar o Modelo (só aparece se o utilizador escolher esta opção)
             if st.session_state.get("retrain_mode", False):
                 st.write("### Re-Treino do Modelo")
                 
-                # Escolha do método para determinar o número de clusters
+                # Escolha do método para determinar o número de clusters no re-treino
                 retrain_method = st.radio(
                     "Escolha a Abordagem para Determinar o Número de Clusters no novo treino:",
                     ["Automático", "Manual"]
                 )
-
+            
                 if retrain_method == "Manual":
+                    # Permitir ao utilizador escolher manualmente o número de clusters
                     st.session_state.num_clusters = st.slider(
                         "Selecione o número de clusters para o re-treino",
                         min_value=2,
@@ -3128,56 +3361,58 @@ def model_selection():
                         value=st.session_state.num_clusters if "num_clusters" in st.session_state else 3
                     )
                     best_n_clusters_retrain = st.session_state.num_clusters
-
+            
                 elif retrain_method == "Automático":
                     # Determinar o melhor número de clusters com base no Silhouette Score
                     if silhouette_scores and any(score > 0 for score in silhouette_scores):
                         best_n_clusters_retrain = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
                     else:
+                        # Caso a determinação automática falhe, exibir erro e atribuir um valor padrão
                         st.error("Não foi possível determinar automaticamente o número de clusters. Por favor, selecione manualmente.")
                         best_n_clusters_retrain = 3  # Valor padrão
-                        
-                # Botão para executar o re-treino
+            
+                # Botão para executar o re-treino do modelo
                 if st.button("Treinar Novamente"):
+                    # Selecionar o modelo previamente escolhido pelo utilizador
                     model = st.session_state.models[st.session_state.selected_model_name]
                     
-                    # Preparar modelo
+                    # Configurar o modelo com o novo número de clusters
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
                     else:
                         model.set_params(n_clusters=best_n_clusters_retrain, n_init=5, max_iter=300)
-                    
-                    # Treinar o modelo com uma barra de progresso
+            
+                    # Treinar o modelo com uma barra de progresso para indicar o progresso ao utilizador
                     with st.spinner(f"Realizando re-treino com {best_n_clusters_retrain} clusters..."):
                         model.fit(st.session_state.training_data)
-                    
-                    # Calcular métricas
+            
+                    # Calcular métricas de avaliação do clustering após o re-treino
                     st.session_state.retrain_metrics = {
                         "Número de Clusters": best_n_clusters_retrain,
                         "Silhouette Score": silhouette_score(st.session_state.training_data, model.labels_),
                         "Davies-Bouldin Index": davies_bouldin_score(st.session_state.training_data, model.labels_),
                         "Calinski-Harabasz Score": calinski_harabasz_score(st.session_state.training_data, model.labels_)
                     }
-                    
-                    # Atualizar rótulos dos clusters
+            
+                    # Atualizar rótulos dos clusters no estado da sessão
                     st.session_state.retrain_labels = model.labels_
                     st.session_state.retrain_completed = True
-                    
-                    # Mensagem de sucesso
+            
+                    # Exibir mensagem de sucesso com informações relevantes
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters e {st.session_state.pca_n_components} componentes PCA!")
                     else:
                         st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters!")
-                    
+            
                 # Exibir métricas do re-treino após a execução
                 if st.session_state.get("retrain_completed", False):
                     st.write("### Métricas do Re-Treino")
                     st.table(fix_dataframe_types(pd.DataFrame([st.session_state.retrain_metrics])))
-                    
-                    # Recuperar o modelo do estado da sessão
+            
+                    # Recuperar o modelo atualizado do estado da sessão
                     current_model = st.session_state.models[st.session_state.selected_model_name]
-
-                    # Verificar centroides para KMeans
+            
+                    # Verificar centroides para KMeans e exibi-los
                     if st.session_state.selected_model_name == "KMeans":
                         if hasattr(current_model, 'cluster_centers_'):
                             st.write("#### Centroides dos Clusters")
@@ -3189,56 +3424,55 @@ def model_selection():
                                 centroids_df = pd.DataFrame(centroids)
                             
                             st.dataframe(fix_dataframe_types(centroids_df))
-    
-                    # Visualização dos clusters do re-treino
+            
+                    # Visualização dos clusters após o re-treino
                     if 'retrain_labels' in st.session_state:
                         st.write("### Visualização dos Clusters do Re-Treino")
-                        
-                        # Preparar dados para visualização
+            
+                        # Preparar dados para visualização 2D
                         if st.session_state.selected_model_name == "Clustering Hierárquico":
-                            # Para hierárquico, já temos os dados PCA
+                            # Para Clustering Hierárquico, utilizar os dados reduzidos pelo PCA
                             plot_data = st.session_state.X_pca
                         else:
-                            # Para K-means, aplicamos um novo PCA para visualização
-                            # Use os dados originais ou X_scaled
-                            X_for_viz = X_scaled  # ou outro conjunto de dados apropriado
+                            # Para K-Means, aplicar PCA para reduzir os dados e facilitar a visualização
+                            X_for_viz = X_scaled  # Utilizar os dados originais normalizados
                             if X_for_viz.shape[1] > 3:
                                 pca_viz = PCA(n_components=3)
                                 plot_data = pca_viz.fit_transform(X_for_viz)
                                 st.write("(Dados reduzidos via PCA para visualização)")
                             else:
                                 plot_data = X_for_viz
-                        
-                        # Obter número total de componentes
+            
+                        # Determinar o número total de componentes disponíveis para visualização
                         total_components = plot_data.shape[1]
-                        
-                        # Permitir escolha de componentes para x e y
+            
+                        # Permitir ao utilizador escolher os componentes para visualização
                         st.write("### Escolha os Componentes para Visualização")
                         col1, col2 = st.columns(2)
-                        
+            
                         with col1:
                             x_component = st.selectbox(
                                 "Componente para o Eixo X", 
                                 list(range(total_components)), 
                                 index=0,
                                 format_func=lambda x: f"Componente {x+1}",
-                                key="retrain_x_component"  # Chave única adicionada
+                                key="retrain_x_component"  # Chave única para evitar conflitos no estado da sessão
                             )
-                        
+            
                         with col2:
                             y_component = st.selectbox(
                                 "Componente para o Eixo Y", 
                                 list(range(total_components)), 
                                 index=1 if total_components > 1 else 0,
                                 format_func=lambda x: f"Componente {x+1}",
-                                key="retrain_y_component"  # Chave única adicionada
+                                key="retrain_y_component"  # Chave única para evitar conflitos no estado da sessão
                             )
-                        
-                        # Verificar se componentes são diferentes
+            
+                        # Garantir que os componentes escolhidos são diferentes antes da visualização
                         if x_component == y_component:
                             st.warning("Por favor, selecione componentes diferentes para X e Y.")
                         else:
-                            # Visualização 2D com componentes selecionados
+                            # Criar gráfico de dispersão dos clusters re-treinados
                             fig, ax = plt.subplots(figsize=(10, 6))
                             scatter = ax.scatter(
                                 plot_data[:, x_component], 
@@ -3254,74 +3488,80 @@ def model_selection():
                             ax.add_artist(legend)
                             st.pyplot(fig)
                             plt.clf()
-                            
-                # Finalizar após o re-treino
+            
+                # Finalizar o processo após o re-treino bem-sucedido
                 if st.session_state.get("retrain_completed", False):
                     st.write("## Concluir o Processo de Clustering")
                     if st.button("Seguir para o Relatório"):
                         st.session_state.step = 'clustering_final_page'
                         st.rerun()
-                    
+
     # 3. Seleção da Coluna Alvo
     from sklearn.preprocessing import LabelEncoder
     import pandas as pd
-
-    # Inicializar variáveis de estado
+    
+    # Inicializar variáveis de estado no session_state se não existirem
     if 'bins_confirmed' not in st.session_state:
-        st.session_state['bins_confirmed'] = False  # Confirmação dos bins
+        st.session_state['bins_confirmed'] = False  # Confirmação da escolha dos bins
     if 'bins_value' not in st.session_state:
-        st.session_state['bins_value'] = 3  # Valor padrão dos bins
-
-    # Filtrar colunas disponíveis com base no tipo de modelo
+        st.session_state['bins_value'] = 3  # Definir um valor padrão para os bins
+    
+    # **Filtrar colunas disponíveis para seleção da variável alvo, dependendo do tipo de modelo**
     if st.session_state.model_type == "Classificação":
+        # Para modelos de classificação: considerar colunas categóricas (object) e colunas numéricas com poucas categorias
         valid_columns = [col for col in columns if data[col].dtype in ['object', 'int64'] or data[col].nunique() <= 10]
     else:
+        # Para modelos de regressão: considerar apenas colunas numéricas contínuas (float64 e int64) com muitas categorias
         valid_columns = [col for col in columns if data[col].dtype in ['float64', 'int64'] and data[col].nunique() > 10]
-
-    # Seleção da Coluna Alvo
+    
+    # **Seleção da Coluna Alvo**
+    # Apenas necessário para modelos de Classificação e Regressão (não aplicável a Clustering)
     if st.session_state.model_type != "Clustering" and st.session_state.selected_model_name and not st.session_state.target_column_confirmed:
-        st.write("Escolha a Coluna Alvo")
+        st.write("### Escolha a Coluna Alvo")
+        
+        # Criar um menu suspenso para o utilizador selecionar a coluna alvo
         target_column = st.selectbox(
             "Selecione a coluna alvo",
-            options=valid_columns,
+            options=valid_columns,  # Exibir apenas as colunas válidas
             key='target_column_selectbox'
         )
-
+    
+        # **Botão para confirmar a seleção da coluna alvo**
         if st.button("Confirmar Coluna Alvo"):
-            if target_column in columns:
+            if target_column in columns:  # Verificar se a coluna selecionada está nos dados
                 st.session_state.target_column = target_column
-                st.session_state.target_column_confirmed = True
-                st.session_state.validation_method = None
-                st.session_state.validation_confirmed = False
-
-                # Processar a coluna alvo
+                st.session_state.target_column_confirmed = True  # Confirmar a seleção
+                st.session_state.validation_method = None  # Resetar método de validação
+                st.session_state.validation_confirmed = False  # Resetar confirmação de validação
+    
+                # Armazenar os valores da variável alvo
                 y = data[st.session_state.target_column]
-
-                # Verificar o tipo de modelo
+    
+                # **Verificar o tipo de modelo**
                 model_type = st.session_state.model_type
-
+    
                 # **Se o modelo for de Classificação**
                 if model_type == "Classificação":
+                    # Utilizar LabelEncoder para transformar colunas categóricas em valores numéricos
                     le = LabelEncoder()
                     y_encoded = le.fit_transform(y)
                     st.session_state['target_column_encoded'] = y_encoded
                     st.success("Coluna categórica detectada e codificada com LabelEncoder.")
-
+    
+                # **Se o modelo for de Regressão**
                 elif model_type == "Regressão":
-                    if y.dtype in ['float64', 'int64']:
-                        st.session_state['target_column_encoded'] = y
+                    if y.dtype in ['float64', 'int64']:  # Verificar se a variável é contínua
+                        st.session_state['target_column_encoded'] = y  # Manter os valores originais
                         st.success("Coluna contínua detectada e pronta para regressão.")
                     else:
+                        # Se a coluna não for contínua, exibir um erro e interromper o processo
                         st.error("Modelos de regressão requerem uma coluna contínua como alvo.")
-                        st.stop()
-
-
-
-    # Exibir a Coluna Alvo Confirmada
+                        st.stop()  # Parar a execução para evitar erros futuros
+    
+    # **Exibir a Coluna Alvo Confirmada**
     if st.session_state.model_type != "Clustering" and st.session_state.target_column_confirmed:
-        st.write(f"Coluna Alvo Confirmada: {st.session_state.target_column}")
-        st.write(f"Tipo: {st.session_state.get('target_column_type', 'Não definido')}")
-
+        st.write(f"### Coluna Alvo Confirmada: {st.session_state.target_column}")
+        st.write(f"Tipo: {st.session_state.get('target_column_type', 'Não definido')}")  # Mostrar tipo da variável alvo
 
         # 4. GridSearch
         # Modelos sem hiperparâmetros ajustáveis
