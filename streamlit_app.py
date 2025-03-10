@@ -1,175 +1,201 @@
 ########### Bibliotecas Necessárias ###########
 
+# -------------------------------------
+# 📌 Bibliotecas para Interface com Utilizador (Streamlit)
+# -------------------------------------
+import streamlit as st  # Framework para criação de interfaces web interativas
+import streamlit.components.v1 as components  # Permite adicionar componentes HTML/CSS personalizados
 
 # -------------------------------------
-# Bibliotecas do Streamlit
+# 📌 Manipulação e Análise de Dados
 # -------------------------------------
-import streamlit as st
-import streamlit.components.v1 as components
+import pandas as pd  # Manipulação de DataFrames e séries temporais
+import numpy as np  # Operações numéricas e matrizes eficientes
 
 # -------------------------------------
-# Manipulação e Análise de Dados
+# 📌 Visualização de Dados
 # -------------------------------------
-import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt  # Criação de gráficos estáticos
+import seaborn as sns  # Gráficos estatísticos avançados baseados no Matplotlib
+import plotly.express as px  # Gráficos interativos e visualizações dinâmicas
 
 # -------------------------------------
-# Visualização de Dados
+# 📌 Modelos de Machine Learning
 # -------------------------------------
-import matplotlib.pyplot as plt
-import seaborn as sns
-import plotly.express as px
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor  # Modelos baseados em árvores de decisão
+from sklearn.linear_model import LogisticRegression, LinearRegression  # Modelos lineares para classificação e regressão
+from sklearn.svm import SVC, SVR  # Modelos de Support Vector Machine (SVM) para classificação e regressão
+from sklearn.cluster import KMeans, AgglomerativeClustering  # Algoritmos de clustering
+from sklearn.neighbors import KNeighborsClassifier  # Modelo de vizinhos mais próximos (KNN)
+from sklearn import svm, tree, neighbors  # Modelos adicionais do sklearn
 
 # -------------------------------------
-# Modelos de Machine Learning
+# 📌 Seleção de Features (Atributos)
 # -------------------------------------
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.svm import SVC, SVR
-from sklearn.cluster import KMeans, AgglomerativeClustering
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn import svm, tree, neighbors
+from mlxtend.feature_selection import SequentialFeatureSelector  # Seleção sequencial de variáveis para otimizar modelos
 
 # -------------------------------------
-# Seleção de Features
-# -------------------------------------
-from mlxtend.feature_selection import SequentialFeatureSelector
-
-# -------------------------------------
-# Métricas de Avaliação
+# 📌 Métricas de Avaliação
 # -------------------------------------
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, 
-    confusion_matrix, classification_report, roc_auc_score,
-    mean_squared_error, mean_absolute_error, r2_score,
-    silhouette_score, davies_bouldin_score, calinski_harabasz_score
+    accuracy_score, precision_score, recall_score, f1_score,  # Métricas para classificação
+    confusion_matrix, classification_report, roc_auc_score,  # Matriz de confusão e análise ROC
+    mean_squared_error, mean_absolute_error, r2_score,  # Métricas para regressão
+    silhouette_score, davies_bouldin_score, calinski_harabasz_score  # Métricas para clustering
 )
 
 # -------------------------------------
-# Pré-Processamento e Pipeline
+# 📌 Pré-Processamento e Pipeline
 # -------------------------------------
 from sklearn.model_selection import (
-    train_test_split, KFold, LeaveOneOut, cross_val_score, GridSearchCV
+    train_test_split,  # Separação entre dados de treino e teste
+    KFold, LeaveOneOut, cross_val_score,  # Validação cruzada para avaliar modelos
+    GridSearchCV  # Procura de melhores hiperparâmetros usando Grid Search
 )
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, LabelEncoder  # Normalização e codificação de variáveis categóricas
+from sklearn.impute import SimpleImputer  # Tratamento de valores ausentes
 
 # -------------------------------------
-# Utilitários
+# 📌 Utilitários Diversos
 # -------------------------------------
-import os
-import joblib
-import pickle
-import io
-from io import BytesIO
-import tempfile
-from datetime import datetime
-from decimal import Decimal
-from fractions import Fraction
-from scipy.sparse import csr_matrix
-import scipy
-import time
-import json
-import requests
-import unidecode
+import os  # Operações no sistema de arquivos (criação de pastas, leitura de arquivos)
+import joblib  # Guardar e carregar  modelos treinados
+import pickle  # Serialização e desserialização de objetos Python
+import json  # Manipulação de arquivos JSON
+import requests  # Requisições HTTP para acesso a APIs externas
+import unidecode  # Remoção de acentos e normalização de caracteres especiais
 
 # -------------------------------------
-# Bibliotecas Adicionais para Geração de Relatórios
+# 📌 Manipulação de Arquivos e Dados Binários
 # -------------------------------------
-from fpdf import FPDF
-import io
-import tempfile
-import requests
-from datetime import datetime
-import matplotlib.pyplot as plt
+from io import BytesIO  # Manipulação de streams binários para arquivos em memória
+import tempfile  # Criação de arquivos e diretórios temporários
 
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
-from reportlab.lib import colors
-from reportlab.lib.units import inch
+# -------------------------------------
+# 📌 Manipulação de Datas e Cálculos Matemáticos
+# -------------------------------------
+from datetime import datetime  # Manipulação de datas e horas
+from decimal import Decimal  # Precisão extra em cálculos decimais
+from fractions import Fraction  # Trabalha com frações matemáticas exatas
+from scipy.sparse import csr_matrix  # Representação eficiente de matrizes esparsas
+import scipy  # Biblioteca científica para estatísticas, álgebra linear e otimização
+import time  # Medição do tempo de execução de processos
+
+# -------------------------------------
+# 📌 Bibliotecas para Geração de Relatórios
+# -------------------------------------
+from fpdf import FPDF  # Criação de documentos PDF programaticamente
+from reportlab.lib.pagesizes import letter  # Definição do tamanho da página nos relatórios
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle  # Estilos para formatação de texto
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image  # Estruturação de documentos PDF
+from reportlab.lib import colors  # Definição de cores em relatórios
+from reportlab.lib.units import inch  # Unidades de medida para layout de documentos
+
 
 
 ##############################################
+# -------------------------------------
+# 📌 Função JavaScript para voltar ao topo da página
+# -------------------------------------
 
-# Função JavaScript para a página voltar ao topo
+# Script JavaScript que permite rolar automaticamente para o topo da página
 scroll_to_top_js = """
 <script>
     function scrollToTop() {
-        window.scrollTo(0, 0);
+        window.scrollTo(0, 0);  // Move a página para o topo (coordenadas 0,0)
     }
 </script>
 """
 
-# Adiciona o JavaScript na página
-components.html(scroll_to_top_js, height=0, width=0)  # Define altura e largura para manter invisível
+# Insere o JavaScript na página com Streamlit
+# Definição de height=0 e width=0 para evitar que o código ocupe espaço visível na interface
+components.html(scroll_to_top_js, height=0, width=0)  
 
-# Ajuste das opções de exibição do Pandas Styler
-pd.set_option("styler.render.max_elements", 2000000)  # Ajuste conforme necessário
-pd.set_option("display.max_rows", None)
-pd.set_option("display.max_columns", None)
+# -------------------------------------
+# 📌 Ajustes de Exibição do Pandas Styler
+# -------------------------------------
+
+# Define o número máximo de elementos a serem renderizados no Styler do Pandas
+pd.set_option("styler.render.max_elements", 2000000)  # Ajustar se necessário para grandes DataFrames
+
+# Configura a exibição de todas as linhas e colunas de um DataFrame
+pd.set_option("display.max_rows", None)  # Permite visualizar todas as linhas sem truncamento
+pd.set_option("display.max_columns", None)  # Permite visualizar todas as colunas sem truncamento
+
 
 ##############################################
 def fix_dataframe_types(df):
-    """Corrigir tipos de dados em um DataFrame para compatibilidade com PyArrow"""
-    # Verificar se é um objeto Styler e extrair o DataFrame
-    if hasattr(df, 'data'):  # Styler objects have a .data attribute
+    """Corrigir tipos de dados num DataFrame para compatibilidade com PyArrow"""
+
+    # Verificar se o objeto é um Styler e extrair o DataFrame
+    if hasattr(df, 'data'):  # Objetos Styler possuem um atributo .data
         df = df.data
-    elif hasattr(df, 'render') and not hasattr(df, 'copy'):  # Another way to detect Styler
+    elif hasattr(df, 'render') and not hasattr(df, 'copy'):  # Outra forma de identificar um Styler
         # Para versões mais recentes do pandas
         if hasattr(df, '_data'):
             df = df._data
-        # Para versões bem recentes do pandas onde pode ser diferente
+        # Para versões ainda mais recentes do pandas, onde a estrutura pode ser diferente
         elif hasattr(df, 'data'):
             df = df.data
-        # Se ainda não conseguiu extrair o DataFrame
+        # Se ainda não for possível extrair o DataFrame
         else:
-            # Tentar converter para dict primeiro e depois para DataFrame
+            # Tentar converter primeiro para dicionário e depois para DataFrame
             try:
                 df = pd.DataFrame(df.to_dict())
             except:
-                # Se tudo falhar, retornar um DataFrame vazio
+                # Se falhar, retornar um DataFrame vazio
                 return pd.DataFrame()
     
-    # Se não for DataFrame, retornar vazio
+    # Se o objeto final não for um DataFrame, retornar um DataFrame vazio
     if not isinstance(df, pd.DataFrame):
         return pd.DataFrame()
         
-    # Criar uma cópia para não modificar o original
+    # Criar uma cópia do DataFrame para evitar modificar o original
     df_fixed = df.copy()
     
-    # Converter colunas problemáticas
+    # Percorrer todas as colunas para corrigir tipos de dados problemáticos
     for col in df_fixed.columns:
-        # Converter Int64 para int64 padrão
+        # Converter colunas do tipo Int64 para int64 padrão (evita problemas de compatibilidade)
         if hasattr(df_fixed[col], 'dtype') and str(df_fixed[col].dtype) == 'Int64':
-            df_fixed[col] = df_fixed[col].fillna(-1).astype('int64')
+            df_fixed[col] = df_fixed[col].fillna(-1).astype('int64')  # Substituir valores nulos por -1 antes da conversão
         
-        # Converter objetos complexos para string
+        # Converter colunas do tipo objeto (strings e dados complexos) para string
         elif df_fixed[col].dtype == 'object':
             try:
-                # Tentar converter para string
+                # Tentar converter diretamente para string
                 df_fixed[col] = df_fixed[col].astype(str)
             except:
-                # Se falhar, aplicar uma conversão manual
+                # Se falhar, aplicar uma conversão manual, garantindo que valores None sejam tratados
                 df_fixed[col] = df_fixed[col].apply(lambda x: str(x) if x is not None else "")
     
+    # Retornar o DataFrame corrigido
     return df_fixed
 
+
 ##############################################
-# Função para configurar a sidebar fixa
+# -------------------------------------
+# 📌 Função para Configurar a Barra Lateral
+# -------------------------------------
+
 def configure_sidebar():
-    with st.sidebar:
+    """Configura a barra lateral com o logótipo da instituição e informações sobre a plataforma."""
+    
+    with st.sidebar:  # Define que os elementos serão adicionados na barra lateral
         st.image(
-            "https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg",
-            width=80,  # Define o tamanho da imagem diretamente
-            caption="Logótipo da Escola"
+            "https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg",  # URL da imagem
+            width=80,  # Define o tamanho da imagem (largura em pixels)
+            caption="Logótipo da Escola"  # Texto exibido abaixo da imagem
         )
+        
+        # Exibe o nome da plataforma em formato HTML para maior personalização
         st.markdown("<p>MLCase - Plataforma de Machine Learning</p>", unsafe_allow_html=True)
+        
+        # Exibe o nome da autora com destaque em negrito usando HTML
         st.markdown("<p><b>Autora:</b> Bruna Sousa</p>", unsafe_allow_html=True)
 
-
-# Configurar a sidebar
+# Chamada da função para configurar a barra lateral
 configure_sidebar()
+
 
 ##############################################
 import matplotlib
@@ -179,404 +205,645 @@ plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
 ##############################################
 
-# FUNÇÃO DE UPLOAD 
+# -------------------------------------
+# 📌 FUNÇÃO DE UPLOAD DE FICHEIROS
+# -------------------------------------
 
-# Função para inicializar variáveis de estado
+# Função para inicializar variáveis de estado na aplicação
 def initialize_state():
-    st.session_state.step = 'data_preview'
-    st.session_state.selected_columns = []
-    st.session_state.numeric_types = {}
-    st.session_state.variable_types = {}
-    st.session_state.treatment_state = {}
-    st.session_state.all_treated = False
+    """Inicializa variáveis de estado utilizadas na aplicação para gerir diferentes etapas do processo."""
+    st.session_state.step = 'data_preview'  # Define o estado inicial como pré-visualização dos dados
+    st.session_state.selected_columns = []  # Lista para armazenar colunas selecionadas pelo utilizador
+    st.session_state.numeric_types = {}  # Dicionário para armazenar tipos numéricos das variáveis
+    st.session_state.variable_types = {}  # Dicionário para armazenar os tipos das variáveis
+    st.session_state.treatment_state = {}  # Dicionário para armazenar o estado do tratamento dos dados
+    st.session_state.all_treated = False  # Flag para indicar se todos os dados foram tratados
 
-# Função auxiliar para escolher o delimitador para ficheiros CSV
+# -------------------------------------
+# 📌 Função auxiliar para escolher o delimitador de ficheiros CSV
+# -------------------------------------
+
 def choose_delimiter():
-    # Lista de delimitadores possíveis, incluindo a opção em branco
-    delimiters = [",", ";", "\t", "|", "Outro"]  # Adiciona a opção "Outro"
+    """Permite ao utilizador escolher um delimitador para ficheiros CSV carregados."""
     
-    # Cria o selectbox para o usuário escolher o delimitador
+    # Lista de delimitadores comuns, incluindo a opção personalizada
+    delimiters = [",", ";", "\t", "|", "Outro"]
+    
+    # Cria um seletor na barra lateral para escolha do delimitador
     delimiter = st.sidebar.selectbox("Escolha o delimitador para CSV", delimiters, index=0)
     
-    # Se o usuário escolher a opção "Outro", permite que ele insira um delimitador personalizado
+    # Se o utilizador escolher a opção "Outro", permite inserir um delimitador personalizado
     if delimiter == "Outro":
         delimiter = st.sidebar.text_input("Digite o delimitador personalizado:")
     
     return delimiter
 
+# -------------------------------------
+# 📌 Função para a etapa de upload do ficheiro
+# -------------------------------------
 
-# Função para a etapa de upload do arquivo
 def upload_file():
-    st.title("MLCase - Plataforma de Machine Learning")
+    """Permite ao utilizador carregar um ficheiro de dados para a plataforma."""
+    
+    st.title("MLCase - Plataforma de Machine Learning")  # Título principal da aplicação
 
-    # Seleção de tipo de arquivo e definição de delimitador padrão
+    # Seleção do tipo de ficheiro a ser carregado
     file_type = st.sidebar.selectbox("Selecione o tipo de arquivo", ["CSV", "Excel", "JSON"])
-    delimiter = ","  # Padrão para CSV
+    delimiter = ","  # Define o delimitador padrão para CSV
 
-    # Upload de arquivo e escolha do delimitador, se CSV
+    # Processo de upload conforme o tipo de ficheiro selecionado
     if file_type == "CSV":
-        delimiter = choose_delimiter()
-        file = st.sidebar.file_uploader("Carregar arquivo", type=["csv"])
+        delimiter = choose_delimiter()  # Permite selecionar um delimitador para o CSV
+        file = st.sidebar.file_uploader("Carregar arquivo", type=["csv"])  # Botão de upload
     elif file_type == "Excel":
-        file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx", "xls"])
+        file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx", "xls"])  # Upload de ficheiro Excel
     elif file_type == "JSON":
-        file = st.sidebar.file_uploader("Carregar arquivo", type=["json"])
+        file = st.sidebar.file_uploader("Carregar arquivo", type=["json"])  # Upload de ficheiro JSON
 
-    # Carrega o arquivo, se fornecido, e configura o estado
+    # Se um ficheiro for carregado, tenta processá-lo
     if file is not None:
         try:
+            # Chama a função de carregamento de dados e inicializa as variáveis de estado
             st.session_state.data = load_data(file_type, file, delimiter)
             initialize_state()
-            st.sidebar.success(f"Conjunto de dados {file_type} carregado com sucesso!")
+            st.sidebar.success(f"Conjunto de dados {file_type} carregado com sucesso!")  # Mensagem de sucesso
 
-            # Botão para avançar para a pré-visualização dos dados
+            # Botão para avançar para a próxima etapa (pré-visualização dos dados)
             if st.sidebar.button("Dados Carregados"):
-                st.session_state.step = 'data_preview'
-                st.stop()  # Atualiza a página para refletir o novo estado
+                st.session_state.step = 'data_preview'  # Atualiza o estado para a pré-visualização
+                st.stop()  # Para a execução para refletir as mudanças
 
         except Exception as e:
-            st.sidebar.error(f"Erro ao carregar o arquivo: {e}")
+            st.sidebar.error(f"Erro ao carregar o arquivo: {e}")  # Exibe mensagem de erro caso algo corra mal
 
-# Função para carregar dados com cache
-@st.cache_data
+# -------------------------------------
+# 📌 Função para carregar dados com cache (evita recarregamento desnecessário)
+# -------------------------------------
+
+@st.cache_data  # Usa cache para evitar recarregar os dados várias vezes
 def load_data(file_type, file, delimiter):
+    """Carrega um ficheiro de dados conforme o tipo selecionado pelo utilizador."""
+    
     if file_type == "CSV":
-        return pd.read_csv(file, delimiter=delimiter)
+        return pd.read_csv(file, delimiter=delimiter)  # Carrega dados CSV com o delimitador escolhido
     elif file_type == "Excel":
-        return pd.read_excel(file)
+        return pd.read_excel(file)  # Carrega ficheiro Excel
     elif file_type == "JSON":
-        return pd.read_json(file)
+        return pd.read_json(file)  # Carrega ficheiro JSON
 
 ##############################################
-# FUNÇÃO DE SELEÇÃO DE COLUNAS 
+# -------------------------------------
+# 📌 FUNÇÃO DE SELEÇÃO DE COLUNAS
+# -------------------------------------
 
-# Função para visualização de dados e seleção de colunas e tipos de dados
+# Função para pré-visualizar os dados e permitir a seleção de colunas e tipos de variáveis
 def data_preview():
-    st.subheader("Pré-visualização dos dados")
-    st.dataframe(fix_dataframe_types(st.session_state.data.head()))
+    """Permite visualizar os dados carregados, selecionar colunas e definir os seus tipos."""
 
-    # Seleção de colunas
+    # Exibir uma pré-visualização dos primeiros registos do dataset (com correção de tipos)
+    st.subheader("Pré-visualização dos dados")
+    st.dataframe(fix_dataframe_types(st.session_state.data.head()))  # Corrige os tipos antes da exibição
+
+    # Obter a lista de colunas do dataset
     columns = st.session_state.data.columns.tolist()
-    selected_columns = st.multiselect("Colunas", columns, columns)
-    st.session_state.selected_columns = selected_columns
+
+    # Criar uma caixa de seleção múltipla para escolher quais colunas utilizar
+    selected_columns = st.multiselect("Colunas", columns, columns)  # Por defeito, todas as colunas são selecionadas
+    st.session_state.selected_columns = selected_columns  # Guardar as colunas selecionadas no estado global
 
     # Preservar transformações no estado global
     if 'filtered_data' not in st.session_state:
-        st.session_state.filtered_data = st.session_state.data.copy()
+        st.session_state.filtered_data = st.session_state.data.copy()  # Criar uma cópia inicial dos dados
     else:
-        # Filtra apenas colunas selecionadas sem perder transformações
+        # Atualizar os dados filtrados apenas com as colunas selecionadas, mantendo transformações já aplicadas
         st.session_state.filtered_data = st.session_state.data[selected_columns]
 
-
+    # Se houver colunas selecionadas, permitir a identificação dos tipos de variáveis
     if selected_columns:
         st.subheader("Identificar tipos de variáveis")
+
+        # Inicializar dicionário para armazenar os tipos de variáveis, caso ainda não exista
         if 'variable_types' not in st.session_state:
             st.session_state.variable_types = {}
-        variable_types = st.session_state.variable_types
-        st.session_state.numeric_types = {}
 
-        # Definir tipos de variáveis e configurar numéricos
+        variable_types = st.session_state.variable_types
+        st.session_state.numeric_types = {}  # Dicionário para armazenar os tipos numéricos
+
+        # Percorrer cada coluna selecionada para definir os tipos de variáveis
         for col in selected_columns:
+            # Criar um seletor para definir se a variável é Numérica, Categórica ou Data
             var_type = st.selectbox(
                 f"Tipo de variável para {col}",
                 ["Numérica", "Categórica", "Data"],
                 index=0 if pd.api.types.is_numeric_dtype(st.session_state.filtered_data[col]) else 1,
-                key=f"var_{col}"
+                key=f"var_{col}"  # Cada seletor tem uma chave única para evitar conflitos
             )
-            variable_types[col] = var_type
+            variable_types[col] = var_type  # Guardar o tipo selecionado
 
-            # Configurações de tipos para variáveis numéricas
+            # Se a variável for numérica, permitir configurar o tipo específico
             if var_type == "Numérica":
                 num_type = st.selectbox(
                     f"Tipo numérico para {col}",
                     ["Int", "Float", "Complex", "Dec", "Frac", "Bool"],
                     index=0 if pd.api.types.is_integer_dtype(st.session_state.filtered_data[col]) else 1,
-                    key=f"num_{col}"
+                    key=f"num_{col}"  # Chave única para o seletor de tipo numérico
                 )
-                st.session_state.numeric_types[col] = num_type
+                st.session_state.numeric_types[col] = num_type  # Guardar o tipo numérico no estado global
 
-                # Discretização - verifica antes se já foi aplicada
+                # Discretização da variável (conversão para categorias)
+                # Verifica primeiro se a coluna já foi discretizada
                 if col not in st.session_state.filtered_data.columns or pd.api.types.is_numeric_dtype(st.session_state.filtered_data[col]):
                     if st.checkbox(f"Discretizar {col}?", key=f"discretize_{col}"):
-                        discretize_column(col)
+                        discretize_column(col)  # Aplica a função de discretização
                 else:
-                    st.write(f"Coluna {col} já foi discretizada.")
+                    st.write(f"Coluna {col} já foi discretizada.")  # Informação para o utilizador
 
+        # Atualizar o estado global com os tipos de variáveis definidos
         st.session_state.variable_types = variable_types
 
-    # Atualizar estado global após processamento
+    # Criar uma cópia dos dados filtrados para manter alterações recentes
     st.session_state.filtered_data = st.session_state.filtered_data.copy()
 
-    # Navegação entre etapas
-    col1, col2 = st.columns(2)
+    # -------------------------------------
+    # 📌 Navegação entre etapas
+    # -------------------------------------
 
+    col1, col2 = st.columns(2)  # Criar duas colunas para os botões "Voltar" e "Próxima etapa"
+
+    # Botão para voltar à etapa anterior
     with col1:
         if st.button("Voltar"):
-            # Apagar estados salvos explicitamente
+            # Apagar estados salvos explicitamente para evitar conflitos
             keys_to_reset = [
                 'filtered_data', 'selected_columns', 'variable_types',
                 'numeric_types', 'treatment_state'
             ]
             for key in keys_to_reset:
-                st.session_state.pop(key, None)  # Remove se existir
+                st.session_state.pop(key, None)  # Remove do estado se existir
 
-            # Resetar para o dataset original
+            # Restaurar os dados originais
             st.session_state.data = st.session_state.data.copy()
 
-            # Voltar para a etapa anterior
+            # Voltar para a etapa de upload do ficheiro
             st.session_state.step = 'file_upload'
-            st.rerun()
+            st.rerun()  # Recarregar a aplicação para refletir as mudanças
 
+    # Botão para avançar para a próxima etapa
     with col2:
         if st.button("Próxima etapa"):
-            apply_numeric_types()
-            st.session_state.step = 'missing_values'
-            st.rerun()
+            apply_numeric_types()  # Aplicar os tipos numéricos definidos pelo utilizador
+            st.session_state.step = 'missing_values'  # Atualizar o estado para a etapa seguinte
+            st.rerun()  # Recarregar a aplicação para refletir as alterações
 
 
-# Função para aplicar tipos numéricos às colunas filtradas
+# -------------------------------------
+# 📌 Função para Aplicar Tipos Numéricos às Colunas Filtradas
+# -------------------------------------
+
 def apply_numeric_types():
+    """Aplica os tipos numéricos definidos pelo utilizador às colunas filtradas no dataset."""
+    
+    # Percorre todas as colunas que têm tipos numéricos definidos pelo utilizador
     for col, num_type in st.session_state.numeric_types.items():
+        # Verifica se a coluna ainda existe no conjunto de dados filtrado
         if col in st.session_state.filtered_data.columns:
+            # Converte a coluna para o tipo numérico selecionado
             st.session_state.filtered_data[col] = convert_numeric_type(st.session_state.filtered_data[col], num_type)
 
-# Conversão de tipos de dados numéricos
+# -------------------------------------
+# 📌 Função para Conversão de Tipos de Dados Numéricos
+# -------------------------------------
+
 def convert_numeric_type(series, num_type):
+    """
+    Converte uma série de dados para o tipo numérico especificado.
+    
+    Parâmetros:
+    - series: pd.Series -> Coluna do DataFrame a ser convertida.
+    - num_type: str -> Tipo numérico desejado ("Int", "Float", "Complex", "Dec", "Frac", "Bool", "Date", "Duration").
+
+    Retorna:
+    - pd.Series convertida para o tipo especificado ou a mesma série original caso ocorra um erro.
+    """
+    
     try:
+        # Conversão para número inteiro (Int64)
         if num_type == "Int":
-            return pd.to_numeric(series, errors='coerce').astype('Int64')
+            return pd.to_numeric(series, errors='coerce').astype('Int64')  # Mantém valores nulos compatíveis com Pandas
+
+        # Conversão para número decimal (Float)
         elif num_type == "Float":
             return pd.to_numeric(series, errors='coerce').astype(float)
+
+        # Conversão para número complexo
         elif num_type == "Complex":
             return pd.to_numeric(series, errors='coerce').apply(lambda x: complex(x) if pd.notnull(x) else np.nan)
+
+        # Conversão para Decimal (melhor precisão para cálculos financeiros)
         elif num_type == "Dec":
             return series.apply(lambda x: Decimal(x) if pd.notnull(x) else np.nan)
+
+        # Conversão para Fração (representação matemática exata)
         elif num_type == "Frac":
             return series.apply(lambda x: Fraction(x) if pd.notnull(x) else np.nan)
+
+        # Conversão para Booleano (True/False)
         elif num_type == "Bool":
             return series.apply(lambda x: str(x).strip().lower() in ['true', '1'])
+
+        # Conversão para Data/Hora
         elif num_type == "Date":
             return pd.to_datetime(series, errors='coerce')
+
+        # Conversão para Duração/Intervalo de Tempo
         elif num_type == "Duration":
             return pd.to_timedelta(series, errors='coerce')
+
+        # Se o tipo especificado não estiver listado, retorna a série original sem alterações
         else:
             return series
+
     except Exception as e:
+        # Exibe um erro no Streamlit caso ocorra um problema na conversão
         st.error(f"Erro ao converter coluna {series.name} para tipo {num_type}: {e}")
 
-# Função para discretizar uma coluna numérica
+
+# -------------------------------------
+# 📌 Função para Discretizar uma Coluna Numérica
+# -------------------------------------
+
 def discretize_column(col):
-    # Botão de ajuda
+    """Permite ao utilizador discretizar uma coluna numérica, transformando-a em categorias definidas manualmente."""
+
+    # -------------------------------------
+    # 📌 Seção de Ajuda - Explicação sobre Discretização
+    # -------------------------------------
+    
+    # Explicação interativa sobre como definir bins (intervalos) e labels (categorias)
     with st.expander("Como preencher os bins e labels?"):
         st.write("**Bins:** Intervalos numéricos para discretização.")
         st.write("**Labels:** Nomeiam os intervalos.")
         st.write("**Exemplo:**")
-        st.write("- Bins: -2,1,2,6,inf")
-        st.write("- Labels: Baixo, Médio, Alto, Muito Alto")
+        st.write("- **Bins:** -2,1,2,6,inf")
+        st.write("- **Labels:** Baixo, Médio, Alto, Muito Alto")
 
-    # Diagnóstico antes de confirmar
+    # -------------------------------------
+    # 📌 Diagnóstico Inicial Antes da Discretização
+    # -------------------------------------
+
     st.write("### Diagnóstico antes da discretização:")
-    st.write(f"- **Mínimo:** {st.session_state.filtered_data[col].min()}")
-    st.write(f"- **Máximo:** {st.session_state.filtered_data[col].max()}")
-    st.write(f"- **Média:** {st.session_state.filtered_data[col].mean():.2f}")
-    st.write(f"- **Mediana:** {st.session_state.filtered_data[col].median():.2f}")
-    st.write(f"- **Valores ausentes antes:** {st.session_state.filtered_data[col].isna().sum()}")
+    st.write(f"- **Mínimo:** {st.session_state.filtered_data[col].min()}")  # Valor mínimo da coluna
+    st.write(f"- **Máximo:** {st.session_state.filtered_data[col].max()}")  # Valor máximo da coluna
+    st.write(f"- **Média:** {st.session_state.filtered_data[col].mean():.2f}")  # Média da coluna
+    st.write(f"- **Mediana:** {st.session_state.filtered_data[col].median():.2f}")  # Mediana da coluna
+    st.write(f"- **Valores ausentes antes:** {st.session_state.filtered_data[col].isna().sum()}")  # Contagem de valores nulos
 
-    # Pré-preencher com exemplos
+    # -------------------------------------
+    # 📌 Entrada de Dados do Utilizador (Bins e Labels)
+    # -------------------------------------
+
+    # Caixa de texto para o utilizador inserir os bins (intervalos numéricos)
     bins_input = st.text_input(
         f"Digite os bins para {col} (separados por vírgulas)",
         value="-2,1,2,6,inf", key=f"bins_{col}"
     )
+
+    # Caixa de texto para o utilizador inserir os labels (nomes das categorias correspondentes aos bins)
     labels_input = st.text_input(
         f"Digite os labels para {col} (separados por vírgulas)",
         value="Baixo,Médio,Alto,Muito Alto", key=f"labels_{col}"
     )
 
-    # Botão para confirmar discretização
+    # -------------------------------------
+    # 📌 Aplicação da Discretização Após Confirmação
+    # -------------------------------------
+
+    # Se o utilizador clicar no botão, iniciar a conversão
     if st.button(f"Confirmar Discretização para {col}", key=f"confirm_{col}"):
+
+        # Verificar se o utilizador preencheu os bins e labels corretamente
         if bins_input and labels_input:
             try:
-                # Converter inputs
+                # Converter a string de bins para uma lista de valores numéricos (float)
                 bins = list(map(float, bins_input.split(',')))
+
+                # Converter a string de labels para uma lista de nomes de categorias
                 labels = labels_input.split(',')
 
-                # Validar bins e labels
+                # -------------------------------------
+                # 📌 Validação de Dados Antes da Conversão
+                # -------------------------------------
+
+                # O número de labels deve ser igual ao número de bins menos um
                 if len(labels) != len(bins) - 1:
                     st.error(f"O número de labels deve ser igual ao número de bins menos um para a coluna {col}.")
+
                 else:
-                    # Garantir tipo float
+                    # Converter a coluna para tipo numérico para evitar erros
                     st.session_state.filtered_data[col] = pd.to_numeric(
                         st.session_state.filtered_data[col], errors='coerce'
                     )
 
-                    # Preencher valores faltantes com a mediana
+                    # Preencher valores ausentes com a mediana da coluna
                     median_value = st.session_state.filtered_data[col].median()
                     st.session_state.filtered_data[col].fillna(median_value, inplace=True)
 
-                    # Diagnóstico após preenchimento
+                    # Diagnóstico após preenchimento de valores ausentes
                     st.write(f"Valores ausentes após preenchimento: {st.session_state.filtered_data[col].isna().sum()}")
 
-                    # Discretizar
+                    # -------------------------------------
+                    # 📌 Aplicação da Discretização
+                    # -------------------------------------
+
+                    # Criar categorias com base nos bins e labels definidos pelo utilizador
                     categorized = pd.cut(
-                        st.session_state.filtered_data[col],
-                        bins=bins,
-                        labels=labels,
-                        include_lowest=True
+                        st.session_state.filtered_data[col],  # Coluna de dados a ser discretizada
+                        bins=bins,  # Intervalos definidos
+                        labels=labels,  # Nomes das categorias correspondentes
+                        include_lowest=True  # Inclui o menor valor nos intervalos
                     )
 
-                    # Garantir categórico e adicionar categoria para valores fora do intervalo
+                    # Converter para tipo categórico
                     categorized = categorized.astype('category')
-                    categorized = categorized.cat.add_categories(["Fora do Intervalo"])
-                    categorized = categorized.fillna("Fora do Intervalo")
 
-                    # Salvar no estado global e garantir consistência
+                    # Adicionar uma categoria extra para valores fora do intervalo definido
+                    categorized = categorized.cat.add_categories(["Fora do Intervalo"])
+                    categorized = categorized.fillna("Fora do Intervalo")  # Substituir valores não categorizados
+
+                    # -------------------------------------
+                    # 📌 Atualização do Estado Global e Diagnóstico Final
+                    # -------------------------------------
+
+                    # Salvar a coluna discretizada no dataset filtrado
                     st.session_state.filtered_data[col] = categorized
+
+                    # Criar uma nova cópia do dataset para garantir a consistência dos dados
                     st.session_state.filtered_data = st.session_state.filtered_data.copy()
 
-                    # Diagnóstico após salvar
+                    # Mensagem de sucesso
                     st.success(f"Coluna {col} discretizada com sucesso!")
+
+                    # Exibir o tipo de dados final da coluna
                     st.write(st.session_state.filtered_data[col].dtype)
+
+                    # Exibir as categorias únicas geradas
                     st.write(st.session_state.filtered_data[col].unique())
+
+                    # Exibir uma pré-visualização dos dados após a discretização
                     st.write("Pré-visualização dos dados após discretização:")
                     st.dataframe(fix_dataframe_types(st.session_state.filtered_data.head()))
 
             except ValueError as e:
+                # Mensagem de erro caso a conversão falhe
                 st.error(f"Erro ao discretizar {col}: {e}")
 
 
-##############################################
-# FUNÇÃO DE TRATAMENTO DE VALORES OMISSOS
 
-# Função para DataFrame com destaque para valores ausentes
+##############################################
+# -------------------------------------
+# 📌 FUNÇÃO DE TRATAMENTO DE VALORES OMISSOS (MISSING VALUES)
+# -------------------------------------
+
+# -------------------------------------
+# 📌 Função para destacar valores ausentes no DataFrame
+# -------------------------------------
+
 def highlight_missing():
+    """Aplica um estilo ao DataFrame, destacando células com valores ausentes em amarelo."""
+
+    # Função interna que aplica a cor amarela às células com valores nulos (NaN)
     def highlight_na(s):
         return ['background-color: yellow' if pd.isnull(v) else '' for v in s]
+
+    # Aplica o estilo ao DataFrame filtrado e retorna o objeto Styler
     return st.session_state.filtered_data.style.apply(highlight_na, subset=st.session_state.filtered_data.columns)
 
-# Função para formatar valores na tabela
-def format_table():
-    formatted_df = st.session_state.filtered_data.copy()
-    for col in formatted_df.columns:
-        if pd.api.types.is_numeric_dtype(formatted_df[col]):
-            formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
-    return formatted_df
+# -------------------------------------
+# 📌 Função para formatar valores na tabela
+# -------------------------------------
 
-# Função para mostrar a pré-visualização com tipos de variáveis
+def format_table():
+    """Formata os valores do DataFrame para exibição, ajustando casas decimais e representações de NaN."""
+    
+    # Criar uma cópia do DataFrame para evitar modificar os dados originais
+    formatted_df = st.session_state.filtered_data.copy()
+
+    # Iterar sobre todas as colunas do DataFrame
+    for col in formatted_df.columns:
+        # Verificar se a coluna contém valores numéricos
+        if pd.api.types.is_numeric_dtype(formatted_df[col]):
+            # Formatar os valores numéricos para exibição com 2 casas decimais
+            formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
+
+    return formatted_df  # Retorna o DataFrame formatado
+
+# -------------------------------------
+# 📌 Função para exibir a pré-visualização dos dados com tipos de variáveis
+# -------------------------------------
+
 def show_preview_with_types(variable_types):
+    """Exibe os dados com uma pré-visualização dos tipos de variáveis identificados."""
+
+    # Título da seção
     st.subheader("Pré-visualização dos dados com tipos de variáveis")
+
+    # Exibir os tipos de variáveis definidos pelo utilizador
     st.write("Tipos de variáveis:")
     st.write(variable_types)
-    
-    # Usa o filtered_data diretamente
+
+    # Formatar os dados antes da exibição
     formatted_df = format_table()
+
+    # Aplicar destaque para valores ausentes e corrigir tipos de dados antes de exibir
     st.dataframe(fix_dataframe_types(highlight_missing(formatted_df)))
 
-# Função para aplicar tratamento de valores ausentes
+
+# -------------------------------------
+# 📌 Função para Aplicar Tratamento de Valores Ausentes
+# -------------------------------------
+
 def apply_missing_value_treatment(column, method, constant_value=None):
-    # Usa diretamente o filtered_data do estado global
+    """Aplica um tratamento específico para valores ausentes numa coluna selecionada do dataset."""
+
+    # Usa diretamente os dados filtrados armazenados no estado global
     data = st.session_state.filtered_data
-    
+
+    # Verifica se a coluna é numérica
     if pd.api.types.is_numeric_dtype(data[column]):
+        # Substituir valores ausentes pela média da coluna
         if method == "Média":
             data[column].fillna(data[column].mean(), inplace=True)
+
+        # Substituir valores ausentes pela mediana da coluna
         elif method == "Mediana":
             data[column].fillna(data[column].median(), inplace=True)
+
+        # Substituir valores ausentes pela moda (valor mais frequente) da coluna
         elif method == "Moda":
             data[column].fillna(data[column].mode().iloc[0], inplace=True)
+
+        # Excluir linhas onde há valores ausentes nesta coluna
         elif method == "Excluir":
             data.dropna(subset=[column], inplace=True)
+
+        # Substituir por um valor constante definido pelo utilizador
         elif method == "Valor constante" and constant_value is not None:
             data[column].fillna(constant_value, inplace=True)
+
+    # Se a coluna for categórica (texto, categorias, etc.)
     else:
+        # Substituir valores ausentes pela moda (valor mais frequente)
         if method == "Substituir por moda":
             data[column].fillna(data[column].mode().iloc[0], inplace=True)
+
+        # Substituir valores ausentes por um valor fixo definido pelo utilizador
         elif method == "Substituir por valor constante" and constant_value is not None:
             data[column].fillna(constant_value, inplace=True)
+
+        # Não faz nada (mantém os valores ausentes)
         elif method == "Manter valores ausentes":
-            pass  # Não faz nada
+            pass  
+
+        # Excluir linhas com valores ausentes nesta coluna
         elif method == "Excluir":
             data.dropna(subset=[column], inplace=True)
 
     # Atualiza os dados processados no estado global
     st.session_state.filtered_data = data
 
+# -------------------------------------
+# 📌 Função para Selecionar Automaticamente o Método de Tratamento de Valores Ausentes
+# -------------------------------------
+
 def auto_select_method(column_name):
-    # Usa diretamente o filtered_data
+    """Seleciona automaticamente o melhor método para tratar valores ausentes numa coluna."""
+
+    # Obtém a coluna a partir dos dados filtrados
     column = st.session_state.filtered_data[column_name]
+
+    # Calcula a percentagem de valores ausentes na coluna
     missing_percentage = column.isnull().sum() / len(column)
 
     # Para colunas numéricas
     if pd.api.types.is_numeric_dtype(column):
         if missing_percentage > 0.5:
-            return "Excluir"
+            return "Excluir"  # Se mais de 50% dos valores estão ausentes, sugere excluir a coluna
         else:
-            return "Substituir por Mediana"
-    # Para colunas categóricas
+            return "Substituir por Mediana"  # Caso contrário, sugere substituir pela mediana
+
+    # Para colunas categóricas (texto, categorias)
     else:
         if missing_percentage > 0.5:
-            return "Excluir"
+            return "Excluir"  # Se mais de 50% dos valores estão ausentes, sugere excluir a coluna
         else:
-            return "Substituir por Moda"
+            return "Substituir por Moda"  # Caso contrário, sugere substituir pela moda (valor mais frequente)
+
+# -------------------------------------
+# 📌 Função para Exibir Tabela com Valores Ausentes
+# -------------------------------------
 
 def display_missing_values(dataframe):
-    # Verifica valores ausentes
+    """Exibe uma tabela com a contagem de valores ausentes em cada coluna do dataset."""
+
+    # Conta o número de valores ausentes por coluna
     missing_data = dataframe.isnull().sum()
+
+    # Mantém apenas as colunas que possuem valores ausentes
     missing_data = missing_data[missing_data > 0]
+    
+    # Converte para DataFrame para melhor visualização
     missing_data = missing_data.reset_index()
     missing_data.columns = ['Coluna', 'Valores Ausentes']
 
+    # Se houver valores ausentes, exibir a tabela
     if not missing_data.empty:
         st.write("Tabela de valores ausentes:")
-        st.dataframe(fix_dataframe_types(missing_data))
+        st.dataframe(fix_dataframe_types(missing_data))  # Aplica correções de tipo antes de exibir
     else:
-        st.write("Não há valores ausentes.")
+        st.write("Não há valores ausentes.")  # Mensagem caso não existam valores em falta
 
-# Função para mostrar e tratar valores ausentes
+# -------------------------------------
+# 📌 FUNÇÃO PARA MOSTRAR E TRATAR VALORES AUSENTES
+# -------------------------------------
+
 def handle_missing_values():
+    """Gerencia o tratamento de valores ausentes no dataset carregado."""
+
+    # Exibe o título da seção no Streamlit
     st.subheader("Tratamento de Valores Ausentes")
 
-    # Acesso aos dados filtrados no estado da sessão
+    # Obtém os dados filtrados armazenados no estado da sessão
     filtered_data = st.session_state.get('filtered_data', None)
 
+    # -------------------------------------
+    # 📌 Verificação Inicial dos Dados
+    # -------------------------------------
+
+    # Verifica se há dados carregados e não estão vazios
     if filtered_data is not None and not filtered_data.empty:
-        # Exibir valores ausentes
+
+        # -------------------------------------
+        # 📌 Função Interna para Exibir Valores Ausentes
+        # -------------------------------------
+
         def display_missing_values(df):
+            """Gera uma tabela resumida com a contagem de valores ausentes por coluna."""
+
+            # Conta a quantidade de valores ausentes em cada coluna
             missing_data = df.isnull().sum()
+
+            # Mantém apenas as colunas que possuem valores ausentes
             missing_data = missing_data[missing_data > 0]
+
+            # Exibe os valores ausentes caso existam
             if not missing_data.empty:
                 st.write("Resumo dos Valores Ausentes:")
                 st.dataframe(fix_dataframe_types(missing_data.rename("Total de Valores Ausentes")))
             else:
-                st.success("Não há valores ausentes nos dados.")
+                st.success("Não há valores ausentes nos dados.")  # Exibe uma mensagem caso não haja valores ausentes
 
-        # Exibir os valores ausentes
+        # Exibir o resumo dos valores ausentes no dataset
         display_missing_values(filtered_data)
 
-        # Verificar se existem valores ausentes
+        # -------------------------------------
+        # 📌 Configuração das Opções de Tratamento de Valores Ausentes
+        # -------------------------------------
+
+        # Verifica se existem valores ausentes em qualquer coluna
         has_missing_values = filtered_data.isnull().any().any()
 
         if has_missing_values:
+            # Inicializar dicionário de tratamento no estado global, caso ainda não exista
             if 'treatment_state' not in st.session_state:
                 st.session_state.treatment_state = {
                     col: {"method": None, "constant": None}
                     for col in filtered_data.columns
                 }
 
-            # Exibir opções para cada coluna com valores ausentes
+            # Percorre cada coluna que possui valores ausentes para exibir opções de tratamento
             for col in filtered_data.columns:
                 if filtered_data[col].isnull().sum() > 0:
                     col_state = st.session_state.treatment_state.get(col, {"method": None, "constant": None})
                     is_numeric = pd.api.types.is_numeric_dtype(filtered_data[col])
 
+                    # -------------------------------------
+                    # 📌 Tratamento de Valores Ausentes em Colunas Numéricas
+                    # -------------------------------------
+
                     if is_numeric:
+                        # Opções disponíveis para tratamento de valores ausentes em variáveis numéricas
                         options = ["Substituir por Média", "Substituir por Mediana", "Substituir por Moda", 
                                    "Substituir por Valor Constante", "Excluir", "Manter Valores Ausentes"]
+                        
+                        # Seletor para escolher o método de tratamento
                         missing_value_method = st.selectbox(
                             f"Método para tratar valores ausentes em {col}",
                             options,
                             index=options.index(col_state["method"]) if col_state["method"] in options else 0,
                             key=f"missing_value_{col}"
                         )
+
+                        # Definir valor constante caso o utilizador escolha essa opção
                         constant_value = None
                         if missing_value_method == "Substituir por Valor Constante":
                             constant_value = st.text_input(
@@ -584,14 +851,24 @@ def handle_missing_values():
                                 value=col_state["constant"] if col_state["constant"] else '',
                                 key=f"constant_{col}"
                             )
+
+                    # -------------------------------------
+                    # 📌 Tratamento de Valores Ausentes em Colunas Categóricas
+                    # -------------------------------------
+
                     else:
+                        # Opções disponíveis para colunas categóricas
                         options = ["Substituir por Moda", "Substituir por Valor Constante", "Manter Valores Ausentes", "Excluir"]
+                        
+                        # Seletor para escolher o método de tratamento
                         missing_value_method = st.selectbox(
                             f"Método para tratar valores ausentes em {col}",
                             options,
                             index=options.index(col_state["method"]) if col_state["method"] in options else 0,
                             key=f"cat_missing_value_{col}"
                         )
+
+                        # Definir valor constante caso o utilizador escolha essa opção
                         constant_value = None
                         if missing_value_method == "Substituir por Valor Constante":
                             constant_value = st.text_input(
@@ -600,15 +877,19 @@ def handle_missing_values():
                                 key=f"cat_constant_{col}"
                             )
 
-                    # Atualizar o estado com as escolhas do usuário
+                    # Atualizar o estado global com as escolhas do utilizador para essa coluna
                     st.session_state.treatment_state[col] = {"method": missing_value_method, "constant": constant_value}
 
-            # Botão para aplicar os tratamentos
+            # -------------------------------------
+            # 📌 Aplicação dos Tratamentos Escolhidos
+            # -------------------------------------
+
             if st.button("Aplicar tratamentos"):
                 for col, treatment in st.session_state.treatment_state.items():
                     method = treatment["method"]
                     constant_value = treatment["constant"]
 
+                    # Aplicar o método selecionado para tratamento dos valores ausentes
                     if method == "Substituir por Média":
                         filtered_data[col].fillna(filtered_data[col].mean(), inplace=True)
                     elif method == "Substituir por Mediana":
@@ -620,114 +901,215 @@ def handle_missing_values():
                     elif method == "Excluir":
                         filtered_data.dropna(subset=[col], inplace=True)
 
+                # Atualizar os dados processados no estado global
                 st.session_state.data = filtered_data.copy()
+
+                # Mensagem de sucesso
                 st.success("Tratamentos aplicados com sucesso!")
 
+        # -------------------------------------
+        # 📌 Navegação entre Etapas
+        # -------------------------------------
 
-        # Navegação
         col1, col2 = st.columns(2)
+
+        # Botão para voltar à etapa anterior
         with col1:
             if st.button("Voltar"):
                 st.session_state.step = 'data_preview'
                 st.rerun()
+
+        # Botão para avançar para a próxima etapa
         with col2:
             if st.button("Próxima etapa"):
                 st.session_state.step = 'outlier_detection'
                 st.rerun()
+
     else:
+        # Caso não haja dados disponíveis, exibir uma mensagem de erro
         st.error("Nenhum dado disponível para tratamento de valores ausentes.")
 
+
 ##############################################
-# FUNÇÃO DE TRATAMENTO DE OUTLIERS
+# -------------------------------------
+# 📌 FUNÇÃO DE TRATAMENTO DE OUTLIERS (VALORES EXTREMOS)
+# -------------------------------------
 
-# Função para detectar e calcular informações de outliers
-@st.cache_data
+# -------------------------------------
+# 📌 Função para Detetar e Calcular Informações sobre Outliers
+# -------------------------------------
 
+@st.cache_data  # Usa cache para evitar recálculo desnecessário ao interagir com a aplicação
 def calculate_outliers(columns, data):
+    """
+    Identifica e calcula estatísticas sobre outliers em variáveis numéricas.
+
+    Parâmetros:
+    - columns: lista com os nomes das colunas a serem analisadas.
+    - data: DataFrame contendo os dados.
+
+    Retorna:
+    - variables_with_outliers: Lista com as variáveis que possuem outliers.
+    - outlier_summary: Lista de dicionários com informações detalhadas sobre os outliers identificados.
+    """
+
+    # Lista para armazenar os nomes das variáveis que contêm outliers
     variables_with_outliers = []
+
+    # Lista para armazenar o resumo estatístico dos outliers encontrados
     outlier_summary = []
 
+    # Percorre todas as colunas selecionadas para análise de outliers
     for col in columns:
+        # Verifica se a coluna contém dados numéricos antes de continuar a análise
         if pd.api.types.is_numeric_dtype(data[col]):
+
+            # -------------------------------------
+            # 📌 Cálculo do Intervalo Interquartil (IQR)
+            # -------------------------------------
+
+            # Primeiro quartil (Q1) - 25% dos dados estão abaixo deste valor
             Q1 = data[col].quantile(0.25)
+
+            # Terceiro quartil (Q3) - 75% dos dados estão abaixo deste valor
             Q3 = data[col].quantile(0.75)
+
+            # Intervalo Interquartil (IQR) - Diferença entre Q3 e Q1
             IQR = Q3 - Q1
 
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
+            # Definição dos limites para deteção de outliers
+            lower_bound = Q1 - 1.5 * IQR  # Limite inferior
+            upper_bound = Q3 + 1.5 * IQR  # Limite superior
 
-            # Identificar outliers
+            # -------------------------------------
+            # 📌 Identificação de Outliers
+            # -------------------------------------
+
+            # Contagem de outliers, ou seja, valores que estão abaixo do limite inferior ou acima do superior
             num_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
+
+            # Se forem encontrados outliers na coluna, armazenar os resultados
             if num_outliers > 0:
+                # Calcular a percentagem de outliers em relação ao total de dados na variável
                 percentage_outliers = (num_outliers / len(data[col])) * 100
+
+                # Adicionar o nome da variável à lista de variáveis com outliers
                 variables_with_outliers.append(col)
+
+                # Criar um dicionário com o resumo estatístico dos outliers na variável analisada
                 outlier_summary.append({
                     "Variável": col,
                     "Total de Outliers": num_outliers,
                     "Percentagem de Outliers (%)": round(percentage_outliers, 2)
                 })
 
+    # Retorna a lista de variáveis que possuem outliers e o resumo estatístico
     return variables_with_outliers, outlier_summary
 
-# Interface de detecção e tratamento de outliers
-def outlier_detection():
-    st.subheader("Detecção de Outliers")
 
-    # Armazenar os dados originais (apenas na primeira execução)
+# Interface de detecção e tratamento de outliers
+# -------------------------------------
+# 📌 FUNÇÃO DE DETEÇÃO E TRATAMENTO DE OUTLIERS
+# -------------------------------------
+
+def outlier_detection():
+    """Realiza a deteção e o tratamento de outliers (valores extremos) em variáveis numéricas do dataset."""
+
+    # Exibir o título da seção no Streamlit
+    st.subheader("Deteção de Outliers")
+
+    # -------------------------------------
+    # 📌 Armazenamento dos Dados Originais
+    # -------------------------------------
+
+    # Se for a primeira execução, armazenar uma cópia dos dados originais
     if 'original_data' not in st.session_state:
         st.session_state.original_data = st.session_state.data.copy()
 
-    # **Boxplot Inicial - Fixo**
+    # -------------------------------------
+    # 📌 Boxplot Inicial (Visualização dos Dados Antes do Tratamento)
+    # -------------------------------------
+
     st.write("### Boxplot Inicial (Dados Originais)")
     fig, ax = plt.subplots(figsize=(12, 6))
-    st.session_state.original_data.boxplot(ax=ax)
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-    # Inicializar estado global
+    st.session_state.original_data.boxplot(ax=ax)  # Criar boxplot para visualizar outliers
+    plt.xticks(rotation=45)  # Ajustar rotação dos rótulos do eixo X
+    st.pyplot(fig)  # Exibir gráfico no Streamlit
+
+    # -------------------------------------
+    # 📌 Inicializar Estados Globais Necessários
+    # -------------------------------------
+
+    # Armazena colunas que já passaram por tratamento
     if 'treated_columns' not in st.session_state:
         st.session_state.treated_columns = []
+
+    # Armazena detalhes sobre os outliers identificados
     if 'outlier_details' not in st.session_state:
         st.session_state.outlier_details = {}
+
+    # Armazena os limites iniciais dos outliers (antes do tratamento)
     if 'initial_limits' not in st.session_state:
         st.session_state.initial_limits = {}
+
+    # Lista de colunas que possuem outliers
     if 'columns_with_outliers' not in st.session_state:
-        st.session_state.columns_with_outliers = []  # Apenas variáveis com outliers
+        st.session_state.columns_with_outliers = []
+
+    # Estado global para armazenar as decisões do utilizador sobre tratamento de outliers
     if 'outlier_treatment_state' not in st.session_state:
         st.session_state.outlier_treatment_state = {}
-    if 'all_outliers_treated' not in st.session_state:  # Novo estado
+
+    # Flag para indicar se todos os outliers foram tratados
+    if 'all_outliers_treated' not in st.session_state:
         st.session_state.all_outliers_treated = False
 
-    # Garantir que os dados estão disponíveis
+    # -------------------------------------
+    # 📌 Verificação da Disponibilidade dos Dados
+    # -------------------------------------
+
     if 'data' not in st.session_state or st.session_state.data is None:
         st.error("Os dados não estão carregados! Volte para a etapa anterior.")
         return
 
-    # Identificar colunas numéricas
+    # -------------------------------------
+    # 📌 Identificação de Outliers
+    # -------------------------------------
+
+    # Selecionar apenas as colunas numéricas do dataset
     numeric_columns = list(st.session_state.data.select_dtypes(include=[np.number]).columns)
+
+    # Lista para armazenar resumo dos outliers
     outlier_summary = []
 
-    # Processar cada coluna para calcular limites e outliers
+    # Percorrer todas as colunas numéricas para calcular limites e identificar outliers
     for col in numeric_columns:
-        # Ignorar colunas já tratadas
+
+        # Ignorar colunas que já foram tratadas
         if col in st.session_state.treated_columns:
             continue
 
-        # Calcular limites
+        # Calcular o primeiro quartil (Q1) e o terceiro quartil (Q3)
         Q1 = st.session_state.data[col].quantile(0.25)
         Q3 = st.session_state.data[col].quantile(0.75)
+
+        # Calcular o intervalo interquartil (IQR)
         IQR = Q3 - Q1
+
+        # Definir limites inferior e superior para identificação de outliers
         lower_bound = Q1 - 1.5 * IQR
         upper_bound = Q3 + 1.5 * IQR
 
-        # Contar outliers
+        # Contar outliers normais (fora do intervalo IQR)
         total_outliers = len(st.session_state.data[(st.session_state.data[col] < lower_bound) | 
                                                    (st.session_state.data[col] > upper_bound)])
+
+        # Contar outliers severos (fora do intervalo 3*IQR)
         total_severe_outliers = len(st.session_state.data[(st.session_state.data[col] < (Q1 - 3.0 * IQR)) | 
                                                            (st.session_state.data[col] > (Q3 + 3.0 * IQR))])
 
-        # Se a coluna tiver outliers, salvar detalhes
+        # Se a variável contiver outliers, armazenar detalhes
         if total_outliers > 0:
-            # Armazenar limites e detalhes no estado global
             st.session_state.initial_limits[col] = {
                 "lower_bound": lower_bound,
                 "upper_bound": upper_bound,
@@ -736,176 +1118,192 @@ def outlier_detection():
             st.session_state.outlier_details[col] = {
                 "total_outliers": total_outliers,
                 "total_severe_outliers": total_severe_outliers,
-                "skewness": st.session_state.data[col].skew()
+                "skewness": st.session_state.data[col].skew()  # Assimetria da distribuição
             }
 
-            # Adicionar ao resumo
+            # Adicionar ao resumo estatístico
             outlier_summary.append({
                 "Nome variável": col,
                 "Total de outliers": total_outliers,
                 "Total de outliers severos": total_severe_outliers
             })
 
-            # Adicionar na lista de variáveis com outliers
+            # Adicionar à lista de colunas com outliers
             if col not in st.session_state.columns_with_outliers:
                 st.session_state.columns_with_outliers.append(col)
 
-    # Salvar resumo no estado
+    # Salvar o resumo inicial no estado global
     st.session_state.initial_outlier_summary = outlier_summary
 
-    # Verificar se ainda há outliers não tratados
+    # -------------------------------------
+    # 📌 Verificar se Restam Outliers para Tratar
+    # -------------------------------------
+
     remaining_outliers = [col for col in st.session_state.columns_with_outliers 
                           if col not in st.session_state.treated_columns]
 
-    # Caso não existam mais outliers para tratar
     if not remaining_outliers:
-        # Se nunca houve outliers desde o início
         if not outlier_summary and not st.session_state.columns_with_outliers:
-            st.success("Nenhum outlier detectado nas variáveis numéricas!")
+            st.success("Nenhum outlier detetado nas variáveis numéricas!")
         else:
-            st.success("Todos os outliers detectados foram tratados!")  # Novo aviso
+            st.success("Todos os outliers detetados foram tratados!")
     else:
-        # Mostrar resumo dos outliers restantes
         st.write("Resumo dos Outliers:")
         st.dataframe(fix_dataframe_types(pd.DataFrame(outlier_summary)))
 
-    # **Exibir e tratar apenas variáveis com outliers não tratados**
-    for col in remaining_outliers:  # Somente as variáveis pendentes
-        # Diagnóstico
+    # -------------------------------------
+    # 📌 Exibição e Tratamento de Outliers Restantes
+    # -------------------------------------
+
+    for col in remaining_outliers:
         st.write(f"**Diagnóstico para {col}:**")
         details = st.session_state.outlier_details[col]
-        st.write(f"- Total: {len(st.session_state.data)}")
+        st.write(f"- Total de Registos: {len(st.session_state.data)}")
         st.write(f"- Outliers: {details['total_outliers']} ({(details['total_outliers'] / len(st.session_state.data)):.2%})")
         st.write(f"- Outliers Severos: {details['total_severe_outliers']} ({(details['total_severe_outliers'] / len(st.session_state.data)):.2%})")
         st.write(f"- Assimetria (Skewness): {details['skewness']:.2f}")
 
-        # Sugestão automática
+        # Sugestão automática de método de tratamento
         if col not in st.session_state.outlier_treatment_state:
             suggested_method = auto_select_outlier_treatment(
                 col, st.session_state.data, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"]
             )
             st.session_state.outlier_treatment_state[col] = suggested_method
 
-        # Selectbox com chave única
+        # Seletor de método de tratamento
         method = st.selectbox(
             f"Selecione o método para tratar outliers em {col}",
             ["Sem Ação", "Remover Outliers", "Remover Outliers Severos", "Substituir por Limites", "Substituir por Média", "Substituir por Mediana"],
             index=["Sem Ação", "Remover Outliers", "Remover Outliers Severos", "Substituir por Limites", "Substituir por Média", "Substituir por Mediana"].index(
                 st.session_state.outlier_treatment_state[col]
             ),
-            key=f"outlier_method_{col}_{len(st.session_state.treated_columns)}"  # Chave única
+            key=f"outlier_method_{col}_{len(st.session_state.treated_columns)}"
         )
 
-        # Botão para aplicar tratamento
+        # Botão para aplicar o tratamento selecionado
         if st.button(f"Aplicar tratamento em {col}"):
             apply_outlier_treatment(col, method, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"])
-            
-            # Esta linha é crucial - ela marca a coluna como tratada
             if col not in st.session_state.treated_columns:
                 st.session_state.treated_columns.append(col)
-                
-            st.rerun()  # Atualizar a página após o tratamento
+            st.rerun()
 
-    # **Boxplot Final**
+    # -------------------------------------
+    # 📌 Boxplot Final Após Tratamento
+    # -------------------------------------
+
     st.write("### Boxplot Após Tratamento")
     fig, ax = plt.subplots(figsize=(12, 6))
     st.session_state.data.boxplot(ax=ax)
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
-    # **Tabela para Verificar Outliers Restantes**
-    st.write("### Resumo Final de Outliers")
+    # -------------------------------------
+    # 📌 Botão para Avançar para a Próxima Etapa
+    # -------------------------------------
 
-    # Função para calcular outliers restantes
-    def calculate_remaining_outliers(data, numeric_columns):
-        outlier_summary = []
-        for col in numeric_columns:
-            # Se esta coluna foi tratada, não deve ter mais outliers
-            if col in st.session_state.treated_columns:
-                outlier_summary.append({
-                    "Coluna": col,
-                    "Outliers Restantes": 0,
-                    "Percentagem (%)": 0.00
-                })
-                continue
-                
-            # Para colunas não tratadas, calcular normalmente
-            Q1 = data[col].quantile(0.25)
-            Q3 = data[col].quantile(0.75)
-            IQR = Q3 - Q1
-    
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
-    
-            # Contar os outliers restantes
-            num_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
-            percentage_outliers = (num_outliers / len(data)) * 100
-    
-            outlier_summary.append({
-                "Coluna": col,
-                "Outliers Restantes": num_outliers,
-                "Percentagem (%)": round(percentage_outliers, 2)
-            })
-        return pd.DataFrame(outlier_summary)
-
-    # Calcular e exibir a tabela
-    numeric_columns = st.session_state.data.select_dtypes(include=[np.number]).columns
-    remaining_outliers = calculate_remaining_outliers(st.session_state.data, numeric_columns)
-    st.write(remaining_outliers)
-
-    
-    # **Botão para próxima etapa sempre visível**
     if st.button("Próxima etapa"):
         st.session_state.step = 'data_summary'
         st.rerun()
 
-# Função de sugestão automática corrigida
+# -------------------------------------
+# 📌 FUNÇÃO DE SUGESTÃO AUTOMÁTICA PARA TRATAMENTO DE OUTLIERS
+# -------------------------------------
+
 def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
-    """Função para sugerir tratamento de outliers com base nos dados"""
-    # Proporção de outliers
-    total = len(data)
+    """
+    Sugere automaticamente o melhor método de tratamento de outliers com base na distribuição dos dados.
+
+    Parâmetros:
+    - col: Nome da coluna a ser analisada.
+    - data: DataFrame contendo os dados.
+    - lower_bound: Limite inferior dos valores considerados normais (IQR 1.5x abaixo do Q1).
+    - upper_bound: Limite superior dos valores considerados normais (IQR 1.5x acima do Q3).
+
+    Retorna:
+    - Método sugerido para tratamento dos outliers.
+    """
+
+    # -------------------------------------
+    # 📌 Cálculo da Proporção de Outliers
+    # -------------------------------------
+
+    total = len(data)  # Número total de registos
+
+    # Contar outliers normais (fora do intervalo de 1.5 * IQR)
     total_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
+
+    # Contar outliers severos (fora do intervalo de 3 * IQR)
     total_severe_outliers = len(data[(data[col] < (lower_bound - 1.5 * (upper_bound - lower_bound))) |
                                      (data[col] > (upper_bound + 1.5 * (upper_bound - lower_bound)))])
-    percentage = total_outliers / total
-    severe_percentage = total_severe_outliers / total
 
-    # Verificar simetria dos dados
-    skewness = data[col].skew()
+    # Calcular percentagens
+    percentage = total_outliers / total  # Percentagem de outliers normais
+    severe_percentage = total_severe_outliers / total  # Percentagem de outliers severos
 
-    # Regras baseadas na proporção de outliers
-    if severe_percentage > 0.10:  # Mais de 10% são severos
+    # -------------------------------------
+    # 📌 Verificação da Assimetria dos Dados (Skewness)
+    # -------------------------------------
+
+    skewness = data[col].skew()  # Medida de assimetria da distribuição dos dados
+
+    # -------------------------------------
+    # 📌 Definição das Regras para Sugerir o Melhor Método
+    # -------------------------------------
+
+    if severe_percentage > 0.10:
+        # Se mais de 10% dos valores forem outliers severos, recomenda-se remover apenas os extremos
         return "Remover Outliers Severos"
-    elif percentage > 0.20:  # Mais de 20% são outliers
+    elif percentage > 0.20:
+        # Se mais de 20% dos valores forem outliers, recomenda-se remover todos os outliers
         return "Remover Outliers"
-    elif percentage > 0.05:  # Entre 5% e 20%
+    elif percentage > 0.05:
+        # Se entre 5% e 20% forem outliers, recomenda-se substituí-los pelos limites aceitáveis
         return "Substituir por Limites"
     else:
-        # Escolha entre média e mediana com base na assimetria
+        # Se houver menos de 5% de outliers, a escolha entre média e mediana é baseada na simetria
         if abs(skewness) > 1:
-            return "Substituir por Mediana"
+            return "Substituir por Mediana"  # Se houver alta assimetria, usa-se a mediana
         else:
-            return "Substituir por Média"
+            return "Substituir por Média"  # Caso contrário, a média é uma escolha razoável
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA APLICAR TRATAMENTO DE OUTLIERS
+# -------------------------------------
 
 def apply_outlier_treatment(col, method, lower_bound, upper_bound):
-    """Aplica o tratamento de outliers na coluna especificada."""
-    # Obter os dados do estado
+    """
+    Aplica o tratamento de outliers na coluna especificada, conforme o método escolhido.
+
+    Parâmetros:
+    - col: Nome da coluna a ser tratada.
+    - method: Método de tratamento selecionado.
+    - lower_bound: Limite inferior considerado aceitável.
+    - upper_bound: Limite superior considerado aceitável.
+    """
+
+    # Obter os dados do estado global
     data = st.session_state.data
+
+    # -------------------------------------
+    # 📌 Remover Todos os Outliers (Fora do Intervalo 1.5 * IQR)
+    # -------------------------------------
     
     if method == "Remover Outliers":
-        # Remover todos os outliers (valores além de 1.5 * IQR)
         st.session_state.data = data[
             (data[col] >= lower_bound) & (data[col] <= upper_bound)
         ]
         st.success(f"Todos os outliers removidos na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Remover Apenas Outliers Severos (Fora do Intervalo 3 * IQR)
+    # -------------------------------------
+
     elif method == "Remover Outliers Severos":
-        # Remover apenas outliers severos (>3xIQR)
         Q1 = data[col].quantile(0.25)
         Q3 = data[col].quantile(0.75)
         IQR = Q3 - Q1
-        
-        # Definição correta de outliers severos (3 * IQR)
+
+        # Definir limites mais rigorosos para outliers severos (3 * IQR)
         severe_lower = Q1 - 3.0 * IQR
         severe_upper = Q3 + 3.0 * IQR
 
@@ -914,246 +1312,332 @@ def apply_outlier_treatment(col, method, lower_bound, upper_bound):
         ]
         st.success(f"Outliers severos removidos na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Substituir Outliers pelos Limites Aceitáveis
+    # -------------------------------------
+
     elif method == "Substituir por Limites":
-        # Substituir valores fora dos limites pelos próprios limites
         st.session_state.data[col] = data[col].clip(lower_bound, upper_bound)
         st.success(f"Valores substituídos pelos limites na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Substituir Outliers pela Média da Coluna
+    # -------------------------------------
+
     elif method == "Substituir por Média":
-        # Substituir valores fora dos limites pela média
         mean_value = data[col].mean()
         mask = (data[col] < lower_bound) | (data[col] > upper_bound)
         st.session_state.data.loc[mask, col] = mean_value
         st.success(f"Valores substituídos pela média ({mean_value:.2f}) na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Substituir Outliers pela Mediana da Coluna
+    # -------------------------------------
+
     elif method == "Substituir por Mediana":
-        # Substituir valores fora dos limites pela mediana
         median_value = data[col].median()
         mask = (data[col] < lower_bound) | (data[col] > upper_bound)
         st.session_state.data.loc[mask, col] = median_value
         st.success(f"Valores substituídos pela mediana ({median_value:.2f}) na coluna '{col}'.")
 
+
 ##########################################################
-# FUNÇÃO DE GUARDAR O DATASET DEPOIS DO PRÉ-PROCESSAMENTO
+# -------------------------------------
+# 📌 FUNÇÃO PARA GUARDAR O DATASET APÓS O PRÉ-PROCESSAMENTO
+# -------------------------------------
 
 def save_modified_dataset_in_memory():
-    # Salvar o dataset tratado diretamente no session_state
-    st.session_state.data_tratada = st.session_state.data.copy()  # Copiar o dataset tratado
-    st.success("Dataset tratado foi salvo na memória para uso posterior.")
+    """
+    Salva o dataset tratado na memória (session_state) para uso posterior.
+    """
 
-# Função de download 
+    # Criar uma cópia do dataset tratado e armazená-lo no estado da sessão
+    st.session_state.data_tratada = st.session_state.data.copy()
+
+    # Exibir uma mensagem de sucesso
+    st.success("O dataset tratado foi salvo na memória para uso posterior.")
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA PERMITIR O DOWNLOAD DO DATASET TRATADO
+# -------------------------------------
+
 def download_button(df, filename="dataset_tratado.csv"):
-    """Função para permitir o download do dataset tratado em formato CSV"""
+    """
+    Permite ao utilizador descarregar o dataset tratado em formato CSV.
+
+    Parâmetros:
+    - df: DataFrame tratado a ser disponibilizado para download.
+    - filename: Nome do ficheiro CSV a ser descarregado (padrão: "dataset_tratado.csv").
+    """
+
+    # Converter o DataFrame para formato CSV (sem índice)
     csv = df.to_csv(index=False)
+
+    # Criar um buffer de memória para armazenar o conteúdo do ficheiro
     buf = io.BytesIO()
-    buf.write(csv.encode())
-    buf.seek(0)
-    
+
+    # Escrever o conteúdo do CSV no buffer e posicionar o cursor no início
+    buf.write(csv.encode())  # Converter para bytes e armazenar no buffer
+    buf.seek(0)  # Definir a posição do cursor para o início do ficheiro
+
+    # Criar um botão de download no Streamlit
     st.download_button(
-        label="Baixar Dataset Tratado",
-        data=buf,
-        file_name=filename,
-        mime="text/csv"
+        label="Baixar Dataset Tratado",  # Texto do botão
+        data=buf,  # Ficheiro a ser descarregado
+        file_name=filename,  # Nome do ficheiro ao fazer o download
+        mime="text/csv"  # Tipo MIME do ficheiro
     )
 
 
 ##########################################################
-# FUNÇÃO DE RESUMO APÓS PRÉ-PROCESSAMENTO
+# -------------------------------------
+# 📌 CLASSE PARA CRIAR O PDF COM O RESUMO APÓS O PRÉ-PROCESSAMENTO
+# -------------------------------------
+
+from fpdf import FPDF
+import requests
+import tempfile
+from datetime import datetime
+
 class CustomPDF(FPDF):
+    """
+    Classe personalizada para gerar um relatório em PDF com cabeçalho e rodapé customizados.
+    """
+
     def header(self):
-        # Baixar a imagem do logo e salvar localmente
+        """
+        Método para gerar o cabeçalho do PDF, incluindo o logótipo da instituição.
+        """
+
+        # URL do logótipo da instituição
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
+
+        # Fazer o download da imagem
         response = requests.get(logo_url)
+
         if response.status_code == 200:
+            # Criar um ficheiro temporário para armazenar a imagem baixada
             with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
-                tmpfile.write(response.content)
-                tmpfile_path = tmpfile.name
-                # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
+                tmpfile.write(response.content)  # Escrever o conteúdo da imagem no ficheiro temporário
+                tmpfile_path = tmpfile.name  # Obter o caminho do ficheiro
+
+                # Adicionar a imagem no cabeçalho do PDF
+                self.image(tmpfile_path, x=10, y=8, w=20)  # Definir posição e tamanho da imagem
         else:
+            # Se a imagem não for baixada corretamente, exibir mensagem no PDF
             self.set_font('Arial', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
-        
-        # Definir fonte para o cabeçalho
+
+        # Definir a fonte do cabeçalho
         self.set_font('Arial', 'B', 12)
+
+        # Adicionar o título da plataforma no cabeçalho
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
-        self.ln(15)  # Espaço após o cabeçalho
+
+        # Criar um espaço entre o cabeçalho e o conteúdo
+        self.ln(15)
 
     def footer(self):
-        # Ir para 1.5 cm da parte inferior
+        """
+        Método para gerar o rodapé do PDF, incluindo a data e número da página.
+        """
+
+        # Definir a posição do rodapé a 1.5 cm do final da página
         self.set_y(-15)
-        # Definir fonte para o rodapé
+
+        # Definir a fonte do rodapé
         self.set_font('Arial', 'I', 10)
-        # Data atual
+
+        # Obter a data atual no formato dia/mês/ano
         current_date = datetime.now().strftime('%d/%m/%Y')
-        # Adicionar rodapé com a data e número da página
+
+        # Adicionar rodapé com a data e o número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
 
-# Função para gerar o PDF com a imagem da tabela
+# -------------------------------------
+# 📌 FUNÇÃO PARA GERAR O PDF COM O RESUMO DO PRÉ-PROCESSAMENTO
+# -------------------------------------
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from io import BytesIO
 
-# Função para gerar o PDF com a tabela simplificada, correlação e boxplot
 def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
+    """
+    Gera um relatório em PDF com informações estatísticas do dataset, valores ausentes, outliers,
+    matriz de correlação e boxplot.
+
+    Parâmetros:
+    - dataset: DataFrame original após pré-processamento.
+    - summary_df: DataFrame com estatísticas descritivas do dataset.
+    - missing_data: Série contendo a contagem de valores ausentes por coluna.
+    - outlier_summary: Lista contendo o resumo dos outliers identificados.
+
+    Retorna:
+    - Um buffer de memória contendo o PDF gerado.
+    """
+
+    # -------------------------------------
+    # 📌 Função Auxiliar para Limpar Texto
+    # -------------------------------------
+
     def clean_text(text):
+        """Remove caracteres incompatíveis com a codificação do PDF."""
         if not isinstance(text, str):
             return text
         return text.encode('latin-1', errors='ignore').decode('latin-1')
 
-    # Inicialização do PDF
+    # -------------------------------------
+    # 📌 Inicialização do PDF
+    # -------------------------------------
+
     pdf = CustomPDF(format='A4')
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-    pdf.set_font("Arial", size=8)  
+    pdf.set_font("Arial", size=8)
 
-    # Título do Relatório
+    # -------------------------------------
+    # 📌 Título do Relatório
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Relatório Resumo dos Dados"), ln=True, align="C")
     pdf.ln(5)
 
-    # Estatísticas Descritivas Simplificadas
+    # -------------------------------------
+    # 📌 Estatísticas Descritivas Simplificadas
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Estatísticas Descritivas"), ln=True)
-    pdf.set_font("Arial", size=8)  
+    pdf.set_font("Arial", size=8)
 
-    # Criar um DataFrame simplificado com as colunas solicitadas: Nome da Coluna, Tipo de Dados, Count, e Média
+    # Criar DataFrame simplificado com estatísticas principais
     summary_simplified = pd.DataFrame({
         'Coluna': dataset.columns,
         'Tipo de Dados': dataset.dtypes,
         'Count': dataset.count(),
-        'Top': dataset.mode().iloc[0],  # Valor mais frequente (top)
+        'Top': dataset.mode().iloc[0],  # Valor mais frequente (moda)
     })
 
-    # Inicializar as colunas 'std', 'min' e 'max' como valores nulos
+    # Inicializar colunas estatísticas apenas para colunas numéricas
     summary_simplified['std'] = None
     summary_simplified['min'] = None
     summary_simplified['max'] = None
-    summary_simplified['Média'] = None  # Para garantir que a média seja inicializada
+    summary_simplified['Média'] = None
 
-    # Calcular as estatísticas apenas para as colunas numéricas
     numeric_columns = dataset.select_dtypes(include=['float64', 'int64']).columns
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'Média'] = dataset[numeric_columns].mean()
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'std'] = dataset[numeric_columns].std()
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'min'] = dataset[numeric_columns].min()
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'max'] = dataset[numeric_columns].max()
 
-    # Formatar as colunas numéricas para 4 casas decimais
+    # Formatar valores numéricos para 4 casas decimais
     for col in ['Média', 'std', 'min', 'max']:
         summary_simplified[col] = summary_simplified[col].apply(lambda x: f"{x:.4f}" if isinstance(x, (int, float)) else x)
 
     # Substituir 'nan' por vazio
     summary_simplified = summary_simplified.fillna('')
 
-    # Gerar a tabela diretamente no PDF
-    pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
-    col_widths = [pdf.get_string_width(col) for col in summary_simplified.columns]  # Largura das colunas
-    max_width = 180  # Largura máxima disponível (ajustável para caber na largura do PDF)
+    # -------------------------------------
+    # 📌 Adicionar Tabela das Estatísticas ao PDF
+    # -------------------------------------
 
-    # Ajustar largura das colunas proporcionalmente
+    pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
+    col_widths = [pdf.get_string_width(col) for col in summary_simplified.columns]
+    max_width = 180
+
     total_width = sum(col_widths)
     scale_factor = max_width / total_width
     col_widths = [width * scale_factor for width in col_widths]
 
-    # Cabeçalho
     for i, col in enumerate(summary_simplified.columns):
         pdf.cell(col_widths[i], 10, clean_text(col), 1, 0, 'C', True)
     pdf.ln()
 
-    # Linhas de dados
     for i, row in summary_simplified.iterrows():
         for j, cell in enumerate(row):
             pdf.cell(col_widths[j], 8, clean_text(str(cell)), 1, 0, 'C')
         pdf.ln()
 
-    pdf.ln(10)  # Espaço após a tabela de estatísticas
+    pdf.ln(10)
 
-    # Resumo de Valores Ausentes
+    # -------------------------------------
+    # 📌 Resumo de Valores Ausentes
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Resumo de Valores Ausentes"), ln=True)
     pdf.set_font("Arial", size=8)
 
-    if not missing_data.empty:  # Verifica se os dados estão vazios
-        # Tabela de Valores Ausentes
-        missing_data_list = [(col, str(count)) for col, count in missing_data.items()]
-        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+    if not missing_data.empty:
+        pdf.set_fill_color(144, 238, 144)
         pdf.cell(50, 10, clean_text("Variável"), 1, 0, 'C', True)
         pdf.cell(50, 10, clean_text("Total de Ausentes"), 1, 1, 'C', True)
-        for col, count in missing_data_list:
+        for col, count in missing_data.items():
             pdf.cell(50, 10, clean_text(col), 1)
-            pdf.cell(50, 10, clean_text(count), 1, 1)
+            pdf.cell(50, 10, clean_text(str(count)), 1, 1)
         pdf.ln(10)
     else:
-        pdf.set_font("Arial", style="I", size=10)
         pdf.cell(0, 10, txt=clean_text("Não há valores ausentes."), ln=True)
-        pdf.ln(5)
 
-    # Resumo de Outliers
+    # -------------------------------------
+    # 📌 Resumo de Outliers
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Resumo de Outliers"), ln=True)
     pdf.set_font("Arial", size=8)
 
     if outlier_summary:
-        # Tabela de Outliers
-        outlier_list = [(entry["Variável"], str(entry["Total de Outliers"])) for entry in outlier_summary]
-        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144)
         pdf.cell(50, 10, clean_text("Variável"), 1, 0, 'C', True)
         pdf.cell(50, 10, clean_text("Total de Outliers"), 1, 1, 'C', True)
-        for variable, total_outliers in outlier_list:
-            pdf.cell(50, 10, clean_text(variable), 1)
-            pdf.cell(50, 10, clean_text(total_outliers), 1, 1)
+        for entry in outlier_summary:
+            pdf.cell(50, 10, clean_text(entry["Variável"]), 1)
+            pdf.cell(50, 10, clean_text(str(entry["Total de Outliers"])), 1, 1)
         pdf.ln(10)
     else:
-        pdf.set_font("Arial", style="I", size=10)
         pdf.cell(0, 10, txt=clean_text("Não há outliers."), ln=True)
-        pdf.ln(75)
 
-    # **Matriz de Correlação (Heatmap)**
-    pdf.set_font("Arial", style="B", size=12)
+    # -------------------------------------
+    # 📌 Matriz de Correlação (Heatmap)
+    # -------------------------------------
+
     pdf.cell(0, 10, txt=clean_text("Matriz de Correlação das Variáveis"), ln=True)
-    pdf.set_font("Arial", size=8)
-
-    # Selecionar apenas as colunas numéricas para correlação
     numeric_data = dataset.select_dtypes(include=['float64', 'int64'])
-
-    # Calcular a correlação
     correlation_matrix = numeric_data.corr()
 
-    # Gerar o heatmap da correlação
     plt.figure(figsize=(8, 6))
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".4f", cbar=True, square=True)
     plt.title('Matriz de Correlação das Variáveis', fontsize=14, fontweight='bold')
 
-    # Salvar o heatmap como imagem temporária
     temp_filename = "correlation_heatmap.png"
     plt.savefig(temp_filename)
     plt.close()
-
-    # Adicionar o heatmap ao PDF
     pdf.image(temp_filename, x=10, w=180)
-    pdf.ln(95)  # Ajustar o espaço após o gráfico
+    pdf.ln(95)
 
-    # **Boxplot combinado de todas as variáveis numéricas**
-    pdf.set_font("Arial", style="B", size=12)
+    # -------------------------------------
+    # 📌 Boxplot das Variáveis Numéricas
+    # -------------------------------------
+
     pdf.cell(0, 10, txt=clean_text("Boxplot das Variáveis Numéricas"), ln=True)
-    pdf.set_font("Arial", size=8)
-
-    # Gerar boxplot para todas as variáveis numéricas no mesmo gráfico
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=numeric_data)
     plt.title('Boxplot das Variáveis Numéricas')
 
-    # Salvar o boxplot combinado como imagem temporária
     temp_filename_boxplot = "boxplot_combined.png"
     plt.savefig(temp_filename_boxplot)
     plt.close()
-
-    # Adicionar o boxplot ao PDF
     pdf.image(temp_filename_boxplot, x=10, w=180)
-    pdf.ln(75)  # Ajustar o espaço após o gráfico
+    pdf.ln(75)
 
-    # **Salvar o PDF no buffer**
+    # -------------------------------------
+    # 📌 Gerar o PDF no Buffer de Memória
+    # -------------------------------------
+
     pdf_buffer = BytesIO()
     pdf_output = pdf.output(dest='S').encode('latin-1', errors='ignore')
     pdf_buffer.write(pdf_output)
@@ -1161,68 +1645,116 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
 
     return pdf_buffer
 
-# Função para salvar a tabela como imagem, com ajustes de formatação
+# -------------------------------------
+# 📌 FUNÇÃO PARA SALVAR UMA TABELA COMO IMAGEM (PNG)
+# -------------------------------------
+
+import matplotlib.pyplot as plt
+
 def save_table_as_image(df, filename="table_image.png"):
-    # Substituir `nan` por valores vazios
+    """
+    Converte um DataFrame Pandas numa imagem (PNG), formatando os valores para melhor visualização.
+
+    Parâmetros:
+    - df: DataFrame contendo a tabela a ser convertida em imagem.
+    - filename: Nome do ficheiro da imagem a ser salva (padrão: "table_image.png").
+    """
+
+    # -------------------------------------
+    # 📌 Tratamento de Valores no DataFrame Antes da Geração da Imagem
+    # -------------------------------------
+
+    # Substituir valores `NaN` por valores vazios para evitar exibições incorretas
     df = df.fillna('')
-    
+
     # Formatar valores numéricos para 4 casas decimais
     for col in df.select_dtypes(include=['float64', 'int64']).columns:
         df[col] = df[col].apply(lambda x: f"{x:.4f}" if isinstance(x, (int, float)) else x)
 
-    # Gerar a imagem da tabela
-    fig, ax = plt.subplots(figsize=(8, 4))  # Tamanho ajustado
-    ax.axis('tight')
-    ax.axis('off')
+    # -------------------------------------
+    # 📌 Configuração da Figura para Geração da Tabela
+    # -------------------------------------
 
-    # Criando a tabela com o estilo adequado
-    table = ax.table(cellText=df.values,
-                    colLabels=df.columns,
-                    loc='center',
-                    cellLoc='center',
-                    colColours=['#D9EAF7'] * len(df.columns))  # Cor do cabeçalho da tabela
+    fig, ax = plt.subplots(figsize=(8, 4))  # Define o tamanho da imagem gerada
+    ax.axis('tight')  # Ajusta os limites para caber na figura
+    ax.axis('off')  # Remove os eixos para melhor visualização
 
-    # Ajustando o layout da tabela
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)  # Tamanho da fonte
-    table.auto_set_column_width(col=list(range(len(df.columns))))
+    # Criar a tabela no gráfico
+    table = ax.table(
+        cellText=df.values,  # Conteúdo da tabela
+        colLabels=df.columns,  # Cabeçalhos das colunas
+        loc='center',  # Centralizar a tabela na imagem
+        cellLoc='center',  # Centralizar o texto nas células
+        colColours=['#D9EAF7'] * len(df.columns)  # Definir cor do cabeçalho da tabela
+    )
 
-    # Salvando a tabela como imagem
-    plt.savefig(filename, format='png', bbox_inches='tight')
-    plt.close()
+    # -------------------------------------
+    # 📌 Ajustes de Formatação da Tabela
+    # -------------------------------------
+
+    table.auto_set_font_size(False)  # Desativar ajuste automático do tamanho da fonte
+    table.set_fontsize(10)  # Definir tamanho da fonte manualmente
+    table.auto_set_column_width(col=list(range(len(df.columns))))  # Ajustar automaticamente a largura das colunas
+
+    # -------------------------------------
+    # 📌 Salvamento da Tabela Como Imagem (PNG)
+    # -------------------------------------
+
+    plt.savefig(filename, format='png', bbox_inches='tight')  # Salvar imagem no formato PNG
+    plt.close()  # Fechar a figura para evitar sobrecarga de memória
 
 # Resumo do Pré-processamento de dados:
+# -------------------------------------
+# 📌 FUNÇÃO PARA GERAR O RESUMO DOS DADOS
+# -------------------------------------
+
 def data_summary():
+    """
+    Apresenta um resumo dos dados tratados, incluindo estatísticas descritivas, valores ausentes,
+    detecção de outliers, boxplots e matriz de correlação. Além disso, permite o download do resumo
+    em PDF e do dataset tratado.
+    """
+
     st.subheader("Resumo dos Dados")
 
-    # Usa diretamente st.session_state.data
+    # -------------------------------------
+    # 📌 Verificar Disponibilidade do Dataset
+    # -------------------------------------
+
     if 'data' in st.session_state and st.session_state.data is not None:
         dataset = st.session_state.data
         st.success("Usando o dataset tratado!")
     else:
         st.error("Nenhum dataset está disponível. Por favor, execute o tratamento de dados antes.")
-        return
+        return  # Encerra a função caso não haja dados disponíveis
 
-    # Verifica se há variáveis selecionadas
+    # -------------------------------------
+    # 📌 Seleção de Colunas para Exibição
+    # -------------------------------------
+
+    # Obter colunas selecionadas ou usar todas as colunas do dataset
     selected_columns = st.session_state.get('selected_columns', [])
     if not selected_columns:
         selected_columns = dataset.columns.tolist()
 
-    # Selecionar variáveis para exibição
+    # Permitir que o utilizador selecione as colunas para visualização
     selected_columns_to_display = st.multiselect(
         "Selecione as variáveis para visualizar as estatísticas",
         options=selected_columns,
         default=selected_columns
     )
 
-    # Informações gerais
+    # Exibir o número de linhas e colunas do dataset filtrado
     st.write("Número de linhas e colunas:", dataset[selected_columns_to_display].shape)
 
-    # Filtra apenas as colunas numéricas (ignorando as categóricas)
+    # -------------------------------------
+    # 📌 Estatísticas Descritivas
+    # -------------------------------------
+
+    # Identificar colunas numéricas
     numeric_columns = dataset[selected_columns_to_display].select_dtypes(include=['number']).columns
 
-    # Estatísticas Descritivas (calculando manualmente para cada tipo)
-    data_types = dataset[selected_columns_to_display].dtypes
+    # Criar um dicionário para armazenar estatísticas
     summary_data = {
         'Count': dataset[selected_columns_to_display].count(),
         'Mean': dataset[numeric_columns].mean(),
@@ -1234,83 +1766,106 @@ def data_summary():
         'Max': dataset[numeric_columns].max(),
     }
 
-    # Transformar em DataFrame
+    # Converter para DataFrame e adicionar os tipos de dados
     summary_df = pd.DataFrame(summary_data)
-    summary_df['Tipo de Dados'] = data_types
+    summary_df['Tipo de Dados'] = dataset[selected_columns_to_display].dtypes
 
-    # Arredondar os valores para 4 casas decimais
-    summary_df = summary_df.round(4)
+    # Arredondar valores numéricos para 4 casas decimais e preencher valores ausentes com 0
+    summary_df = summary_df.round(4).fillna(0)
 
-    # Preencher valores ausentes nas colunas numéricas com 0
-    summary_df = summary_df.fillna(0)
-
+    # Exibir a tabela de estatísticas descritivas
     st.write("Estatísticas Descritivas e Tipos de Dados")
     st.dataframe(fix_dataframe_types(summary_df))
-    
-    # **Valores Ausentes**
+
+    # -------------------------------------
+    # 📌 Análise de Valores Ausentes
+    # -------------------------------------
+
     st.subheader("Resumo de Valores Ausentes")
+
+    # Identificar colunas com valores ausentes
     missing_data = dataset[selected_columns_to_display].isnull().sum()
     missing_data = missing_data[missing_data > 0]
+
     if not missing_data.empty:
         st.write("Valores ausentes encontrados:")
         st.dataframe(fix_dataframe_types(missing_data.rename("Total de Valores Ausentes")))
     else:
         st.write("Não há valores ausentes nas variáveis selecionadas.")
 
-    # **Resumo de Outliers**
+    # -------------------------------------
+    # 📌 Análise de Outliers
+    # -------------------------------------
+
     st.subheader("Resumo de Outliers")
+
+    # Selecionar apenas colunas numéricas
     numeric_data = dataset[selected_columns_to_display].select_dtypes(include=['number'])
-    
-    # Obter a lista de colunas já tratadas (se existir)
+
+    # Obter colunas já tratadas
     treated_columns = st.session_state.get('treated_columns', [])
-        
+
+    # Criar lista para armazenar o resumo dos outliers
+    outlier_summary = []
+
     if not numeric_data.empty:
-        outlier_summary = []
         for column in numeric_data.columns:
-            # Se a coluna já foi tratada, pula a análise
-            if column in treated_columns:
+            if column in treated_columns:  # Ignorar colunas já tratadas
                 continue
-                
-            # Análise normal para colunas não tratadas
+
+            # Cálculo dos quartis e do intervalo interquartil (IQR)
             Q1 = numeric_data[column].quantile(0.25)
             Q3 = numeric_data[column].quantile(0.75)
             IQR = Q3 - Q1
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
-    
+
+            # Identificar outliers
             outliers = numeric_data[(numeric_data[column] < lower_bound) | (numeric_data[column] > upper_bound)]
-            if len(outliers) > 0:  # Adiciona apenas se houver outliers
+            if len(outliers) > 0:
                 outlier_summary.append({
                     "Variável": column,
                     "Total de Outliers": len(outliers)
                 })
-    
-        # Verifica se há outliers detectados
+
+        # Exibir o resumo dos outliers encontrados
         if outlier_summary:
             st.dataframe(fix_dataframe_types(pd.DataFrame(outlier_summary)))
         else:
-            st.write("Não há outliers nas variáveis selecionadas.")  # Mensagem quando não há outliers
+            st.write("Não há outliers nas variáveis selecionadas.")
     else:
         st.write("Nenhuma variável numérica para análise de outliers.")
-    # **Boxplot** - Gráfico
+
+    # -------------------------------------
+    # 📌 Gráfico Boxplot das Variáveis Numéricas
+    # -------------------------------------
+
     st.subheader("Boxplot das Variáveis Numéricas")
+
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=numeric_data)
     plt.title('Boxplot das Variáveis Numéricas')
     st.pyplot(plt)
 
-    # **Matriz de Correlação (Heatmap)**
+    # -------------------------------------
+    # 📌 Matriz de Correlação (Heatmap)
+    # -------------------------------------
+
     st.subheader("Matriz de Correlação das Variáveis")
-    # Calcular a correlação
+
+    # Calcular a correlação entre variáveis numéricas
     correlation_matrix = numeric_data.corr()
 
-    # Gerar o heatmap da correlação
+    # Gerar e exibir o heatmap da correlação
     plt.figure(figsize=(8, 6))
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".4f", cbar=True, square=True)
     plt.title('Matriz de Correlação das Variáveis', fontsize=14, fontweight='bold', fontname='Arial')
     st.pyplot(plt)
-    
-    # **Função de Download do PDF**
+
+    # -------------------------------------
+    # 📌 Download do Resumo em PDF
+    # -------------------------------------
+
     pdf_buffer = generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary)
     st.download_button(
         label="Baixar PDF com o Resumo",
@@ -1319,12 +1874,19 @@ def data_summary():
         mime="application/pdf"
     )
 
-    # Função de Download
+    # -------------------------------------
+    # 📌 Download do Dataset Tratado
+    # -------------------------------------
+
     dataset_to_download = dataset[selected_columns_to_display]
     download_button(dataset_to_download)
 
-    # Navegação
+    # -------------------------------------
+    # 📌 Navegação Entre Etapas
+    # -------------------------------------
+
     col1, col2 = st.columns([1, 1])
+
     with col1:
         if st.button("Voltar"):
             st.session_state.step = 'outlier_detection'
@@ -1335,47 +1897,89 @@ def data_summary():
             st.session_state.step = 'model_selection'
             st.rerun()
 
+
 ##########################################################
-# FUNÇÃO DE MODELOS
+# -------------------------------------
+# 📌 FUNÇÃO PARA PLOTAR MÉTRICAS DE DESEMPENHO DOS MODELOS
+# -------------------------------------
+
+import streamlit as st
+import matplotlib.pyplot as plt
+
 def plot_metrics(metrics_df):
+    """
+    Gera gráficos para visualizar as métricas de desempenho dos modelos, diferenciando entre
+    tarefas de classificação e regressão.
+
+    Parâmetros:
+    - metrics_df: DataFrame contendo as métricas de desempenho dos modelos.
+
+    Retorno:
+    - Exibe os gráficos no Streamlit.
+    """
+
     try:
-        # Inicializa a chave 'metrics' se não estiver no session_state
+        # -------------------------------------
+        # 📌 Inicializar Armazenamento de Métricas no Estado da Sessão
+        # -------------------------------------
+
+        # Se a chave 'metrics' ainda não estiver no session_state, inicializá-la
         if 'metrics' not in st.session_state:
             st.session_state['metrics'] = {}
 
         # Verificar se o DataFrame está vazio
         if metrics_df.empty:
-            st.warning("Nenhum dado para plotar.")
+            st.warning("Nenhum dado para exibir no gráfico.")
             return
 
-        # Armazenar métricas no session_state
+        # Armazenar as métricas no estado da sessão para referência posterior
         for _, row in metrics_df.iterrows():
             model_name = row.name  # Assumindo que o índice contém o nome do modelo
             st.session_state['metrics'][model_name] = row.to_dict()
 
-        # Definir o índice do DataFramex
+        # -------------------------------------
+        # 📌 Configuração do Índice e Identificação do Tipo de Modelo
+        # -------------------------------------
+
+        # Definir a coluna 'Modelo' como índice, se ainda não estiver
         metrics_df.set_index('Modelo', inplace=True)
 
-        # Verificar se as colunas de classificação estão presentes
+        # Listas de métricas típicas para classificação e regressão
         classification_columns = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
         regression_columns = ['MSE', 'MAE', 'R²']
 
+        # -------------------------------------
+        # 📌 Plotagem de Gráficos de Classificação
+        # -------------------------------------
+
         if all(col in metrics_df.columns for col in classification_columns):
-            # Plotar métricas de classificação
+            # Criar a figura do gráfico de barras
             fig, ax = plt.subplots(figsize=(10, 6))
+            
+            # Plotar as métricas de classificação
             metrics_df[classification_columns].plot(kind='bar', ax=ax)
+
+            # Configuração do gráfico
             plt.title('Métricas de Desempenho dos Modelos (Classificação)', fontsize=16)
             plt.ylabel('Valor', fontsize=14)
             plt.xlabel('Modelos', fontsize=14)
             plt.xticks(rotation=45, ha='right', fontsize=12)
-            plt.ylim(0, 1)
+            plt.ylim(0, 1)  # As métricas de classificação geralmente variam entre 0 e 1
             plt.legend(loc='lower right', fontsize=12)
             plt.grid(axis='y', linestyle='--', alpha=0.7)
 
+        # -------------------------------------
+        # 📌 Plotagem de Gráficos de Regressão
+        # -------------------------------------
+
         elif all(col in metrics_df.columns for col in regression_columns):
-            # Plotar métricas de regressão
+            # Criar a figura do gráfico de barras
             fig, ax = plt.subplots(figsize=(10, 6))
+
+            # Plotar as métricas de regressão
             metrics_df[regression_columns].plot(kind='bar', ax=ax)
+
+            # Configuração do gráfico
             plt.title('Métricas de Desempenho dos Modelos (Regressão)', fontsize=16)
             plt.ylabel('Valor', fontsize=14)
             plt.xlabel('Modelos', fontsize=14)
@@ -1385,72 +1989,137 @@ def plot_metrics(metrics_df):
 
         else:
             st.error("O DataFrame não contém métricas válidas para classificação ou regressão.")
-            return
+            return  # Se não há métricas válidas, encerra a função
 
-        # Mostrar o gráfico no Streamlit
+        # -------------------------------------
+        # 📌 Exibir o Gráfico no Streamlit
+        # -------------------------------------
+
         st.pyplot(fig)
 
     except Exception as e:
+        # Tratamento de erros genérico para evitar falhas inesperadas
         st.error(f"Ocorreu um erro ao plotar as métricas: {str(e)}")
-    
+
     finally:
-        plt.clf()  # Limpar a figura para evitar sobreposições
+        # Limpar a figura para evitar sobreposição de gráficos na interface do Streamlit
+        plt.clf()
 
+# -------------------------------------
+# 📌 FUNÇÃO PARA DEFINIR O GRID DE HIPERPARÂMETROS PADRÃO PARA CADA MODELO
+# -------------------------------------
 
-
-# Adicionar os modelos de regressão na função get_default_param_grid
 def get_default_param_grid(model_name):
+    """
+    Retorna um dicionário contendo os hiperparâmetros padrão para cada modelo de Machine Learning.
+
+    Parâmetros:
+    - model_name: Nome do modelo para o qual se deseja obter o conjunto de hiperparâmetros.
+
+    Retorno:
+    - Dicionário com os hiperparâmetros e os respetivos intervalos de valores para otimização.
+    """
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para Support Vector Classification (SVC)
+    # -------------------------------------
     if model_name == "Support Vector Classification (SVC)":
         return {
-            'C': [0.1, 1, 10],
-            'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']  # Apenas para kernel 'rbf'
+            'C': [0.1, 1, 10],  # Define a penalização do erro
+            'kernel': ['linear', 'rbf'],  # Tipos de kernel utilizados
+            'gamma': ['scale', 'auto']  # Apenas utilizado quando kernel='rbf'
         }
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para K-Nearest Neighbors (KNN)
+    # -------------------------------------
     elif model_name == "K-Nearest Neighbors (KNN)":
         return {
-            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20
-            'weights': ['uniform', 'distance']
+            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20 para o número de vizinhos
+            'weights': ['uniform', 'distance']  # Define a forma de ponderação das distâncias
         }
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para Random Forest
+    # -------------------------------------
     elif model_name == "Random Forest":
-        # Geração dinâmica de max_depth como range
+        # Geração dinâmica do parâmetro `max_depth`
         max_depth_range = [None] + list(range(5, 21, 5))  # [None, 5, 10, 15, 20]
         return {
-            'max_depth': max_depth_range,
-            'n_estimators': [10, 50, 100]
+            'max_depth': max_depth_range,  # Profundidade máxima da árvore
+            'n_estimators': [10, 50, 100]  # Número de árvores na floresta
         }
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para Suporte de Vetores em Regressão (SVR)
+    # -------------------------------------
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
-            'C': [ 1, 10],
-            'epsilon': [0.1, 0.2],
-            'kernel': ['linear', 'rbf']
+            'C': [1, 10],  # Penalização do erro
+            'epsilon': [0.1, 0.2],  # Margem de tolerância para erro
+            'kernel': ['linear', 'rbf']  # Tipos de kernel utilizados
         }
-    elif model_name in ["Regressão Linear Simples (RLS)"]:
-        return {}  # Regressão Linear geralmente não tem hiperparâmetros ajustáveis
-    else:
-        return {}
 
+    # -------------------------------------
+    # 📌 Configuração para Regressão Linear Simples (RLS)
+    # -------------------------------------
+    elif model_name == "Regressão Linear Simples (RLS)":
+        return {}  # A regressão linear geralmente não requer ajuste de hiperparâmetros
+
+    # -------------------------------------
+    # 📌 Retorno para modelos não especificados
+    # -------------------------------------
+    else:
+        return {}  # Se o modelo não for reconhecido, retorna um dicionário vazio
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAÇÃO MANUAL DOS PARÂMETROS DOS MODELOS
+# -------------------------------------
+
+import streamlit as st
+import json
 
 def configure_manual_params(model_key, param_grid, manual_params):
     """
-    Configura manualmente os parâmetros para o modelo selecionado com intervalos personalizados exibidos.
+    Permite a configuração manual dos hiperparâmetros para o modelo selecionado, 
+    exibindo intervalos personalizados para os parâmetros numéricos.
+
+    Parâmetros:
+    - model_key: Nome do modelo a ser ajustado.
+    - param_grid: Dicionário com os hiperparâmetros e opções disponíveis.
+    - manual_params: Dicionário onde os valores dos hiperparâmetros serão armazenados.
+
+    Retorno:
+    - manual_params atualizado com os valores configurados pelo utilizador.
     """
+
     st.write(f"Configurações manuais para o modelo: {model_key}")
 
-    # **Limpar parâmetros inválidos no estado global ANTES de criar os widgets**
-    if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
-        del st.session_state['manual_params']['gamma']  # Remove 'gamma' do estado global
+    # -------------------------------------
+    # 📌 Limpar Parâmetros Inválidos no Estado Global
+    # -------------------------------------
 
-    # Intervalos específicos para parâmetros
+    # Remover 'gamma' do estado global se ele estiver presente
+    if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
+        del st.session_state['manual_params']['gamma']
+
+    # -------------------------------------
+    # 📌 Definição de Intervalos Personalizados para Parâmetros Numéricos
+    # -------------------------------------
+
     param_ranges = {
-        'C': {'min': 0.1, 'max': 100.0, 'step': 0.1, 'default': 1.0},
-        'epsilon': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
-        'gamma': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},
-        'degree': {'min': 1, 'max': 5, 'step': 1, 'default': 3},
+        'C': {'min': 0.1, 'max': 100.0, 'step': 0.1, 'default': 1.0},  # Controle de penalização do erro
+        'epsilon': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},  # Tolerância ao erro em SVR
+        'gamma': {'min': 0.01, 'max': 1.0, 'step': 0.01, 'default': 0.1},  # Parâmetro do kernel 'rbf'
+        'degree': {'min': 1, 'max': 5, 'step': 1, 'default': 3},  # Apenas para kernel 'poly'
     }
 
-    # Criar widgets para parâmetros
+    # -------------------------------------
+    # 📌 Criar Widgets para Configuração de Parâmetros
+    # -------------------------------------
+
     for param in param_grid:
-        # Parâmetros categóricos
+        # Se o parâmetro for categórico (exemplo: 'kernel', 'weights')
         if isinstance(param_grid[param][0], str):
             manual_params[param] = st.selectbox(
                 f"{param} (Opções: {', '.join(param_grid[param])}):",
@@ -1458,27 +2127,29 @@ def configure_manual_params(model_key, param_grid, manual_params):
                 index=0,
                 key=f"{model_key}_{param}"
             )
-        # Parâmetros numéricos
+
+        # Se o parâmetro for numérico (inteiro ou float)
         elif isinstance(param_grid[param][0], (int, float)):
             param_type = float if any(isinstance(x, float) for x in param_grid[param]) else int
 
-            # Verificar se existe intervalo personalizado
+            # Verificar se o parâmetro tem um intervalo personalizado definido
             if param in param_ranges:
                 config = param_ranges[param]
 
-                # Mostrar intervalo aceito como dica para o usuário
+                # Exibir informação sobre o intervalo aceito
                 st.write(f"**{param}** (Intervalo: {config['min']} a {config['max']})")
 
-                # Configuração interativa
-                if param == 'max_depth':  # Verifica se o parâmetro é 'max_depth'
+                # Se for 'max_depth' (pode ser `None`), criar um selectbox
+                if param == 'max_depth':
                     manual_params[param] = st.selectbox(
                         f"{param}:",
-                        options=[None] + list(range(1, 21)),  # Inclusão de None
+                        options=[None] + list(range(1, 21)),  # Permite selecionar `None`
                         index=0 if config['default'] is None else list(range(1, 21)).index(config['default']),
                         key=f"{model_key}_{param}"
                     )
+
                 else:
-                    # Para outros parâmetros numéricos
+                    # Criar um input numérico para outros parâmetros
                     manual_params[param] = st.number_input(
                         f"{param}:",
                         min_value=config['min'],
@@ -1488,7 +2159,11 @@ def configure_manual_params(model_key, param_grid, manual_params):
                         key=f"{model_key}_{param}"
                     )
 
-    # **Configuração dinâmica para 'gamma' com base no kernel**
+    # -------------------------------------
+    # 📌 Configuração Dinâmica do Parâmetro 'gamma'
+    # -------------------------------------
+
+    # O parâmetro 'gamma' só deve ser configurado se o kernel for 'rbf'
     if 'kernel' in manual_params and manual_params['kernel'] == 'rbf':
         config = param_ranges['gamma']
         st.write(f"**gamma** (Intervalo: {config['min']} a {config['max']})")
@@ -1501,90 +2176,150 @@ def configure_manual_params(model_key, param_grid, manual_params):
             key=f"{model_key}_gamma"
         )
     else:
-        # **Remover 'gamma' do manual_params e do estado global se o kernel não for 'rbf'**
+        # Se o kernel não for 'rbf', remover 'gamma' do estado global e do dicionário de parâmetros
         manual_params.pop('gamma', None)
         if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
-            del st.session_state['manual_params']['gamma']  # Remove também do estado global
+            del st.session_state['manual_params']['gamma']
 
-    # Atualizar estado global com os parâmetros finais
+    # -------------------------------------
+    # 📌 Atualizar Estado Global com Parâmetros Configurados
+    # -------------------------------------
+
     st.session_state['manual_params'] = manual_params
-    st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)
+    st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)  # Armazena como JSON formatado
 
-    # Diagnóstico: Exibir parâmetros salvos
+    # Exibir os parâmetros configurados
     st.write("Parâmetros manuais salvos:", st.session_state['manual_params'])
 
     return manual_params
 
+# -------------------------------------
+# 📌 DICIONÁRIO DE PARÂMETROS VÁLIDOS PARA CADA MODELO
+# -------------------------------------
 
-
-
-# Dicionário que mapeia modelos aos seus parâmetros válidos
 VALID_PARAMS = {
-    "Random Forest": ["n_estimators", "max_depth"],
+    "Random Forest": ["n_estimators", "max_depth"],  # Ajustáveis para Random Forest
     "Support Vector Classification (SVC)": ["C", "kernel", "gamma"],  # Agora inclui "gamma"
-    "K-Nearest Neighbors (KNN)": ["n_neighbors", "weights"],
+    "K-Nearest Neighbors (KNN)": ["n_neighbors", "weights"],  # Número de vizinhos e peso das distâncias
     "Regressão Linear Simples (RLS)": [],  # Sem hiperparâmetros ajustáveis
-    "Regressão por Vetores de Suporte (SVR)": ["C", "epsilon", "kernel"],  # Parâmetros ajustáveis para SVR
+    "Regressão por Vetores de Suporte (SVR)": ["C", "epsilon", "kernel"],  # Hiperparâmetros típicos do SVR
 }
 
 
-# Função para configurar a validação cruzada com base na escolha do usuário
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAR A VALIDAÇÃO CRUZADA COM BASE NA ESCOLHA DO UTILIZADOR
+# -------------------------------------
+
 def get_cv_strategy(cv_choice, X_train, y_train):
+    """
+    Retorna a estratégia de validação cruzada com base na escolha do utilizador.
+
+    Parâmetros:
+    - cv_choice: Tipo de validação cruzada selecionado pelo utilizador.
+    - X_train: Dados de treino.
+    - y_train: Labels do conjunto de treino.
+
+    Retorno:
+    - Objeto da estratégia de validação cruzada correspondente.
+    """
+    
     if cv_choice == "K-Fold":
-        return KFold(n_splits=5, shuffle=True, random_state=42)
+        return KFold(n_splits=5, shuffle=True, random_state=42)  # Divide os dados em 5 partes aleatórias
+
     elif cv_choice == "Leave-One-Out":
-        return LeaveOneOut()
+        return LeaveOneOut()  # Usa cada amostra individualmente como conjunto de teste
+
     elif cv_choice == "Divisão em Treino e Teste":
-        # Exemplo de divisão simples em treino e teste
+        # Divide os dados de treino em 70% treino e 30% teste
         return train_test_split(X_train, y_train, test_size=0.3, random_state=42)
+
     elif cv_choice == "Holdout":
-        # Pode ser uma abordagem similar ao treino-teste com outro conjunto
+        # Funciona de forma semelhante ao treino-teste, com um conjunto adicional
         return train_test_split(X_train, y_train, test_size=0.3, random_state=42)
+
     else:
-        return KFold(n_splits=5, shuffle=True, random_state=42)  # Default é K-Fold
+        # Se a escolha for inválida, usa K-Fold como padrão
+        return KFold(n_splits=5, shuffle=True, random_state=42)
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAR MANUALMENTE O SVR (SUPPORT VECTOR REGRESSION)
+# -------------------------------------
 
 def configure_svr(model_key, manual_params):
-    st.write("Configuração de parâmetros para Support Vector Regression (SVR)")
-    
-    # Configurar parâmetros comuns
-    c = st.number_input("Parâmetro C (Regularização)", min_value=0.1, max_value=100.0, step=0.1, value=1.0)
-    epsilon = st.number_input("Parâmetro epsilon", min_value=0.0, max_value=1.0, step=0.1, value=0.1)
-    kernel = st.selectbox("Kernel", options=["linear", "rbf", "poly", "sigmoid"], index=0)
+    """
+    Configuração manual dos parâmetros para o modelo Support Vector Regression (SVR).
 
-    # Salvar os valores no dicionário de parâmetros
+    Parâmetros:
+    - model_key: Nome do modelo (SVR).
+    - manual_params: Dicionário para armazenar os hiperparâmetros configurados pelo utilizador.
+
+    Retorno:
+    - Dicionário manual_params atualizado com os valores escolhidos pelo utilizador.
+    """
+    
+    st.write("Configuração de parâmetros para Support Vector Regression (SVR)")
+
+    # Configuração dos hiperparâmetros principais
+    c = st.number_input(
+        "Parâmetro C (Regularização)", min_value=0.1, max_value=100.0, step=0.1, value=1.0
+    )
+    epsilon = st.number_input(
+        "Parâmetro epsilon", min_value=0.0, max_value=1.0, step=0.1, value=0.1
+    )
+    kernel = st.selectbox(
+        "Escolha o kernel", options=["linear", "rbf", "poly", "sigmoid"], index=0
+    )
+
+    # Guardar os valores no dicionário de parâmetros
     manual_params['C'] = c
     manual_params['epsilon'] = epsilon
     manual_params['kernel'] = kernel
 
-    # Configuração adicional para kernels específicos
+    # Configuração extra para o kernel 'rbf'
     if kernel == "rbf":
-        gamma = st.number_input("Parâmetro gamma", min_value=0.0, max_value=1.0, step=0.1, value=0.1)
+        gamma = st.number_input(
+            "Parâmetro gamma", min_value=0.0, max_value=1.0, step=0.1, value=0.1
+        )
         manual_params['gamma'] = gamma
 
     return manual_params
 
-def configure_svc(model_key, manual_params):
-    """Configura os parâmetros para o modelo SVC."""
+# -------------------------------------
+# 📌 FUNÇÃO PARA CONFIGURAR MANUALMENTE O SVC (SUPPORT VECTOR CLASSIFICATION)
+# -------------------------------------
 
-    # Diagnóstico: Mostrar parâmetros antes da seleção manual
+def configure_svc(model_key, manual_params):
+    """
+    Configuração manual dos parâmetros para o modelo Support Vector Classification (SVC).
+
+    Parâmetros:
+    - model_key: Nome do modelo (SVC).
+    - manual_params: Dicionário para armazenar os hiperparâmetros configurados pelo utilizador.
+
+    Retorno:
+    - Dicionário manual_params atualizado com os valores escolhidos pelo utilizador.
+    """
+
+    # Exibir o estado inicial dos parâmetros (para depuração)
     st.write("Estado inicial dos parâmetros:", st.session_state.get('manual_params', {}))
 
-    # Seleção do kernel
+    # Seleção do tipo de kernel
     kernel_value = st.selectbox(
         "Escolha o valor para 'kernel'",
-        options=["linear", "rbf"],
+        options=["linear", "rbf"],  # Opções disponíveis
         index=0,  # Define 'linear' como padrão
         key="kernel_selectbox"
     )
 
-    # Configurar 'C' (sempre exibido)
+    # Definição do valor de 'C' (Parâmetro de regularização)
     C_value = st.number_input(
         "Defina o valor para 'C'",
         min_value=0.01, step=0.01, value=1.0,
         key="C_input"
     )
 
-    # Inicializa manual_params com 'C' e 'kernel'
+    # Inicializar manual_params com os valores escolhidos
     manual_params = {
         "C": C_value,
         "kernel": kernel_value
@@ -1594,281 +2329,409 @@ def configure_svc(model_key, manual_params):
     if kernel_value == "rbf":
         gamma_value = st.selectbox(
             "Escolha o valor para 'gamma'",
-            options=["scale", "auto"],
+            options=["scale", "auto"],  # Opções disponíveis
             index=0,
             key="gamma_selectbox"
         )
-        manual_params["gamma"] = gamma_value  # Adiciona gamma se necessário
+        manual_params["gamma"] = gamma_value  # Adiciona 'gamma' se necessário
+
     else:
         # **Remover 'gamma' se o kernel for 'linear'**
         # Remover do manual_params local
         manual_params.pop('gamma', None)
-        # Remover do estado global
+        
+        # Remover do estado global (caso tenha sido armazenado anteriormente)
         if 'manual_params' in st.session_state and 'gamma' in st.session_state['manual_params']:
             del st.session_state['manual_params']['gamma']  # Remove globalmente
-        if 'best_params_str' in st.session_state:  # Remove dos parâmetros salvos
+            
+        if 'best_params_str' in st.session_state:  # Remove dos parâmetros guardados
             st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)
 
-    # Diagnóstico: Mostrar parâmetros após a seleção manual
+    # Exibir os parâmetros atualizados após a seleção manual
     st.write("Parâmetros atualizados:", manual_params)
 
-    # Salvar no estado global apenas parâmetros válidos
+    # **Guardar os parâmetros configurados no estado global**
     st.session_state['manual_params'] = manual_params
     st.session_state['best_params_str'] = json.dumps(manual_params, indent=2)
 
-    # Exibir os parâmetros salvos para depuração
+    # Exibir os parâmetros guardados para depuração
     st.write("Parâmetros manuais salvos:", st.session_state['manual_params'])
 
     return manual_params
 
+
 import pickle
 import os
 
+# -------------------------------------
+# 📌 FUNÇÕES PARA GUARDAR E CARREGAR OS MELHORES PARÂMETROS
+# -------------------------------------
+
 def save_best_params(params):
-    """Salva os melhores parâmetros encontrados em um arquivo."""
+    """
+    Guarda os melhores hiperparâmetros encontrados num ficheiro pickle.
+
+    Parâmetros:
+    - params (dict): Dicionário contendo os melhores hiperparâmetros.
+    
+    Retorno:
+    - Nenhum (apenas salva os dados).
+    """
     with open('best_params.pkl', 'wb') as f:
         pickle.dump(params, f)
 
 def load_best_params():
-    """Carrega os melhores parâmetros salvos, se existirem."""
+    """
+    Carrega os melhores hiperparâmetros previamente guardados, se existirem.
+
+    Retorno:
+    - dict: Dicionário contendo os melhores hiperparâmetros, ou None se não existirem parâmetros guardados.
+    """
     if os.path.exists('best_params.pkl'):
         with open('best_params.pkl', 'rb') as f:
             return pickle.load(f)
     return None
 
 
+# -------------------------------------
+# 📌 FUNÇÃO PARA TREINAR UM MODELO SVR COM OU SEM GRID SEARCH
+# -------------------------------------
+
 def train_svr_with_gridsearch(X_train, y_train, X_test, y_test, use_grid_search=True, manual_params=None):
     """
-    Train Support Vector Regression (SVR) model with optional GridSearchCV
-    
-    Parameters:
+    Treina um modelo de Support Vector Regression (SVR) com ou sem otimização de hiperparâmetros via GridSearchCV.
+
+    Parâmetros:
     -----------
-    X_train : array-like
-        Training feature matrix
-    y_train : array-like
-        Training target vector
-    X_test : array-like
-        Testing feature matrix
-    y_test : array-like
-        Testing target vector
-    use_grid_search : bool, optional (default=True)
-        Whether to use GridSearchCV for hyperparameter tuning
-    manual_params : dict, optional
-        Manually specified parameters to override GridSearch
-    
-    Returns:
+    - X_train : array-like
+        Matriz de features do conjunto de treino.
+    - y_train : array-like
+        Vetor de rótulos do conjunto de treino.
+    - X_test : array-like
+        Matriz de features do conjunto de teste.
+    - y_test : array-like
+        Vetor de rótulos do conjunto de teste.
+    - use_grid_search : bool (padrão=True)
+        Define se será utilizada a busca de hiperparâmetros via GridSearchCV.
+    - manual_params : dict (opcional)
+        Parâmetros especificados manualmente para substituir o GridSearch.
+
+    Retorno:
     --------
-    dict
-        Dictionary containing model performance metrics and details
+    - dict:
+        Dicionário contendo as métricas de desempenho do modelo treinado e os melhores hiperparâmetros encontrados.
     """
     try:
-        # Standardize the features
+        # -------------------------------------
+        # 📌 1. Padronizar os dados de entrada (necessário para SVR)
+        # -------------------------------------
         scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
-        
-        # Base SVR model
+        X_train_scaled = scaler.fit_transform(X_train)  # Ajusta e transforma os dados de treino
+        X_test_scaled = scaler.transform(X_test)  # Apenas transforma os dados de teste com os mesmos parâmetros
+
+        # -------------------------------------
+        # 📌 2. Definir o modelo base SVR
+        # -------------------------------------
         svr = SVR()
-        
-        # Default parameter grid for SVR
+
+        # -------------------------------------
+        # 📌 3. Definir o grid de hiperparâmetros padrão para SVR
+        # -------------------------------------
         param_grid = {
-            'C': [0.1, 1, 10, 100],
-            'epsilon': [0.01, 0.1, 0.2],
-            'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']
+            'C': [0.1, 1, 10, 100],  # Parâmetro de regularização
+            'epsilon': [0.01, 0.1, 0.2],  # Margem de erro permitida
+            'kernel': ['linear', 'rbf'],  # Tipos de kernel suportados
+            'gamma': ['scale', 'auto']  # Ajuste da largura da função kernel
         }
-        
-        # If manual parameters are provided, update the param_grid
+
+        # Se o utilizador forneceu parâmetros manuais, substituir os valores no grid
         if manual_params:
             for param, value in manual_params.items():
-                # Ensure the value is a list for GridSearchCV
+                # Garante que o valor seja uma lista para compatibilidade com o GridSearchCV
                 param_grid[param] = [value] if not isinstance(value, list) else value
-        
-        # Cross-validation strategy
-        cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-        
+
+        # -------------------------------------
+        # 📌 4. Definir a estratégia de validação cruzada
+        # -------------------------------------
+        cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)  # Divide os dados em 5 partes
+
+        # -------------------------------------
+        # 📌 5. Escolher entre GridSearchCV ou parâmetros manuais
+        # -------------------------------------
         if use_grid_search:
-            # Perform GridSearchCV
+            # Executar GridSearchCV para encontrar os melhores hiperparâmetros
             grid_search = GridSearchCV(
                 estimator=svr, 
                 param_grid=param_grid, 
                 cv=cv_strategy, 
-                scoring='neg_mean_squared_error', 
-                n_jobs=-1
+                scoring='neg_mean_squared_error',  # Critério de avaliação (erro quadrático médio negativo)
+                n_jobs=-1  # Utilizar todos os processadores disponíveis
             )
             grid_search.fit(X_train_scaled, y_train)
-            
-            # Best model from GridSearch
+
+            # Melhor modelo encontrado pelo GridSearch
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
+        
         else:
-            # Use manual or default parameters
+            # Aplicar parâmetros manuais, caso existam
             if manual_params:
                 svr.set_params(**manual_params)
-            
+
+            # Treinar o modelo diretamente sem GridSearch
             best_model = svr.fit(X_train_scaled, y_train)
             best_params = manual_params or {}
-        
-        # Make predictions
+
+        # -------------------------------------
+        # 📌 6. Fazer previsões no conjunto de teste
+        # -------------------------------------
         y_pred = best_model.predict(X_test_scaled)
-        
-        # Calculate metrics
-        mse = mean_squared_error(y_test, y_pred)
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        
-        # Prepare metrics dictionary
+
+        # -------------------------------------
+        # 📌 7. Calcular métricas de desempenho
+        # -------------------------------------
+        mse = mean_squared_error(y_test, y_pred)  # Erro Quadrático Médio
+        mae = mean_absolute_error(y_test, y_pred)  # Erro Absoluto Médio
+        r2 = r2_score(y_test, y_pred)  # R² Score (coeficiente de determinação)
+
+        # -------------------------------------
+        # 📌 8. Criar um dicionário com as métricas do modelo
+        # -------------------------------------
         metrics = {
             "Modelo": "Support Vector Regression (SVR)",
             "R²": r2,
             "MAE": mae,
             "MSE": mse,
-            "Best Parameters": best_params
+            "Best Parameters": best_params  # Hiperparâmetros utilizados
         }
-        
-        return metrics
+
+        return metrics  # Retorna as métricas para análise
     
     except Exception as e:
-        st.error(f"Erro ao treinar o modelo SVR: {str(e)}")
+        st.error(f"Erro ao treinar o modelo SVR: {str(e)}")  # Exibir erro no Streamlit caso ocorra
         return None
 
+
 def train_model_with_gridsearch(model, param_grid, X_train, y_train, use_grid_search, manual_params=None, cv_choice="K-Fold"):
+    """
+    Treina um modelo de Machine Learning com ou sem otimização de hiperparâmetros via GridSearchCV.
+
+    Parâmetros:
+    -----------
+    - model : objeto do modelo
+        Modelo de Machine Learning a ser treinado (ex: RandomForest, SVC, SVR, etc.).
+    - param_grid : dict
+        Dicionário contendo os hiperparâmetros a serem ajustados.
+    - X_train : array-like
+        Matriz de features do conjunto de treino.
+    - y_train : array-like
+        Vetor de rótulos do conjunto de treino.
+    - use_grid_search : bool
+        Define se será utilizada a busca de hiperparâmetros via GridSearchCV.
+    - manual_params : dict (opcional)
+        Parâmetros especificados manualmente para substituir o GridSearch.
+    - cv_choice : str (padrão="K-Fold")
+        Método de validação cruzada a ser utilizado.
+
+    Retorno:
+    --------
+    - best_model : objeto do modelo treinado
+        Melhor modelo encontrado após o treino.
+    - best_params : dict
+        Dicionário com os melhores hiperparâmetros utilizados.
+    """
     try:
-        # Inicializar parâmetros manuais como vazio, se não fornecido
+        # -------------------------------------
+        # 📌 1. Inicializar parâmetros manuais, caso não tenham sido fornecidos
+        # -------------------------------------
         if manual_params is None:
             manual_params = {}
 
         # Obter o nome do modelo
         model_name = type(model).__name__
 
-        # Logs para diagnóstico - Parâmetros no estado global antes do treino
-        st.write("Parâmetros no estado global antes do treino:")
-        st.write("best_params:", st.session_state.get('best_params', {}))
-        st.write("manual_params:", st.session_state.get('manual_params', {}))
+        # Diagnóstico: Exibir parâmetros no estado global antes do treino
+        st.write("🔍 Parâmetros no estado global antes do treino:")
+        st.write("✅ best_params:", st.session_state.get('best_params', {}))
+        st.write("✅ manual_params:", st.session_state.get('manual_params', {}))
 
-        # Carregar parâmetros salvos do estado global
+        # -------------------------------------
+        # 📌 2. Carregar parâmetros previamente guardados, se existirem
+        # -------------------------------------
         saved_params = st.session_state.get('best_params', None)
 
-        # Aplicar parâmetros salvos, se existirem e não usar GridSearch
+        # Se houver parâmetros guardados e GridSearch não for utilizado, aplicar os parâmetros salvos
         if saved_params and not use_grid_search:
-            st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
+            st.info(f"ℹ️ Aplicando parâmetros salvos ao modelo: {saved_params}")
             model.set_params(**saved_params)
 
-        # Remover 'gamma' se o kernel for 'linear'
+        # -------------------------------------
+        # 📌 3. Ajustar manualmente parâmetros incompatíveis
+        # -------------------------------------
+        # Se o modelo for SVM e o kernel for 'linear', o parâmetro 'gamma' não é necessário
         if manual_params.get("kernel") == "linear" and "gamma" in manual_params:
             del manual_params["gamma"]
+
+            # Remover 'gamma' do estado global, se presente
             if 'gamma' in st.session_state.get('manual_params', {}):
                 del st.session_state['manual_params']['gamma']
 
-        # Se usar GridSearch
+        # -------------------------------------
+        # 📌 4. Treinar modelo com GridSearchCV (se ativado)
+        # -------------------------------------
         if use_grid_search:
-            # Atualizar grid com parâmetros manuais fornecidos
+            # Atualizar o grid de hiperparâmetros com os valores fornecidos manualmente
             if manual_params:
                 for param, value in manual_params.items():
-                    if not isinstance(value, list):
+                    if not isinstance(value, list):  # Garantir que o valor seja uma lista para compatibilidade com GridSearch
                         manual_params[param] = [value]
                 param_grid.update(manual_params)
 
-            # Configurar validação cruzada
+            # Definir estratégia de validação cruzada
             cv_strategy = get_cv_strategy(cv_choice, X_train, y_train)
+
+            # Definir métrica de avaliação (R² para regressão, accuracy para classificação)
             scoring = 'r2' if model_name == "SVR" else 'accuracy'
 
-            # Treinar com GridSearch
-            grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_strategy, scoring=scoring, n_jobs=-1)
+            # Configurar GridSearchCV para encontrar os melhores hiperparâmetros
+            grid_search = GridSearchCV(
+                estimator=model, 
+                param_grid=param_grid, 
+                cv=cv_strategy, 
+                scoring=scoring, 
+                n_jobs=-1  # Utilizar todos os processadores disponíveis
+            )
             grid_search.fit(X_train, y_train)
 
-            # Melhor modelo e parâmetros
+            # Extrair melhor modelo e hiperparâmetros encontrados
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
+
+            # Guardar os melhores parâmetros no estado global
             st.session_state['best_params'] = best_params
-            st.success(f"Melhores parâmetros encontrados: {best_params}")
+            st.success(f"🎯 Melhores parâmetros encontrados: {best_params}")
 
             return best_model, best_params
 
+        # -------------------------------------
+        # 📌 5. Treinar modelo sem GridSearch (caso desativado)
+        # -------------------------------------
         else:
-            # Se não usar GridSearch, aplicar manualmente os parâmetros
+            # Filtrar apenas os parâmetros válidos para o modelo
             valid_params = model.get_params().keys()
             manual_params = {k: v for k, v in manual_params.items() if k in valid_params}
+
+            # Aplicar os parâmetros escolhidos manualmente
             model.set_params(**manual_params)
 
-            # Treinar diretamente
+            # Treinar o modelo diretamente sem GridSearch
             model.fit(X_train, y_train)
 
-            # Salvar parâmetros manuais no estado global
+            # Guardar os parâmetros manuais no estado global
             st.session_state['manual_params'] = manual_params
-            st.success(f"Parâmetros manuais salvos: {manual_params}")
+            st.success(f"📝 Parâmetros manuais salvos: {manual_params}")
 
             return model, manual_params
 
+    # -------------------------------------
+    # 📌 6. Capturar e exibir erros, caso ocorram
+    # -------------------------------------
     except Exception as e:
-        st.error(f"Ocorreu um erro ao treinar o modelo: {str(e)}")
+        st.error(f"❌ Ocorreu um erro ao treinar o modelo: {str(e)}")
         return None, None
+
 
 # Função para calcular o Gap Statistic para o Clustering Hierárquico
 def calculate_gap_statistic_hierarchical(X, n_clusters_range, n_ref=10):
     """
-    Calcula o Gap Statistic para o AgglomerativeClustering.
-    
+    Calcula a estatística de Gap (Gap Statistic) para o algoritmo AgglomerativeClustering.
+
     Parâmetros:
-        X (ndarray): Dados de entrada (n_samples x n_features).
-        n_clusters_range (tuple): Intervalo de números de clusters para avaliar.
-        n_ref (int): Número de amostras de referência aleatórias a serem geradas.
-    
-    Retorna:
-        gap_scores (list): Gap statistics para cada número de clusters.
+    -----------
+    - X (ndarray): Dados de entrada no formato (n_samples x n_features).
+    - n_clusters_range (tuple): Intervalo de números de clusters a serem avaliados, ex: (2, 10).
+    - n_ref (int, padrão=10): Número de amostras de referência aleatórias geradas para cálculo do Gap.
+
+    Retorno:
+    --------
+    - gap_scores (list): Lista com os valores de Gap Statistic para cada número de clusters avaliado.
     """
-    # Normalizar os dados
+    # -------------------------------------
+    # 📌 1. Normalizar os dados antes do clustering
+    # -------------------------------------
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    
-    # Armazenar os Gap Statistic Scores
+
+    # Lista para armazenar os valores de Gap Statistic
     gap_scores = []
-    
+
+    # -------------------------------------
+    # 📌 2. Avaliar diferentes números de clusters
+    # -------------------------------------
     for n_clusters in range(n_clusters_range[0], n_clusters_range[1] + 1):
-        # Ajustar o modelo AgglomerativeClustering aos dados reais
+        # **Ajustar o modelo AgglomerativeClustering aos dados reais**
         model = AgglomerativeClustering(n_clusters=n_clusters)
         model.fit(X_scaled)
         labels = model.labels_
-        
-        # Calcular a soma das distâncias dos pontos aos seus respectivos clusters
-        intra_cluster_dist = sum([np.sum(np.linalg.norm(X_scaled[labels == i] - X_scaled[labels == i].mean(axis=0), axis=1)) for i in range(n_clusters)])
-        
-        # Gerar amostras de referência aleatórias e calcular as distâncias dentro dos clusters aleatórios
+
+        # **Calcular a soma das distâncias intra-cluster**
+        intra_cluster_dist = sum([
+            np.sum(np.linalg.norm(X_scaled[labels == i] - X_scaled[labels == i].mean(axis=0), axis=1))
+            for i in range(n_clusters)
+        ])
+
+        # -------------------------------------
+        # 📌 3. Criar conjuntos de dados de referência aleatórios
+        # -------------------------------------
         ref_inertias = []
         for _ in range(n_ref):
+            # Gerar dados aleatórios no mesmo espaço dimensional
             random_data = np.random.random_sample(size=X_scaled.shape)
+
+            # Aplicar AgglomerativeClustering nos dados aleatórios
             random_model = AgglomerativeClustering(n_clusters=n_clusters)
             random_model.fit(random_data)
             ref_labels = random_model.labels_
-            ref_inertia = sum([np.sum(np.linalg.norm(random_data[ref_labels == i] - random_data[ref_labels == i].mean(axis=0), axis=1)) for i in range(n_clusters)])
+
+            # **Calcular a soma das distâncias intra-cluster para os dados aleatórios**
+            ref_inertia = sum([
+                np.sum(np.linalg.norm(random_data[ref_labels == i] - random_data[ref_labels == i].mean(axis=0), axis=1))
+                for i in range(n_clusters)
+            ])
             ref_inertias.append(ref_inertia)
-        
-        # Calcular a média e o desvio padrão das inércias nos dados aleatórios
+
+        # -------------------------------------
+        # 📌 4. Calcular a estatística de Gap
+        # -------------------------------------
+        # Média e desvio padrão das inércias dos clusters aleatórios
         ref_inertia_mean = np.mean(ref_inertias)
         ref_inertia_std = np.std(ref_inertias)
-        
+
         # Gap Statistic: diferença entre a inércia real e a média das inércias aleatórias
         gap = np.log(ref_inertia_mean) - np.log(intra_cluster_dist)
         gap_scores.append(gap)
-    
-    return gap_scores
 
+    return gap_scores
 
 
 # Função para a seleção e treino de modelos
 def model_selection():
-    st.subheader("Seleção e treino de Modelos")
+    """
+    Esta função permite ao utilizador selecionar e treinar um modelo de Machine Learning 
+    através da interface do Streamlit.
+    """
+    st.subheader("Seleção e Treino de Modelos")
 
-    # Verificar se os dados estão disponíveis
+    # 📌 1. Verificação se os dados estão disponíveis
     if 'data' not in st.session_state or st.session_state.data is None:
         st.error("Dados não encontrados. Por favor, carregue os dados primeiro.")
         return
 
-    # Usa diretamente st.session_state.data
+    # Obter os dados e as colunas disponíveis
     data = st.session_state.data
     columns = data.columns.tolist()
-    
-    # Inicializar variáveis de estado se não estiverem presentes
+
+    # 📌 2. Inicializar variáveis de estado caso não existam
     if 'target_column' not in st.session_state:
         st.session_state.target_column = None
     if 'target_column_confirmed' not in st.session_state:
@@ -1892,11 +2755,10 @@ def model_selection():
     if 'feature_selection_done' not in st.session_state:
         st.session_state.feature_selection_done = False
 
-    # Configurações
+    # 📌 3. Configurações gerais
     st.write("### Configurações")
 
-
-    # 1. Escolha do Tipo de Modelo
+    # 📌 4. Escolha do Tipo de Modelo
     if not st.session_state.model_type_confirmed:
         st.write("Escolha o Tipo de Modelo")
         model_types = ["Classificação", "Regressão", "Clustering"]
@@ -1906,11 +2768,11 @@ def model_selection():
             st.session_state.model_type_confirmed = True
             st.success("Tipo de modelo confirmado!")
 
-    # 2. Escolha do Modelo Específico
+    # 📌 5. Escolha do Modelo Específico
     if st.session_state.model_type_confirmed and not st.session_state.selected_model_name:
         st.write("Selecione o(s) Modelo(s)")
 
-        # Modelos disponíveis com base no tipo selecionado
+        # Dicionário com os modelos disponíveis para cada tipo
         if st.session_state.model_type == "Classificação":
             models = {
                 "Support Vector Classification (SVC)": SVC(),
@@ -1928,21 +2790,16 @@ def model_selection():
                 "Clustering Hierárquico": AgglomerativeClustering(linkage='ward'),
             }
 
-        # Armazena os modelos no session_state para uso posterior
+        # Armazena os modelos no estado da sessão para uso posterior
         st.session_state.models = models
-        
 
-        # Condicional para exibir ou não a opção "Treinar todos os modelos"
-        if st.session_state.model_type != "Clustering":
-            model_options = list(models.keys()) 
-        else:
-            model_options = list(models.keys())  # Apenas os modelos de clustering
+        # 📌 6. Criar lista de opções de modelos disponíveis
+        model_options = list(models.keys())  # Lista com os nomes dos modelos
 
-        default_model_name = st.session_state["model_name"]
-        if default_model_name not in model_options:
-            default_model_name = model_options[0]  # Corrigir para um valor válido
+        # Definir o modelo predefinido para evitar erro de índice
+        default_model_name = st.session_state.get("model_name", model_options[0])
 
-        # Configurar o selectbox
+        # Criar menu de seleção do modelo
         model_name = st.selectbox(
             "Selecione o modelo", 
             options=model_options, 
@@ -1950,11 +2807,11 @@ def model_selection():
             index=model_options.index(default_model_name)
         )
 
-        # Atualizar o estado do modelo selecionado
+        # Atualizar o estado global do modelo selecionado
         st.session_state["model_name"] = model_name
         st.session_state.model_name = model_name
 
-        # Botão para confirmar o modelo
+        # 📌 7. Botão para confirmar o modelo selecionado
         if st.button("Confirmar Modelo"):
             if model_name:  # Verifica se um modelo foi selecionado
                 st.session_state.selected_model_name = model_name
@@ -1962,29 +2819,28 @@ def model_selection():
             else:
                 st.warning("Selecione um modelo antes de continuar.")
 
-
     # Função para a configuração de Clustering
     import pandas as pd
     from sklearn.decomposition import PCA
     import numpy as np
-
-    # Inicializar a variável `best_n_clusters_retrain` com um valor padrão
+    
+    # Inicializar a variável best_n_clusters_retrain com um valor padrão
     best_n_clusters_retrain = None
-
-    # Inicializar estados se não existirem
+    
+    # Inicializar estados se ainda não existirem
     if 'pca_configured' not in st.session_state:
         st.session_state.pca_configured = False
     if 'ready_for_clustering' not in st.session_state:
         st.session_state.ready_for_clustering = False
-
-    # Função para a configuração de Clustering
+    
+    # Verifica se o modelo selecionado é de Clustering e se há um modelo escolhido
     if st.session_state.model_type == "Clustering" and st.session_state.selected_model_name:
         st.write("### Configuração para Clustering")
-
-        # Dados categóricos codificados
+    
+        # Codificar variáveis categóricas para representação numérica
         X = pd.get_dummies(st.session_state.data)
-
-        # Padronizar os dados
+    
+        # Padronizar os dados para melhorar a eficácia dos algoritmos de clustering
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
@@ -1993,11 +2849,11 @@ def model_selection():
         if st.session_state.selected_model_name == "Clustering Hierárquico" and not st.session_state.pca_configured:
             st.write("### Redução de Dimensionalidade com PCA para Clustering Hierárquico")
             
-            # Verificar se o dataset é grande o suficiente para um aviso
+            # Verificar se o dataset é grande o suficiente para exigir PCA
             if X.shape[0] > 1000 or X.shape[1] > 10:
-                st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é necessária para Clustering Hierárquico.")
+                st.warning(f"Atenção: O seu dataset tem {X.shape[0]} registos e {X.shape[1]} dimensões. A aplicação de PCA pode ser necessária para otimizar o desempenho do Clustering Hierárquico.")
             
-            # Permitir ao usuário escolher o número de componentes ou usar valor automático
+            # Permitir ao utilizador escolher o número de componentes ou utilizar um valor automático
             use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True, key="auto_comp_hierarch")
             
             if use_auto_components:
@@ -2006,13 +2862,13 @@ def model_selection():
                 explained_variance_ratio = pca_full.explained_variance_ratio_
                 cumulative_variance = np.cumsum(explained_variance_ratio)
                 
-                # Encontrar o número de componentes que explicam pelo menos 90% da variância
+                # Determinar o número de componentes que explicam pelo menos 90% da variância
                 n_components = np.argmax(cumulative_variance >= 0.9) + 1
                 n_components = min(n_components, 10)  # Limitar a no máximo 10 componentes
                 
                 st.write(f"Número de componentes selecionados automaticamente: {n_components} (explica aproximadamente {cumulative_variance[n_components-1]*100:.1f}% da variância)")
                 
-                # Mostrar gráfico de variância explicada
+                # Criar um gráfico para visualizar a variância explicada
                 fig, ax = plt.subplots(figsize=(8, 4))
                 ax.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='-')
                 ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variância Explicada')
@@ -2024,7 +2880,7 @@ def model_selection():
                 st.pyplot(fig)
                 plt.clf()
             else:
-                # Permitir que o usuário escolha o número de componentes
+                # Permitir que o utilizador escolha manualmente o número de componentes
                 max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
                 n_components = st.slider("Número de componentes PCA para Hierárquico", 2, max_components, value=min(3, max_components), key="n_comp_hierarch")
             
@@ -2034,7 +2890,7 @@ def model_selection():
                 pca = PCA(n_components=n_components)
                 X_pca = pca.fit_transform(X_scaled)
                 
-                # Salvar no estado da sessão
+                # Guardar os dados transformados e as configurações no estado da sessão
                 st.session_state.X_pca = X_pca
                 st.session_state.pca_n_components = n_components
                 st.session_state.pca_configured = True
@@ -2043,11 +2899,11 @@ def model_selection():
                 
                 st.success(f"PCA configurado com sucesso! Dimensionalidade reduzida de {X_scaled.shape[1]} para {X_pca.shape[1]} componentes.")
                 
-                # Visualização 2D dos dados com PCA se tivermos pelo menos 2 componentes
+                # Visualizar os dados após a aplicação do PCA se tivermos pelo menos 2 componentes
                 if n_components >= 2:
                     st.write("### Visualização dos Dados Após PCA")
                     
-                    # Permitir que o usuário escolha quais componentes visualizar
+                    # Permitir ao utilizador escolher os componentes a visualizar
                     available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
                     
                     component_x = st.selectbox(
@@ -2066,7 +2922,7 @@ def model_selection():
                         key="comp_y_hierarch"
                     )
                     
-                    # Criar a visualização 2D baseada nos componentes escolhidos
+                    # Criar um gráfico de dispersão com os componentes escolhidos
                     fig, ax = plt.subplots(figsize=(10, 6))
                     scatter = ax.scatter(X_pca[:, component_x], X_pca[:, component_y], alpha=0.7)
                     ax.set_xlabel(f'Componente Principal {component_x+1}', fontsize=12)
@@ -2074,7 +2930,7 @@ def model_selection():
                     ax.set_title(f'Visualização 2D dos Componentes PCA {component_x+1} e {component_y+1}', fontsize=14, fontweight='bold')
                     ax.grid(True, linestyle='--', alpha=0.7)
                     
-                    # Mostrar a variância explicada por estes componentes
+                    # Mostrar a variância explicada por cada componente escolhido
                     if hasattr(pca, 'explained_variance_ratio_'):
                         var_x = pca.explained_variance_ratio_[component_x] * 100
                         var_y = pca.explained_variance_ratio_[component_y] * 100
@@ -2084,36 +2940,36 @@ def model_selection():
                     plt.tight_layout()
                     st.pyplot(fig)
                     plt.clf()
-
-            # Botão para avançar para a configuração do clustering (fora do if anterior)
-                if st.button("Prosseguir para Clustering"):
-                    st.session_state.ready_for_clustering = True
-                    st.rerun()
-            
+    
+            # Botão para avançar para a configuração do clustering
+            if st.button("Prosseguir para Clustering"):
+                st.session_state.ready_for_clustering = True
+                st.rerun()
+           
         # ETAPA 1: Configuração do PCA para KMeans
         if st.session_state.selected_model_name == "KMeans" and not st.session_state.pca_configured:
             st.write("### Redução de Dimensionalidade com PCA")
             
-            # Verificar se o dataset é grande o suficiente para um aviso
+            # Verificar se o dataset é grande e pode beneficiar do PCA
             if X.shape[0] > 1000 or X.shape[1] > 10:
-                st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é altamente recomendada.")
-            
-            # Permitir ao usuário escolher o número de componentes ou usar valor automático
+                st.warning(f"Atenção: O seu dataset tem {X.shape[0]} registos e {X.shape[1]} dimensões. A aplicação de PCA é altamente recomendada para melhorar a eficiência do modelo.")
+        
+            # Permitir ao utilizador escolher entre uma determinação automática ou manual do número de componentes
             use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True)
-            
+        
             if use_auto_components:
-                # Calcular o PCA para determinar a variância explicada
+                # Calcular o PCA para determinar a variância explicada por cada componente
                 pca_full = PCA().fit(X_scaled)
                 explained_variance_ratio = pca_full.explained_variance_ratio_
                 cumulative_variance = np.cumsum(explained_variance_ratio)
-                
-                # Encontrar o número de componentes que explicam pelo menos 90% da variância
+        
+                # Determinar o número de componentes necessários para explicar pelo menos 90% da variância total
                 n_components = np.argmax(cumulative_variance >= 0.9) + 1
                 n_components = min(n_components, 10)  # Limitar a no máximo 10 componentes
-                
+        
                 st.write(f"Número de componentes selecionados automaticamente: {n_components} (explica aproximadamente {cumulative_variance[n_components-1]*100:.1f}% da variância)")
                 
-                # Mostrar gráfico de variância explicada
+                # Criar um gráfico para visualizar a variância explicada pelos componentes do PCA
                 fig, ax = plt.subplots(figsize=(8, 4))
                 ax.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='-')
                 ax.axhline(y=0.9, color='r', linestyle='--', label='90% Variância Explicada')
@@ -2125,165 +2981,177 @@ def model_selection():
                 st.pyplot(fig)
                 plt.clf()
             else:
-                # Permitir que o usuário escolha o número de componentes
+                # Permitir ao utilizador selecionar manualmente o número de componentes a utilizar
                 max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
                 n_components = st.slider("Número de componentes PCA", 2, max_components, value=min(3, max_components))
-            
+        
             # Botão para confirmar a configuração do PCA
             if st.button("Confirmar Configuração do PCA"):
-                # Aplicar PCA com o número de componentes escolhido
+                # Aplicar o PCA com o número de componentes escolhido
                 pca = PCA(n_components=n_components)
                 X_pca = pca.fit_transform(X_scaled)
-                
-                # Salvar no estado da sessão
+        
+                # Guardar os dados transformados e as configurações no estado da sessão
                 st.session_state.X_pca = X_pca
                 st.session_state.pca_n_components = n_components
                 st.session_state.pca_configured = True
                 st.session_state.pca_model = pca
                 st.session_state.explained_variance = pca.explained_variance_ratio_
-                
+        
                 st.success(f"PCA configurado com sucesso! Dimensionalidade reduzida de {X_scaled.shape[1]} para {X_pca.shape[1]} componentes.")
-                
-                # Visualização 2D e 3D simultânea dos dados com PCA se tivermos pelo menos 2 componentes
+        
+                # Visualização 2D dos dados após PCA, caso tenhamos pelo menos 2 componentes
                 if n_components >= 2:
                     st.write("### Visualização dos Dados Após PCA")
-                    
-                    # Permitir que o usuário escolha quais componentes visualizar
+        
+                    # Permitir ao utilizador escolher os componentes a visualizar
                     available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
-                    
+        
                     component_x = st.selectbox(
                         "Escolha o componente para o eixo X:",
                         options=list(range(available_components)),
                         format_func=lambda x: f"Componente {x+1}",
                         index=0
                     )
-                    
+        
                     component_y = st.selectbox(
                         "Escolha o componente para o eixo Y:",
                         options=list(range(available_components)),
                         format_func=lambda x: f"Componente {x+1}",
                         index=1 if available_components > 1 else 0
                     )
-                    
-                    # Criar a visualização 2D baseada nos componentes escolhidos
+        
+                    # Criar um gráfico de dispersão com os componentes escolhidos
                     fig, ax = plt.subplots(figsize=(10, 6))
                     scatter = ax.scatter(X_pca[:, component_x], X_pca[:, component_y], alpha=0.7)
                     ax.set_xlabel(f'Componente Principal {component_x+1}', fontsize=12)
                     ax.set_ylabel(f'Componente Principal {component_y+1}', fontsize=12)
                     ax.set_title(f'Visualização 2D dos Componentes PCA {component_x+1} e {component_y+1}', fontsize=14, fontweight='bold')
                     ax.grid(True, linestyle='--', alpha=0.7)
-                    
-                    # Mostrar a variância explicada por estes componentes (se disponível)
+        
+                    # Exibir a variância explicada pelos componentes selecionados, se disponível
                     if hasattr(pca, 'explained_variance_ratio_'):
                         var_x = pca.explained_variance_ratio_[component_x] * 100
                         var_y = pca.explained_variance_ratio_[component_y] * 100
                         ax.set_xlabel(f'Componente Principal {component_x+1} ({var_x:.1f}% variância)', fontsize=12)
                         ax.set_ylabel(f'Componente Principal {component_y+1} ({var_y:.1f}% variância)', fontsize=12)
-                    
+        
                     plt.tight_layout()
                     st.pyplot(fig)
                     plt.clf()
-
+        
                 # Botão para avançar para a configuração do clustering
                 if st.button("Prosseguir para Clustering"):
                     st.session_state.ready_for_clustering = True
                     st.rerun()
-        
+    
         # ETAPA 2: Configuração do Clustering (após o PCA para Hierarchical ou diretamente para K-means)
         elif st.session_state.selected_model_name == "KMeans" or (st.session_state.selected_model_name == "Clustering Hierárquico" and st.session_state.pca_configured):
-            # Escolher o intervalo de clusters (reduzido de 2-20 para 2-10 por padrão para ser menos pesado)
-            num_clusters_range = st.slider("Intervalo de clusters para explorar (para análise)", 2, 10, (2, 6))
             
-            # Preparar dados para análise
+            # Escolher o intervalo de clusters a explorar (reduzido para 2-10 por padrão para evitar processamento excessivo)
+            num_clusters_range = st.slider("Intervalo de clusters para explorar (para análise)", 2, 10, (2, 6))
+        
+            # Definir os dados de treino conforme o método de clustering escolhido
             if st.session_state.selected_model_name == "Clustering Hierárquico":
-                # Para clustering hierárquico, usar dados com PCA
+                # Se for Clustering Hierárquico, usar os dados transformados pelo PCA
                 training_data = st.session_state.X_pca
             else:
-                # Para K-means, usar dados originais
+                # Se for K-Means, utilizar os dados normalizados sem PCA
                 training_data = X_scaled
-            
-            # Opção para usar amostragem para análise mais rápida
+        
+            # Opção para utilizar amostragem, permitindo uma análise mais rápida
             use_sampling = st.checkbox("Usar amostragem dos dados para análise mais rápida", value=True)
             if use_sampling:
+                # Permitir ao utilizador selecionar o tamanho da amostra para análise
                 sample_size = st.slider("Tamanho da amostra", 
-                                    min_value=min(100, training_data.shape[0]),
-                                    max_value=min(2000, training_data.shape[0]),
-                                    value=min(1000, training_data.shape[0]))
-                # Realizar amostragem
-                np.random.seed(42)  # Para reprodutibilidade
+                                        min_value=min(100, training_data.shape[0]),
+                                        max_value=min(2000, training_data.shape[0]),
+                                        value=min(1000, training_data.shape[0]))
+                
+                # Realizar a amostragem aleatória dos dados
+                np.random.seed(42)  # Para garantir reprodutibilidade dos resultados
                 sample_indices = np.random.choice(training_data.shape[0], sample_size, replace=False)
                 analysis_data = training_data[sample_indices]
                 st.info(f"Usando {sample_size} pontos ({sample_size/training_data.shape[0]:.1%} dos dados) para análise.")
             else:
+                # Caso a amostragem não seja ativada, utilizar todos os dados disponíveis
                 analysis_data = training_data
-            
-            # Análise de clusters
+        
+            # Início da análise para determinar o número ideal de clusters
             st.write("### Análise para Determinação do Número de Clusters")
+        
+            # Inicializar listas para armazenar as métricas de avaliação dos clusters
             silhouette_scores = []
             davies_bouldin_scores = []
             calinski_harabasz_scores = []
-
-            # Adicionar barra de progresso
+        
+            # Criar uma barra de progresso e um espaço para atualizar o status do processamento
             progress_bar = st.progress(0)
             status_text = st.empty()
-            
-            # Calcular métricas para cada número de clusters
+        
+            # Calcular métricas para cada número de clusters dentro do intervalo selecionado
             total_iterations = num_clusters_range[1] - num_clusters_range[0] + 1
-
-            # Condicional para KMeans e Clustering Hierárquico
+        
+            # Loop para testar diferentes quantidades de clusters
             for i, n_clusters in enumerate(range(num_clusters_range[0], num_clusters_range[1] + 1)):
-                # Atualizar barra de progresso
+                # Atualizar a barra de progresso
                 progress = (i + 1) / total_iterations
                 progress_bar.progress(progress)
                 status_text.text(f"Analisando com {n_clusters} clusters... ({i+1}/{total_iterations})")
-                
+        
                 try:
+                    # Verificar qual método de clustering foi escolhido
                     if st.session_state.selected_model_name == "KMeans":
-                        # Otimização: Reduzir n_init e max_iter para KMeans
+                        # Para KMeans, otimizar os hiperparâmetros reduzindo n_init e max_iter
                         temp_model = KMeans(n_clusters=n_clusters, random_state=42, n_init=5, max_iter=100)
-                    else:  # Clustering Hierárquico
+                    else:
+                        # Para Clustering Hierárquico, utilizar o método de ligação "ward"
                         temp_model = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
-                    
-                    # Treinar modelo com dados amostrados
+        
+                    # Treinar o modelo com os dados amostrados
                     temp_model.fit(analysis_data)
                     labels = temp_model.labels_
-                    
-                    # Calcular as métricas
+        
+                    # Calcular e armazenar as métricas de avaliação do clustering
                     silhouette_scores.append(silhouette_score(analysis_data, labels))
                     davies_bouldin_scores.append(davies_bouldin_score(analysis_data, labels))
                     calinski_harabasz_scores.append(calinski_harabasz_score(analysis_data, labels))
-                    
+        
                 except Exception as e:
+                    # Caso ocorra um erro durante a execução, mostrar mensagem ao utilizador
                     st.error(f"Erro ao processar {n_clusters} clusters: {str(e)}")
-                    # Adicionar valores neutros para manter o array no tamanho correto
+                    # Preencher com valores neutros para manter a estrutura do array
                     silhouette_scores.append(0)
                     davies_bouldin_scores.append(float('inf'))
                     calinski_harabasz_scores.append(0)
-            
-            # Limpar barra de progresso e status
+        
+            # Limpar barra de progresso e status após a conclusão
             status_text.empty()
             progress_bar.empty()
-
-            # Criar DataFrame com os resultados
+        
+            # Criar um DataFrame com os resultados das métricas calculadas
             metrics_df = pd.DataFrame({
                 "Número de Clusters": range(num_clusters_range[0], num_clusters_range[1] + 1),
                 "Silhouette Score": silhouette_scores,
                 "Davies-Bouldin Index": davies_bouldin_scores,
                 "Calinski-Harabasz Score": calinski_harabasz_scores,
             })
-            
-            # Exibir a tabela no Streamlit
+        
+            # Exibir a tabela de métricas no Streamlit
             st.write("#### Tabela de Métricas por Número de Clusters")
             st.dataframe(fix_dataframe_types(metrics_df.style.format({
                 "Silhouette Score": "{:.2f}",
                 "Davies-Bouldin Index": "{:.2f}",
                 "Calinski-Harabasz Score": "{:.2f}",
             })))
-
-            # Exibir gráficos para as métricas
+        
+            # Exibir gráficos das métricas para facilitar a interpretação visual
             st.write("#### Gráficos das Métricas por Número de Clusters")
+            
+            # Criar colunas para organizar a exibição dos gráficos
             col1, col2, col3 = st.columns(3)
-
+        
+            # Gráfico do Silhouette Score
             with col1:
                 plt.figure(figsize=(6, 4))
                 plt.plot(metrics_df["Número de Clusters"], metrics_df["Silhouette Score"], marker='o')
@@ -2292,7 +3160,8 @@ def model_selection():
                 plt.ylabel("Silhouette Score")
                 st.pyplot(plt.gcf())
                 plt.clf()
-
+        
+            # Gráfico do Davies-Bouldin Index
             with col2:
                 plt.figure(figsize=(6, 4))
                 plt.plot(metrics_df["Número de Clusters"], metrics_df["Davies-Bouldin Index"], marker='o')
@@ -2301,7 +3170,8 @@ def model_selection():
                 plt.ylabel("Davies-Bouldin Index")
                 st.pyplot(plt.gcf())
                 plt.clf()
-
+        
+            # Gráfico do Calinski-Harabasz Score
             with col3:
                 plt.figure(figsize=(6, 4))
                 plt.plot(metrics_df["Número de Clusters"], metrics_df["Calinski-Harabasz Score"], marker='o')
@@ -2316,134 +3186,138 @@ def model_selection():
                 best_n_clusters = metrics_df.loc[metrics_df["Silhouette Score"].idxmax(), "Número de Clusters"]
                 st.write(f"**Melhor Número de Clusters** (com base no Silhouette Score): {best_n_clusters}")
                 best_n_clusters_retrain = best_n_clusters
-
-            # Escolher abordagem para número de clusters
+            
+            # Permitir ao utilizador escolher a abordagem para determinar o número de clusters
             st.write("### Escolha a Abordagem para Determinar o Número de Clusters")
             method = st.radio("Selecione a abordagem:", ["Automático", "Manual"], key="initial_training_method")
-
+            
             if method == "Automático":
-                # Escolher o melhor número de clusters com base no Silhouette Score
+                # Determinar automaticamente o melhor número de clusters com base no Silhouette Score
                 if silhouette_scores and any(score > 0 for score in silhouette_scores):
                     best_n_clusters = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
                     best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
                 else:
+                    # Caso a determinação automática falhe, exibir erro e atribuir um valor padrão
                     st.error("Não foi possível determinar automaticamente o número de clusters. Por favor, selecione manualmente.")
                     best_n_clusters_retrain = 3  # Valor padrão
-
+            
             elif method == "Manual":
+                # Permitir ao utilizador escolher manualmente o número de clusters
                 best_n_clusters = st.slider("Escolha o número de clusters", num_clusters_range[0], num_clusters_range[1], value=3)
                 best_n_clusters_retrain = best_n_clusters  # Atualizar o valor para re-treino
-
-            # Garantir que `best_n_clusters_retrain` tenha um valor válido antes de usar
+            
+            # Garantir que `best_n_clusters_retrain` tenha um valor válido antes de continuar
             if best_n_clusters_retrain is None:
                 st.warning("Por favor, selecione uma abordagem para determinar o número de clusters.")
             else:
-                # Treinar modelo inicial
+                # Treinar o modelo inicial
                 if st.button(f"Treinar Modelo Inicial"):
-                    # Configurar e treinar o modelo (usando todos os dados para treino final)
+                    # Configurar o modelo de clustering escolhido
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         model = st.session_state.models["Clustering Hierárquico"]
                         model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
                     else:  # KMeans
                         model = st.session_state.models["KMeans"]
-                        # Otimizar KMeans para maior velocidade no treino final
+                        # Ajustar hiperparâmetros para otimização no treino final
                         model.set_params(n_clusters=best_n_clusters_retrain, n_init=5, max_iter=300)
-                    
-                    # Barra de progresso para o treino
+            
+                    # Barra de progresso para o treino do modelo
                     with st.spinner(f"Treinando o modelo com {best_n_clusters_retrain} clusters..."):
                         model.fit(training_data)
                         st.session_state.clustering_labels = model.labels_
-                    
-                    # Calcular métricas
+            
+                    # Calcular métricas de avaliação do clustering
                     st.session_state.initial_metrics = {
                         "Número de Clusters": best_n_clusters_retrain,
                         "Silhouette Score": silhouette_score(training_data, st.session_state.clustering_labels),
                         "Davies-Bouldin Index": davies_bouldin_score(training_data, st.session_state.clustering_labels),
                         "Calinski-Harabasz Score": calinski_harabasz_score(training_data, st.session_state.clustering_labels)
                     }
-                    
-                    # Salvar informações importantes no estado da sessão
+            
+                    # Guardar informações importantes no estado da sessão
                     st.session_state.training_data = training_data
                     st.session_state.training_completed = True
-                    st.session_state.trained_model = model  # Salvar o modelo treinado
-                    
-                    # Mostrar mensagem de sucesso
+                    st.session_state.trained_model = model  # Guardar o modelo treinado
+            
+                    # Exibir mensagem de sucesso conforme o método escolhido
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         st.success(f"Modelo hierárquico treinado com sucesso usando {best_n_clusters_retrain} clusters e {st.session_state.pca_n_components} componentes PCA!")
                     else:
-                        st.success(f"Modelo K-means treinado com sucesso usando {best_n_clusters_retrain} clusters!")
-
-            # Exibir métricas e próxima ação apenas após o treino
+                        st.success(f"Modelo K-Means treinado com sucesso usando {best_n_clusters_retrain} clusters!")
+            
+            # Exibir métricas e visualização apenas após o treino do modelo
             if st.session_state.get("training_completed", False):
                 st.write("### Métricas do Treino Inicial")
                 st.table(fix_dataframe_types(pd.DataFrame([st.session_state.initial_metrics])))
-
-                # Visualização dos clusters
+            
+                # Visualização dos clusters treinados
                 if 'clustering_labels' in st.session_state:
                     st.write("### Visualização dos Clusters")
-                                        
-                    # Para KMeans podemos mostrar os centroides
+            
+                    # Para K-Means, mostrar os centroides dos clusters
                     if st.session_state.selected_model_name == "KMeans":
                         if "trained_model" in st.session_state and hasattr(st.session_state.trained_model, 'cluster_centers_'):
                             st.write("#### Centroides dos Clusters")
                             centroids = st.session_state.trained_model.cluster_centers_
+                            
+                            # Exibir apenas as primeiras 10 dimensões, se existirem muitas dimensões
                             if centroids.shape[1] > 10:
                                 st.write(f"(Mostrando apenas as primeiras 10 dimensões de {centroids.shape[1]})")
                                 centroids_df = pd.DataFrame(centroids[:, :10])
                             else:
                                 centroids_df = pd.DataFrame(centroids)
-                            
+            
                             st.dataframe(fix_dataframe_types(centroids_df))
-                    
-                    # Preparar dados para visualização
+            
+                    # Preparar dados para visualização dos clusters
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
-                        # Para hierárquico, já temos os dados PCA
+                        # Para Clustering Hierárquico, utilizar os dados reduzidos pelo PCA
                         plot_data = st.session_state.X_pca
                     else:
-                        # Para K-means, podemos reduzir os dados para visualização se necessário
+                        # Para K-Means, reduzir dimensionalidade se necessário
                         if X_scaled.shape[1] > 3:
                             pca_viz = PCA(n_components=3)
                             plot_data = pca_viz.fit_transform(X_scaled)
                             st.write("(Dados reduzidos via PCA para visualização)")
                         else:
                             plot_data = X_scaled
-
-                    # Obter número total de componentes
+            
+                    # Obter o número total de componentes disponíveis para visualização
                     total_components = plot_data.shape[1]
-
-                    # Permitir escolha de componentes para x e y
+            
+                    # Permitir ao utilizador escolher os componentes para visualização
                     st.write("### Escolha os Componentes para Visualização")
                     col1, col2 = st.columns(2)
-
+            
                     with col1:
                         x_component = st.selectbox(
-                            "Componente para o Eixo X", 
-                            list(range(total_components)), 
+                            "Componente para o Eixo X",
+                            list(range(total_components)),
                             index=0,
                             format_func=lambda x: f"Componente {x+1}",
-                            key="initial_x_component"  # Chave única adicionada
+                            key="initial_x_component"
                         )
-
+            
                     with col2:
                         y_component = st.selectbox(
-                            "Componente para o Eixo Y", 
-                            list(range(total_components)), 
+                            "Componente para o Eixo Y",
+                            list(range(total_components)),
                             index=1 if total_components > 1 else 0,
                             format_func=lambda x: f"Componente {x+1}",
-                            key="initial_y_component"  # Chave única adicionada
+                            key="initial_y_component"
                         )
-
-                    # Verificar se componentes são diferentes
+            
+                    # Verificar se os componentes escolhidos são diferentes
                     if x_component == y_component:
                         st.warning("Por favor, selecione componentes diferentes para X e Y.")
                     else:
-                        # Visualização 2D com componentes selecionados
+                        # Criar gráfico de dispersão para visualização dos clusters
                         fig, ax = plt.subplots(figsize=(10, 6))
                         scatter = ax.scatter(
-                            plot_data[:, x_component], 
-                            plot_data[:, y_component], 
-                            c=st.session_state.clustering_labels, 
-                            cmap='viridis', 
+                            plot_data[:, x_component],
+                            plot_data[:, y_component],
+                            c=st.session_state.clustering_labels,
+                            cmap='viridis',
                             alpha=0.7
                         )
                         ax.set_title(f'Visualização 2D dos Clusters ({best_n_clusters_retrain} clusters)')
@@ -2453,14 +3327,14 @@ def model_selection():
                         ax.add_artist(legend)
                         st.pyplot(fig)
                         plt.clf()
-
-                # Escolher ação seguinte
+            
+                # Opção para o utilizador escolher a ação seguinte
                 next_action = st.selectbox(
                     "Selecione a próxima ação:",
                     ["Re-Treinar o Modelo", "Finalizar"]
                 )
-
-                # Botão de confirmação da escolha
+            
+                # Botão para confirmar a escolha do utilizador
                 if st.button("Confirmar Escolha"):
                     if next_action == "Finalizar":
                         st.session_state.step = 'clustering_final_page'
@@ -2468,17 +3342,18 @@ def model_selection():
                     elif next_action == "Re-Treinar o Modelo":
                         st.session_state.retrain_mode = True
 
-            # Re-Treinar o Modelo (só aparece se a escolha foi confirmada)
+            # Re-Treinar o Modelo (só aparece se o utilizador escolher esta opção)
             if st.session_state.get("retrain_mode", False):
                 st.write("### Re-Treino do Modelo")
                 
-                # Escolha do método para determinar o número de clusters
+                # Escolha do método para determinar o número de clusters no re-treino
                 retrain_method = st.radio(
                     "Escolha a Abordagem para Determinar o Número de Clusters no novo treino:",
                     ["Automático", "Manual"]
                 )
-
+            
                 if retrain_method == "Manual":
+                    # Permitir ao utilizador escolher manualmente o número de clusters
                     st.session_state.num_clusters = st.slider(
                         "Selecione o número de clusters para o re-treino",
                         min_value=2,
@@ -2486,56 +3361,58 @@ def model_selection():
                         value=st.session_state.num_clusters if "num_clusters" in st.session_state else 3
                     )
                     best_n_clusters_retrain = st.session_state.num_clusters
-
+            
                 elif retrain_method == "Automático":
                     # Determinar o melhor número de clusters com base no Silhouette Score
                     if silhouette_scores and any(score > 0 for score in silhouette_scores):
                         best_n_clusters_retrain = range(num_clusters_range[0], num_clusters_range[1] + 1)[np.argmax(silhouette_scores)]
                     else:
+                        # Caso a determinação automática falhe, exibir erro e atribuir um valor padrão
                         st.error("Não foi possível determinar automaticamente o número de clusters. Por favor, selecione manualmente.")
                         best_n_clusters_retrain = 3  # Valor padrão
-                        
-                # Botão para executar o re-treino
+            
+                # Botão para executar o re-treino do modelo
                 if st.button("Treinar Novamente"):
+                    # Selecionar o modelo previamente escolhido pelo utilizador
                     model = st.session_state.models[st.session_state.selected_model_name]
                     
-                    # Preparar modelo
+                    # Configurar o modelo com o novo número de clusters
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         model.set_params(n_clusters=best_n_clusters_retrain, linkage='ward')
                     else:
                         model.set_params(n_clusters=best_n_clusters_retrain, n_init=5, max_iter=300)
-                    
-                    # Treinar o modelo com uma barra de progresso
+            
+                    # Treinar o modelo com uma barra de progresso para indicar o progresso ao utilizador
                     with st.spinner(f"Realizando re-treino com {best_n_clusters_retrain} clusters..."):
                         model.fit(st.session_state.training_data)
-                    
-                    # Calcular métricas
+            
+                    # Calcular métricas de avaliação do clustering após o re-treino
                     st.session_state.retrain_metrics = {
                         "Número de Clusters": best_n_clusters_retrain,
                         "Silhouette Score": silhouette_score(st.session_state.training_data, model.labels_),
                         "Davies-Bouldin Index": davies_bouldin_score(st.session_state.training_data, model.labels_),
                         "Calinski-Harabasz Score": calinski_harabasz_score(st.session_state.training_data, model.labels_)
                     }
-                    
-                    # Atualizar rótulos dos clusters
+            
+                    # Atualizar rótulos dos clusters no estado da sessão
                     st.session_state.retrain_labels = model.labels_
                     st.session_state.retrain_completed = True
-                    
-                    # Mensagem de sucesso
+            
+                    # Exibir mensagem de sucesso com informações relevantes
                     if st.session_state.selected_model_name == "Clustering Hierárquico":
                         st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters e {st.session_state.pca_n_components} componentes PCA!")
                     else:
                         st.success(f"Re-treino concluído com sucesso com {best_n_clusters_retrain} clusters!")
-                    
+            
                 # Exibir métricas do re-treino após a execução
                 if st.session_state.get("retrain_completed", False):
                     st.write("### Métricas do Re-Treino")
                     st.table(fix_dataframe_types(pd.DataFrame([st.session_state.retrain_metrics])))
-                    
-                    # Recuperar o modelo do estado da sessão
+            
+                    # Recuperar o modelo atualizado do estado da sessão
                     current_model = st.session_state.models[st.session_state.selected_model_name]
-
-                    # Verificar centroides para KMeans
+            
+                    # Verificar centroides para KMeans e exibi-los
                     if st.session_state.selected_model_name == "KMeans":
                         if hasattr(current_model, 'cluster_centers_'):
                             st.write("#### Centroides dos Clusters")
@@ -2547,56 +3424,55 @@ def model_selection():
                                 centroids_df = pd.DataFrame(centroids)
                             
                             st.dataframe(fix_dataframe_types(centroids_df))
-    
-                    # Visualização dos clusters do re-treino
+            
+                    # Visualização dos clusters após o re-treino
                     if 'retrain_labels' in st.session_state:
                         st.write("### Visualização dos Clusters do Re-Treino")
-                        
-                        # Preparar dados para visualização
+            
+                        # Preparar dados para visualização 2D
                         if st.session_state.selected_model_name == "Clustering Hierárquico":
-                            # Para hierárquico, já temos os dados PCA
+                            # Para Clustering Hierárquico, utilizar os dados reduzidos pelo PCA
                             plot_data = st.session_state.X_pca
                         else:
-                            # Para K-means, aplicamos um novo PCA para visualização
-                            # Use os dados originais ou X_scaled
-                            X_for_viz = X_scaled  # ou outro conjunto de dados apropriado
+                            # Para K-Means, aplicar PCA para reduzir os dados e facilitar a visualização
+                            X_for_viz = X_scaled  # Utilizar os dados originais normalizados
                             if X_for_viz.shape[1] > 3:
                                 pca_viz = PCA(n_components=3)
                                 plot_data = pca_viz.fit_transform(X_for_viz)
                                 st.write("(Dados reduzidos via PCA para visualização)")
                             else:
                                 plot_data = X_for_viz
-                        
-                        # Obter número total de componentes
+            
+                        # Determinar o número total de componentes disponíveis para visualização
                         total_components = plot_data.shape[1]
-                        
-                        # Permitir escolha de componentes para x e y
+            
+                        # Permitir ao utilizador escolher os componentes para visualização
                         st.write("### Escolha os Componentes para Visualização")
                         col1, col2 = st.columns(2)
-                        
+            
                         with col1:
                             x_component = st.selectbox(
                                 "Componente para o Eixo X", 
                                 list(range(total_components)), 
                                 index=0,
                                 format_func=lambda x: f"Componente {x+1}",
-                                key="retrain_x_component"  # Chave única adicionada
+                                key="retrain_x_component"  # Chave única para evitar conflitos no estado da sessão
                             )
-                        
+            
                         with col2:
                             y_component = st.selectbox(
                                 "Componente para o Eixo Y", 
                                 list(range(total_components)), 
                                 index=1 if total_components > 1 else 0,
                                 format_func=lambda x: f"Componente {x+1}",
-                                key="retrain_y_component"  # Chave única adicionada
+                                key="retrain_y_component"  # Chave única para evitar conflitos no estado da sessão
                             )
-                        
-                        # Verificar se componentes são diferentes
+            
+                        # Garantir que os componentes escolhidos são diferentes antes da visualização
                         if x_component == y_component:
                             st.warning("Por favor, selecione componentes diferentes para X e Y.")
                         else:
-                            # Visualização 2D com componentes selecionados
+                            # Criar gráfico de dispersão dos clusters re-treinados
                             fig, ax = plt.subplots(figsize=(10, 6))
                             scatter = ax.scatter(
                                 plot_data[:, x_component], 
@@ -2612,97 +3488,104 @@ def model_selection():
                             ax.add_artist(legend)
                             st.pyplot(fig)
                             plt.clf()
-                            
-                # Finalizar após o re-treino
+            
+                # Finalizar o processo após o re-treino bem-sucedido
                 if st.session_state.get("retrain_completed", False):
                     st.write("## Concluir o Processo de Clustering")
                     if st.button("Seguir para o Relatório"):
                         st.session_state.step = 'clustering_final_page'
                         st.rerun()
-                    
+
     # 3. Seleção da Coluna Alvo
     from sklearn.preprocessing import LabelEncoder
     import pandas as pd
-
-    # Inicializar variáveis de estado
+    
+    # Inicializar variáveis de estado no session_state se não existirem
     if 'bins_confirmed' not in st.session_state:
-        st.session_state['bins_confirmed'] = False  # Confirmação dos bins
+        st.session_state['bins_confirmed'] = False  # Confirmação da escolha dos bins
     if 'bins_value' not in st.session_state:
-        st.session_state['bins_value'] = 3  # Valor padrão dos bins
-
-    # Filtrar colunas disponíveis com base no tipo de modelo
+        st.session_state['bins_value'] = 3  # Definir um valor padrão para os bins
+    
+    # **Filtrar colunas disponíveis para seleção da variável alvo, dependendo do tipo de modelo**
     if st.session_state.model_type == "Classificação":
+        # Para modelos de classificação: considerar colunas categóricas (object) e colunas numéricas com poucas categorias
         valid_columns = [col for col in columns if data[col].dtype in ['object', 'int64'] or data[col].nunique() <= 10]
     else:
+        # Para modelos de regressão: considerar apenas colunas numéricas contínuas (float64 e int64) com muitas categorias
         valid_columns = [col for col in columns if data[col].dtype in ['float64', 'int64'] and data[col].nunique() > 10]
-
-    # Seleção da Coluna Alvo
+    
+    # **Seleção da Coluna Alvo**
+    # Apenas necessário para modelos de Classificação e Regressão (não aplicável a Clustering)
     if st.session_state.model_type != "Clustering" and st.session_state.selected_model_name and not st.session_state.target_column_confirmed:
-        st.write("Escolha a Coluna Alvo")
+        st.write("### Escolha a Coluna Alvo")
+        
+        # Criar um menu suspenso para o utilizador selecionar a coluna alvo
         target_column = st.selectbox(
             "Selecione a coluna alvo",
-            options=valid_columns,
+            options=valid_columns,  # Exibir apenas as colunas válidas
             key='target_column_selectbox'
         )
-
+    
+        # **Botão para confirmar a seleção da coluna alvo**
         if st.button("Confirmar Coluna Alvo"):
-            if target_column in columns:
+            if target_column in columns:  # Verificar se a coluna selecionada está nos dados
                 st.session_state.target_column = target_column
-                st.session_state.target_column_confirmed = True
-                st.session_state.validation_method = None
-                st.session_state.validation_confirmed = False
-
-                # Processar a coluna alvo
+                st.session_state.target_column_confirmed = True  # Confirmar a seleção
+                st.session_state.validation_method = None  # Resetar método de validação
+                st.session_state.validation_confirmed = False  # Resetar confirmação de validação
+    
+                # Armazenar os valores da variável alvo
                 y = data[st.session_state.target_column]
-
-                # Verificar o tipo de modelo
+    
+                # **Verificar o tipo de modelo**
                 model_type = st.session_state.model_type
-
+    
                 # **Se o modelo for de Classificação**
                 if model_type == "Classificação":
+                    # Utilizar LabelEncoder para transformar colunas categóricas em valores numéricos
                     le = LabelEncoder()
                     y_encoded = le.fit_transform(y)
                     st.session_state['target_column_encoded'] = y_encoded
                     st.success("Coluna categórica detectada e codificada com LabelEncoder.")
-
+    
+                # **Se o modelo for de Regressão**
                 elif model_type == "Regressão":
-                    if y.dtype in ['float64', 'int64']:
-                        st.session_state['target_column_encoded'] = y
+                    if y.dtype in ['float64', 'int64']:  # Verificar se a variável é contínua
+                        st.session_state['target_column_encoded'] = y  # Manter os valores originais
                         st.success("Coluna contínua detectada e pronta para regressão.")
                     else:
+                        # Se a coluna não for contínua, exibir um erro e interromper o processo
                         st.error("Modelos de regressão requerem uma coluna contínua como alvo.")
-                        st.stop()
-
-
-
-    # Exibir a Coluna Alvo Confirmada
+                        st.stop()  # Parar a execução para evitar erros futuros
+    
+    # **Exibir a Coluna Alvo Confirmada**
     if st.session_state.model_type != "Clustering" and st.session_state.target_column_confirmed:
-        st.write(f"Coluna Alvo Confirmada: {st.session_state.target_column}")
-        st.write(f"Tipo: {st.session_state.get('target_column_type', 'Não definido')}")
+        st.write(f"### Coluna Alvo Confirmada: {st.session_state.target_column}")
+        st.write(f"Tipo: {st.session_state.get('target_column_type', 'Não definido')}")  # Mostrar tipo da variável alvo
 
-
-        # 4. GridSearch
-        # Modelos sem hiperparâmetros ajustáveis
+        # 4. GridSearch - Ajuste de Hiperparâmetros
+        # **Função para limpar parâmetros inválidos no session_state**
         def limpar_parametros_invalidos():
             """Remove parâmetros inválidos do session_state."""
             if 'manual_params' in st.session_state:
                 if 'gamma' in st.session_state['manual_params']:
                     del st.session_state['manual_params']['gamma']  # Remove 'gamma' se presente
-
-        # Inicializa modelos sem hiperparâmetros ajustáveis
+        
+        # **Definir modelos que não possuem hiperparâmetros ajustáveis**
         NO_HYPERPARAM_MODELS = ["Regressão Linear Simples (RLS)"]
-
-        # Verifica se o modelo foi selecionado
+        
+        # **Verificar se o modelo foi selecionado e se o GridSearch ainda não foi confirmado**
         if st.session_state.selected_model_name and not st.session_state.grid_search_confirmed:
-
-            # Verificar se o modelo não possui hiperparâmetros ajustáveis
+        
+            # **Caso o modelo não tenha hiperparâmetros ajustáveis**
             if st.session_state.selected_model_name in NO_HYPERPARAM_MODELS:
                 st.write(f"O modelo {st.session_state.selected_model_name} não possui hiperparâmetros ajustáveis.")
                 st.session_state.use_grid_search = "Não"
                 param_grid = {}  # Nenhum parâmetro para ajustar
                 st.session_state.grid_search_confirmed = True
+        
             else:
-                # Perguntar ao usuário se quer usar GridSearch
+                # **Perguntar ao utilizador se quer usar GridSearch**
                 use_grid_search = st.radio(
                     "Usar GridSearch?", 
                     ["Sim", "Não"], 
@@ -2710,12 +3593,12 @@ def model_selection():
                     index=0 if st.session_state.get('use_grid_search', "Sim") == "Sim" else 1
                 )
                 st.session_state.use_grid_search = use_grid_search
-
-                # Inicializar param_grid como vazio
+        
+                # **Inicializar param_grid como vazio**
                 param_grid = {}  # Evita erros de variável não definida
-
+        
                 if use_grid_search == "Sim":
-                    # Perguntar como os parâmetros devem ser escolhidos
+                    # **Perguntar como os parâmetros devem ser escolhidos**
                     param_choice = st.radio(
                         "Escolher os parâmetros de GridSearch?",
                         ["Utilizar os melhores parâmetros", "Escolher manualmente os parâmetros de GridSearch"],
@@ -2723,43 +3606,41 @@ def model_selection():
                         index=0 if st.session_state.get('param_choice', "Utilizar os melhores parâmetros") == "Utilizar os melhores parâmetros" else 1
                     )
                     st.session_state.param_choice = param_choice
-
-                    # Inicializar parâmetros manuais
+        
+                    # **Inicializar parâmetros manuais**
                     if 'manual_params' not in st.session_state:
                         st.session_state.manual_params = {}
-
+        
                     manual_params = st.session_state.manual_params
-
-                    # Configuração manual dos parâmetros
+        
+                    # **Configuração manual dos parâmetros**
                     if param_choice == "Escolher manualmente os parâmetros de GridSearch":
-                        # Recuperar o modelo selecionado
+                        # **Recuperar o modelo selecionado**
                         model_key = st.session_state.selected_model_name
-                    
-                        # Inicializar os parâmetros padrão do modelo selecionado
+        
+                        # **Obter os parâmetros padrão para o modelo selecionado**
                         param_grid = get_default_param_grid(model_key)
-                    
-                        # Se não houver parâmetros padrão, informar o usuário
+        
+                        # **Se não houver parâmetros padrão, informar o utilizador**
                         if not param_grid:
                             st.warning(f"Parâmetros padrão não definidos para o modelo {model_key}.")
                             param_grid = {}
-                    
-                        # Exibir os parâmetros para o usuário ajustar manualmente
+        
+                        # **Exibir os parâmetros para o utilizador ajustar manualmente**
                         manual_params = {}
                         for param, values in param_grid.items():
-                            # **Lógica Especial para o Kernel**
+                            # **Tratar parâmetros específicos como 'kernel'**
                             if param == "kernel":
-                                # Selecionar o kernel
                                 manual_params[param] = st.selectbox(
                                     f"Escolha o valor para '{param}':",
                                     values,  # Lista de valores permitidos
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-                    
+        
                             # **Mostrar 'gamma' apenas se o kernel for 'rbf'**
                             elif param == "gamma":
                                 if "kernel" in manual_params and manual_params["kernel"] == "rbf":
-                                    # Mostrar gamma apenas para 'rbf'
                                     manual_params[param] = st.selectbox(
                                         f"Escolha o valor para '{param}':",
                                         values,  # Lista de valores permitidos
@@ -2767,29 +3648,26 @@ def model_selection():
                                         key=f"{model_key}_{param}"
                                     )
                                 else:
-                                    # Remover 'gamma' do estado global e local
+                                    # **Remover 'gamma' se não for necessário**
                                     manual_params.pop(param, None)
                                     if 'manual_params' in st.session_state and param in st.session_state['manual_params']:
                                         del st.session_state['manual_params'][param]
-                    
-                            # **Tratar parâmetros numéricos**
+        
+                            # **Tratar parâmetros numéricos (ex.: C, epsilon)**
                             elif isinstance(values[0], (int, float)):
-                                # Mostrar os valores disponíveis para o parâmetro
                                 st.write(f"Parâmetro: **{param}** | Intervalo disponível: [{min(values)}, {max(values)}]")
-                            
-                                # Verificar o tipo de dado (float ou int) para parametrização
+        
                                 param_type = float if any(isinstance(v, float) for v in values) else int
-                            
-                                # Criar o número interativo
+        
                                 manual_params[param] = st.number_input(
                                     f"Escolha o valor para '{param}':",
                                     min_value=float(min(values)) if param_type == float else int(min(values)),
                                     max_value=float(max(values)) if param_type == float else int(max(values)),
                                     value=float(values[0]) if param_type == float else int(values[0]),
-                                    step=0.1 if param_type == float else 1,  # Ajuste o step dinamicamente
+                                    step=0.1 if param_type == float else 1,  
                                     key=f"{model_key}_{param}"
                                 )
-                            
+        
                             # **Tratar `max_depth` separadamente como um selectbox**
                             elif param == "max_depth":
                                 st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
@@ -2799,123 +3677,128 @@ def model_selection():
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-                    
+        
                             # **Tratar parâmetros categóricos (ex.: 'weights')**
                             elif isinstance(values[0], str):
-                                # Mostrar os valores disponíveis para o parâmetro
                                 st.write(f"Parâmetro: **{param}** | Valores disponíveis: {values}")
-                            
-                                # Criar o selectbox interativo
                                 manual_params[param] = st.selectbox(
                                     f"Escolha o valor para '{param}':",
                                     values,  # Lista de valores permitidos
                                     index=0,  # Primeiro valor como padrão
                                     key=f"{model_key}_{param}"
                                 )
-                    
-                        # Salvar os parâmetros manuais no estado global
+        
+                        # **Salvar os parâmetros manuais no estado global**
                         st.session_state['manual_params'] = manual_params
                         st.write("Parâmetros manuais salvos:", manual_params)
-
-
-
-                # Confirmar configurações do GridSearch
+        
+                # **Botão para confirmar configurações do GridSearch**
                 if st.button("Confirmar GridSearch"):
                     st.session_state.grid_search_confirmed = True
                     st.success("Configuração do GridSearch confirmada!")
-
-                    # Parâmetros padrão até o treino
+        
+                    # **Se o utilizador escolheu "Utilizar os melhores parâmetros", armazenar um dicionário vazio**
                     if st.session_state.use_grid_search == "Sim" and st.session_state.param_choice == "Utilizar os melhores parâmetros":
                         st.session_state['manual_params'] = {}
                         st.session_state['best_params_str'] = "{}"
                         st.session_state['best_params'] = param_grid
                         st.session_state['best_params_selected'] = param_grid
-                        
-
+                                
         # 5. Escolha do Método de Validação
-        # O método de validação agora aparece somente após confirmação do GridSearch
+        
+        # O método de validação só aparece após a confirmação do GridSearch
         if st.session_state.grid_search_confirmed and st.session_state.selected_model_name and not st.session_state.validation_method:
-            st.write("Escolha o Método de Validação")
+            
+            st.write("### Escolha o Método de Validação")
+            
+            # Lista dos métodos disponíveis
             validation_methods = ["Divisão em Treino e Teste", "Holdout"]
+        
+            # Escolha do método pelo utilizador
             validation_method = st.radio(
-                "Escolha o método de validação",
+                "Selecione o método de validação",
                 validation_methods,
                 key='validation_method_radio'
             )
-
+        
             # Configurações específicas para cada método de validação
             if validation_method == "Divisão em Treino e Teste":
+                # O utilizador escolhe a proporção do conjunto de teste
                 test_size = st.slider(
                     "Proporção do conjunto de teste",
                     min_value=0.1, max_value=0.9, value=0.3, step=0.1
                 )
                 st.session_state.test_size = test_size
-
+        
             elif validation_method == "Holdout":
+                # O utilizador escolhe a proporção do conjunto de treino
                 train_size = st.slider(
                     "Proporção do conjunto de treino",
                     min_value=0.1, max_value=0.9, value=0.7, step=0.1
                 )
                 st.session_state.train_size = train_size
-
-            # Botão de confirmação para o método de validação
+        
+            # **Botão para confirmar a escolha do método de validação**
             if st.button("Confirmar Validação"):
-                st.session_state.validation_method = validation_method  # Armazena o método de validação escolhido
-
-                # Preparação de dados para validação
+                # Guardar o método de validação escolhido
+                st.session_state.validation_method = validation_method  
+        
+                # **Preparação dos dados**
+                # Remover a coluna alvo do conjunto de características
                 X = data.drop(columns=[st.session_state.target_column])
                 y = data[st.session_state.target_column]
-
-                # Conversão de variáveis categóricas para numéricas
-                X = pd.get_dummies(X)
-
+        
+                # **Conversão de variáveis categóricas para numéricas**
+                X = pd.get_dummies(X)  # Criação de variáveis dummy para colunas categóricas
+        
                 try:
-                    # Tratamento de diferentes métodos de validação
+                    # **Divisão dos dados com base no método escolhido**
                     if st.session_state.validation_method == "Divisão em Treino e Teste":
-                        # Divisão simples em treino e teste
+                        # Divisão clássica em treino e teste
                         st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test = train_test_split(
                             X, y, test_size=st.session_state.test_size, random_state=42
                         )
                         st.success("Divisão dos dados realizada com sucesso!")
-
+        
                     elif st.session_state.validation_method == "Holdout":
-                        # Holdout: outra forma de divisão de treino e teste
+                        # Outro método de divisão treino-teste, baseado na proporção de treino
                         st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test = train_test_split(
                             X, y, train_size=st.session_state.train_size, random_state=42
                         )
                         st.success("Divisão dos dados realizada com sucesso!")
-
-                    # Confirma a validação
+        
+                    # **Confirma que a validação foi concluída**
                     st.session_state.validation_confirmed = True
-
+        
                 except Exception as e:
                     st.error(f"Erro na divisão dos dados: {e}")
-
-                # Exibir método de validação confirmado
+        
+                # **Exibir o método de validação confirmado**
                 if st.session_state.validation_confirmed:
-                    st.write(f"Método de Validação Confirmado: {st.session_state.validation_method}")
+                    st.write(f"**Método de Validação Confirmado:** {st.session_state.validation_method}")
 
-        # Exibir o botão para treinar o modelo **apenas após a validação ser confirmada**
         # 6. Treino do Modelo
+        
+        # **Exibir o botão para treinar o modelo apenas após a validação ser confirmada**
         if st.session_state.validation_confirmed:
             if st.button("Treinar o Modelo"):
-                st.session_state.validation_confirmed = False  # Resetando após o treino
+                st.session_state.validation_confirmed = False  # Resetar a validação após o treino
                 st.success("Treino iniciado com sucesso!")
-
-                # Recuperar o modelo selecionado
+        
+                # **Recuperar o modelo selecionado**
                 model_name = st.session_state.selected_model_name
                 model = st.session_state.models.get(st.session_state.selected_model_name)
-
-                # Verificar se o modelo foi encontrado
+        
+                # **Verificar se o modelo foi encontrado**
                 if model is None:
                     st.error(f"Modelo {st.session_state.selected_model_name} não encontrado.")
-                    return  # Interrompe o fluxo caso o modelo não seja encontrado
-
-                # Inicializar 'treinos_realizados' se necessário
+                    return  # Interrompe a execução caso o modelo não seja encontrado
+        
+                # **Inicializar 'treinos_realizados' no estado global caso ainda não exista**
                 if 'treinos_realizados' not in st.session_state:
                     st.session_state['treinos_realizados'] = []
-
-                # Coletar as informações armazenadas no session_state
+        
+                # **Recolher as informações necessárias do estado global**
                 target_column = st.session_state.target_column
                 validation_method = st.session_state.validation_method
                 use_grid_search = st.session_state.use_grid_search
@@ -2924,237 +3807,289 @@ def model_selection():
                 y_train = st.session_state.y_train
                 X_test = st.session_state.X_test
                 y_test = st.session_state.y_test
-
+        
                 # **Remover parâmetros inválidos antes do treino**
                 if 'manual_params' in st.session_state:
                     if manual_params.get('kernel') == 'linear' and 'gamma' in manual_params:
-                        del manual_params['gamma']  # Remove o parâmetro local
+                        del manual_params['gamma']  # Remover parâmetro inválido localmente
                     if 'gamma' in st.session_state['manual_params']:
-                        del st.session_state['manual_params']['gamma']  # Remove do estado global
-
-                # **Adicionar tratamento de valores ausentes**
+                        del st.session_state['manual_params']['gamma']  # Remover do estado global
+        
+                # **Tratar valores ausentes antes do treino**
                 from sklearn.impute import SimpleImputer
-
-                imputer = SimpleImputer(strategy="mean")  # Ou "median" conforme necessário
-                X_train = imputer.fit_transform(X_train)  # Tratamento no conjunto de treino
-                X_test = imputer.transform(X_test)        # Tratamento no conjunto de teste
-
-                # Exibir resumo das escolhas feitas antes do treino
+                imputer = SimpleImputer(strategy="mean")  # Estratégia de imputação ("mean" pode ser alterado para "median")
+                X_train = imputer.fit_transform(X_train)  # Aplicar imputação no conjunto de treino
+                X_test = imputer.transform(X_test)        # Aplicar imputação no conjunto de teste
+        
+                # **Exibir resumo das escolhas feitas pelo utilizador**
                 st.write("### Resumo das Escolhas Feitas:")
                 st.write(f"**Modelo Selecionado**: {model_name}")
                 st.write(f"**Coluna Alvo**: {target_column}")
                 st.write(f"**Método de Validação**: {validation_method}")
-                st.write(f"GridSearch Ativado? {use_grid_search}")  # Debug para verificar a escolha do usuário
-
-                # Treino de um único modelo
+                st.write(f"**GridSearch Ativado?** {use_grid_search}")  # Informação adicional para depuração
+        
+                # **Iniciar o treino do modelo**
                 param_grid = get_default_param_grid(model_name) if use_grid_search == "Sim" else {}
                 resultado = train_and_evaluate(
                     model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params
                 )
-
-                # **Salvar apenas os parâmetros válidos no estado global após o treino**
+        
+                # **Guardar os melhores parâmetros no estado global após o treino**
                 if 'Best Parameters' in resultado:
-                    st.session_state['best_params'] = resultado['Best Parameters']  # Para treino inicial
-                    st.session_state['best_params_selected'] = resultado['Best Parameters']  # Para seleção de features
+                    st.session_state['best_params'] = resultado['Best Parameters']
+                    st.session_state['best_params_selected'] = resultado['Best Parameters']
                     st.session_state['best_params_str'] = json.dumps(st.session_state['best_params'], indent=2)
                     st.write("Parâmetros salvos no estado global:", st.session_state['best_params'])
                 else:
                     st.warning("Nenhum parâmetro encontrado para salvar.")
-
-                # Após o primeiro treino
-                # Após o primeiro treino
+        
+                # **Guardar os resultados após o primeiro treino**
                 if resultado:
-                    # Armazena os resultados iniciais para comparação futura
-                    st.session_state['resultado_sem_selecao'] = resultado  # Salva os resultados sem seleção
+                    st.session_state['resultado_sem_selecao'] = resultado  # Salvar resultado sem seleção de features
                     st.session_state['treinos_realizados'].append(resultado)
-                    
-                    # Criar o DataFrame com as métricas
+        
+                    # **Criar um DataFrame com as métricas do modelo treinado**
                     df_resultado = pd.DataFrame([resultado])
-                
-                    # Corrigir os tipos antes de formatar
+        
+                    # **Corrigir os tipos de dados antes de exibir**
                     df_corrigido = fix_dataframe_types(df_resultado)
-                    
-                    # Aplicar formatação depois de corrigir os tipos
-                    st.write("Métricas do modelo treinado:")
+        
+                    # **Exibir métricas do modelo**
+                    st.write("### Métricas do Modelo Treinado:")
                     formatted_display = df_corrigido.style.format(
                         {col: "{:.4f}" for col in df_corrigido.select_dtypes(include=['float', 'float64']).columns}
                     )
                     st.dataframe(formatted_display)
-                
-                    # Gráfico das métricas
+        
+                    # **Gerar gráfico com as métricas do modelo**
                     plot_metrics(df_corrigido)
-                
-                    # Marcar o treino como concluído
+        
+                    # **Marcar o treino como concluído**
                     st.session_state['treino_concluido'] = True
                 else:
                     st.error("O treino do modelo falhou.")
-
-        # Avançar para Seleção de Features SOMENTE após o gráfico de métricas ser mostrado
+        
+        # **Avançar para Seleção de Features APENAS após a exibição das métricas**
         if st.session_state.get('treino_concluido', False):
             st.write("### Avançar para Seleção de Features")
-
-            # Garantir que há treinos realizados
+        
+            # **Verificar se há treinos realizados**
             if 'treinos_realizados' in st.session_state and st.session_state['treinos_realizados']:
-                # Depuração: Exibir treinos realizados
-                #st.write("Treinos realizados:", st.session_state['treinos_realizados'])
-
-                # Identificar o tipo de problema para usar a métrica apropriada
+                
+                # **Identificar o melhor modelo com base na métrica apropriada**
                 if st.session_state.model_type == "Classificação":
                     melhores_metricas = sorted(
                         st.session_state['treinos_realizados'], 
-                        key=lambda x: x.get('Accuracy', 0),  # Usar Accuracy para classificação
+                        key=lambda x: x.get('Accuracy', 0),  # Ordenação pela métrica Accuracy
                         reverse=True
-                    )[0]  # Escolher o melhor modelo
+                    )[0]  # Seleciona o melhor modelo
                 elif st.session_state.model_type == "Regressão":
                     melhores_metricas = sorted(
                         st.session_state['treinos_realizados'], 
-                        key=lambda x: x.get('R²', 0),  # Usar R² para regressão
+                        key=lambda x: x.get('R²', 0),  # Ordenação pela métrica R²
                         reverse=True
-                    )[0]  # Escolher o melhor modelo
-
-                # Seleção de modelo manual ou manter o melhor automaticamente
+                    )[0]  # Seleciona o melhor modelo
+        
+                # **Permitir ao utilizador escolher um modelo manualmente ou manter o melhor**
                 model_options = [resultado['Modelo'] for resultado in st.session_state['treinos_realizados']]
                 default_index = model_options.index(melhores_metricas['Modelo']) if melhores_metricas['Modelo'] in model_options else 0
-
+        
                 selected_model_temp = st.selectbox(
                     "Escolha um modelo para avançar para a Seleção de Features:",
                     options=model_options,
                     index=default_index
                 )
-
-                # Botão para avançar
+        
+                # **Botão para avançar para a próxima etapa**
                 if st.button("Avançar para Seleção de Features"):
-                    # Atualizar o modelo selecionado no session_state apenas ao clicar no botão
-                    st.session_state.selected_model_name = selected_model_temp
-                    st.session_state.step = 'feature_selection'
-                    st.session_state['treino_concluido'] = False
+                    st.session_state.selected_model_name = selected_model_temp  # Atualiza o modelo selecionado
+                    st.session_state.step = 'feature_selection'  # Atualiza a etapa do fluxo
+                    st.session_state['treino_concluido'] = False  # Reseta o estado do treino
                     st.rerun()
             else:
                 st.error("Nenhum modelo foi treinado. Execute o treino primeiro.")
 
-
 # Função para treinar e avaliar os modelos de clustering
 def train_clustering_model(model, X_data, model_name):
+    """
+    Treina um modelo de clustering (KMeans ou Clustering Hierárquico) e armazena os rótulos dos clusters.
+
+    Parâmetros:
+    - model: Modelo de clustering selecionado (KMeans ou Clustering Hierárquico).
+    - X_data: Dados de entrada para treino do modelo.
+    - model_name: Nome do modelo a ser treinado.
+
+    """
     try:
-        # Padronizar os dados
+        # **Padronizar os dados para melhor desempenho dos modelos**
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X_data)
-        
+        X_scaled = scaler.fit_transform(X_data)  # Normaliza os dados
+
+        # **Treinar o modelo conforme o tipo de clustering selecionado**
         if model_name == "KMeans":
-            model.set_params(n_clusters=st.session_state.kmeans_clusters)
-            model.fit(X_scaled)
-            st.session_state['labels'] = model.labels_
+            model.set_params(n_clusters=st.session_state.kmeans_clusters)  # Definir o número de clusters
+            model.fit(X_scaled)  # Ajustar o modelo aos dados normalizados
+            st.session_state['labels'] = model.labels_  # Armazenar os rótulos dos clusters
         
         elif model_name == "Clustering Hierárquico":
-            # Configurar explicitamente todos os parâmetros necessários
+            # Configurar todos os parâmetros necessários para o modelo Hierárquico
             model.set_params(n_clusters=st.session_state.kmeans_clusters, linkage="ward")
-            model.fit(X_scaled)
-            st.session_state['labels'] = model.labels_
+            model.fit(X_scaled)  # Ajustar o modelo aos dados
+            st.session_state['labels'] = model.labels_  # Armazenar os rótulos dos clusters
         
-        st.write(f"Clusterização realizada com {model_name}")
-        
+        # **Exibir mensagem de sucesso**
+        st.write(f"Clusterização realizada com sucesso usando o modelo {model_name}!")
+
     except Exception as e:
+        # **Capturar e exibir erros, caso ocorram**
         st.error(f"Erro ao treinar o modelo {model_name}: {str(e)}")
-# Visualização dos Clusters usando PCA
+
+
+# Função para visualização dos clusters usando PCA
 def visualize_clusters(X_data):
-    if 'labels' in st.session_state:
+    """
+    Gera uma visualização dos clusters em 2D usando PCA para reduzir a dimensionalidade dos dados.
+
+    Parâmetros:
+    - X_data: Dados de entrada que serão projetados em 2D para visualização dos clusters.
+
+    """
+    if 'labels' in st.session_state:  # Verifica se os rótulos dos clusters já foram gerados
+        # **Aplicar PCA para reduzir os dados para 2 dimensões**
         pca = PCA(n_components=2)
         X_pca = pca.fit_transform(X_data)
 
+        # **Criar gráfico de dispersão dos clusters**
         plt.figure(figsize=(8, 6))
-        plt.scatter(X_pca[:, 0], X_pca[:, 1], c=st.session_state['labels'], cmap='viridis')
+        plt.scatter(X_pca[:, 0], X_pca[:, 1], c=st.session_state['labels'], cmap='viridis', alpha=0.7)
         plt.xlabel('Componente Principal 1')
         plt.ylabel('Componente Principal 2')
         plt.title('Visualização dos Clusters em 2D')
+
+        # **Exibir o gráfico no Streamlit**
         st.pyplot(plt.gcf())
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR, SVC
+from sklearn.linear_model import LinearRegression
 
 def evaluate_regression_model(y_true, y_pred):
+    """
+    Avalia um modelo de regressão com base em três métricas principais:
+    - R²: Coeficiente de determinação (quanto maior, melhor).
+    - MAE: Erro absoluto médio (quanto menor, melhor).
+    - MSE: Erro quadrático médio (quanto menor, melhor).
+
+    Parâmetros:
+    - y_true: Valores reais da variável de saída.
+    - y_pred: Valores previstos pelo modelo.
+
+    Retorna:
+    - Um dicionário com as métricas calculadas.
+    """
     r2 = r2_score(y_true, y_pred)
     mae = mean_absolute_error(y_true, y_pred)
     mse = mean_squared_error(y_true, y_pred)
-    return {"R²": r2, "MAE": mae,"MSE": mse }
+    return {"R²": r2, "MAE": mae, "MSE": mse}
 
 def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_grid_search, manual_params=None):
-    try:
-        # Verificações para tipos de modelos
-        is_svr = isinstance(model, SVR)
-        is_svc = isinstance(model, SVC)  # Adicionar verificação para SVC
-        is_regression = is_svr or isinstance(model, LinearRegression)
+    """
+    Treina e avalia um modelo de Machine Learning utilizando GridSearch para otimização dos hiperparâmetros.
 
-        # Escalonamento para SVR
+    Parâmetros:
+    - model: O modelo de Machine Learning a ser treinado (ex.: SVR, SVC, LinearRegression).
+    - param_grid: Dicionário contendo os parâmetros para GridSearchCV (se ativado).
+    - X_train: Conjunto de treino para as variáveis preditoras.
+    - y_train: Conjunto de treino para a variável alvo.
+    - X_test: Conjunto de teste para as variáveis preditoras.
+    - y_test: Conjunto de teste para a variável alvo.
+    - use_grid_search: Booleano que indica se o GridSearchCV deve ser utilizado.
+    - manual_params: Parâmetros fornecidos manualmente pelo utilizador (se houver).
+
+    Retorna:
+    - Um dicionário com as métricas de avaliação do modelo treinado.
+    """
+    try:
+        # **Verificar o tipo de modelo**
+        is_svr = isinstance(model, SVR)  # Identifica se o modelo é uma regressão por vetores de suporte (SVR)
+        is_svc = isinstance(model, SVC)  # Identifica se o modelo é um classificador SVC
+        is_regression = is_svr or isinstance(model, LinearRegression)  # Identifica se o modelo é de regressão
+
+        # **Escalonamento dos dados apenas para SVR (necessário para otimizar o desempenho)**
         if is_svr:
             scaler = StandardScaler()
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
 
-        # GridSearch otimizado
+        # **Configuração do GridSearchCV**
         if use_grid_search:
-            cv = KFold(n_splits=5, shuffle=True, random_state=42)
-            scoring = 'r2' if is_regression else 'accuracy'
+            cv = KFold(n_splits=5, shuffle=True, random_state=42)  # Validação cruzada com 5 divisões
+            scoring = 'r2' if is_regression else 'accuracy'  # Define a métrica de avaliação conforme o tipo de problema
             
-            # Tratamento especial para SVC (muito mais rápido)
+            # **Otimização para modelos SVC (Classificação por Vetores de Suporte)**
             if is_svc:
-                # Grid reduzido para SVC
+                # Reduz o número de parâmetros testados para acelerar o GridSearch
                 simplified_grid = {
                     'C': [1],            # Apenas um valor para C
                     'kernel': ['rbf'],   # Apenas um tipo de kernel
                     'gamma': ['scale']   # Apenas uma configuração de gamma
                 }
                 
-                # Aplicar parâmetros manuais, se fornecidos
+                # **Aplicar parâmetros manuais, se fornecidos pelo utilizador**
                 if manual_params:
                     for param, value in manual_params.items():
-                        simplified_grid[param] = [value]
-                        
-                # Usar o grid simplificado
-                actual_grid = simplified_grid
+                        simplified_grid[param] = [value]  # Garante que os valores sejam listas para GridSearch
                 
-                # Reduzir número de folds para SVC
-                cv = KFold(n_splits=3, shuffle=True, random_state=42)
+                actual_grid = simplified_grid  # Usa o grid simplificado para SVC
+                cv = KFold(n_splits=3, shuffle=True, random_state=42)  # Reduz o número de folds para otimizar tempo
+                
             else:
-                # Para outros modelos, usar o grid original
-                actual_grid = param_grid
+                actual_grid = param_grid  # Para outros modelos, usa o grid normal
                 
-                # Incorporar parâmetros manuais
+                # **Se o utilizador forneceu parâmetros manuais, incorporá-los ao grid**
                 if manual_params:
                     actual_grid.update({k: [v] for k, v in manual_params.items()})
-            
-            # Executar GridSearch com os parâmetros apropriados
+
+            # **Executar o GridSearch para encontrar os melhores hiperparâmetros**
             grid_search = GridSearchCV(
                 model, 
                 actual_grid,
                 cv=cv,
                 scoring=scoring,
-                n_jobs=-1  # Utilizar todos os cores disponíveis
+                n_jobs=-1  # Usa todos os núcleos disponíveis para acelerar a busca
             )
             grid_search.fit(X_train, y_train)
             
-            best_model = grid_search.best_estimator_
-            best_params = grid_search.best_params_
+            best_model = grid_search.best_estimator_  # Melhor modelo encontrado pelo GridSearch
+            best_params = grid_search.best_params_  # Melhores hiperparâmetros identificados
+
         else:
-            # Treinar sem GridSearch
+            # **Se não usar GridSearch, aplicar os parâmetros manualmente (se fornecidos)**
             if manual_params:
                 model.set_params(**manual_params)
-            
-            model.fit(X_train, y_train)
-            best_model = model
-            best_params = manual_params or {}
 
-        # Predições
+            model.fit(X_train, y_train)  # Treinar o modelo com os dados de treino
+            best_model = model  # O modelo treinado sem otimização
+            best_params = manual_params or {}  # Se não houver parâmetros manuais, define um dicionário vazio
+
+        # **Fazer previsões com o modelo treinado**
         y_pred = best_model.predict(X_test)
 
-        # Métricas baseadas no tipo de modelo
+        # **Calcular métricas de desempenho**
         metrics = {
             "Modelo": model.__class__.__name__,
             **(
+                # **Se for um modelo de regressão**
                 {
                     "R²": r2_score(y_test, y_pred),
                     "MAE": mean_absolute_error(y_test, y_pred),
                     "MSE": mean_squared_error(y_test, y_pred)
                 } if is_regression else 
+                # **Se for um modelo de classificação**
                 {
                     "Accuracy": accuracy_score(y_test, y_pred),
                     "Precision": precision_score(y_test, y_pred, average='weighted'),
@@ -3165,168 +4100,251 @@ def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, use_
             "Best Parameters": best_params
         }
 
-        return metrics
+        return metrics  # Retorna as métricas do modelo treinado
 
     except Exception as e:
+        # **Capturar erros e exibir no Streamlit**
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
 
-# Função para selecionar o scoring
+# **Função para selecionar o método de avaliação (Scoring)**
 def select_scoring():
-    # Verifica se 'selected_scoring' já existe, caso contrário, inicializa com 'f1' como padrão
-    if 'selected_scoring' not in st.session_state:
-        st.session_state.selected_scoring = 'F1-Score'  # Definir 'f1' como valor padrão
+    """
+    Permite ao utilizador selecionar a métrica de avaliação a ser usada na seleção de features.
+    A escolha é armazenada no session_state para ser utilizada posteriormente.
 
-    # Agora o selectbox usa o valor já armazenado em 'selected_scoring'
+    - Se o utilizador já tiver feito uma escolha anteriormente, ela será mantida.
+    - Se for a primeira vez, a métrica padrão será "F1-Score".
+    - A escolha pode ser guardada num ficheiro para persistência.
+
+    Retorna:
+    - Nenhum valor explícito, mas a métrica escolhida é armazenada no session_state.
+    """
+    # Verifica se a métrica já foi selecionada; se não, define "F1-Score" como padrão
+    if 'selected_scoring' not in st.session_state:
+        st.session_state.selected_scoring = 'F1-Score'
+
+    # Criar a caixa de seleção para escolha da métrica
     st.session_state.selected_scoring = st.selectbox(
         "Escolha o scoring para a seleção de features:",
         ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
         index=['Accuracy', 'Precision', 'Recall', 'F1-Score'].index(st.session_state.selected_scoring)
     )
 
-    # Exibir a escolha armazenada
+    # Exibir a escolha feita
     st.write("Scoring selecionado:", st.session_state.selected_scoring)
 
-    # Salvar em um arquivo ou variável para persistência adicional
+    # Opção para guardar a escolha num ficheiro
     if st.button("Salvar escolha"):
         with open("scoring_choice.txt", "w") as file:
-            file.write(st.session_state.selected_scoring)
+            file.write(st.session_state.selected_scoring)  # Grava a escolha no ficheiro
         st.success("Escolha salva com sucesso!")
 
 
-# Função para remover features correlacionadas
+# **Função para remover features altamente correlacionadas**
 def remove_highly_correlated_features(df, threshold=0.9):
     """
-    Remove features altamente correlacionadas.
-    
+    Remove colunas do DataFrame que apresentam uma correlação superior a um determinado limiar.
+
     Parâmetros:
-    - df: DataFrame de entrada
-    - threshold: Limiar de correlação (padrão 0.9)
-    
+    - df (DataFrame): Conjunto de dados de entrada.
+    - threshold (float): Limiar de correlação acima do qual as colunas serão removidas (padrão: 0.9).
+
     Retorna:
-    - DataFrame com features não correlacionadas
+    - DataFrame sem as colunas altamente correlacionadas.
     """
-    # Calcular matriz de correlação absoluta
-    corr_matrix = df.corr().abs()
-    
-    # Obter a matriz triangular superior
+    # **1. Calcular a matriz de correlação absoluta**
+    corr_matrix = df.corr().abs()  # Calcula os coeficientes de correlação absolutos
+
+    # **2. Criar uma matriz triangular superior**
+    # Esta matriz exclui a diagonal principal e os valores abaixo dela, para evitar redundâncias
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    
-    # Identificar colunas a serem removidas
+
+    # **3. Identificar as colunas a serem removidas**
+    # Se qualquer valor na matriz for superior ao threshold, removemos a coluna correspondente
     to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
-    
-    # Informar quais features serão removidas (opcional)
+
+    # **4. Informar ao utilizador quais colunas foram removidas**
     if to_drop:
         st.info(f"Features removidas por alta correlação: {to_drop}")
-    
-    # Retornar DataFrame sem as features correlacionadas
+
+    # **5. Retornar o DataFrame sem as colunas altamente correlacionadas**
     return df.drop(columns=to_drop)
 
-
-# Função para selecionar features importantes com RandomForest
+# **Função para selecionar features importantes com RandomForest**
 def select_important_features(X, y, threshold=0.01, model_type=None):
     """
-    Seleciona features importantes usando RandomForest.
-    
+    Seleciona as features mais relevantes utilizando RandomForest.
+
     Parâmetros:
-    - X: Matriz de features
-    - y: Vetor de rótulos
-    - threshold: Limiar de importância (padrão 0.01)
-    - model_type: Tipo de modelo (Classificação ou Regressão)
-    
+    - X: Matriz de features (DataFrame).
+    - y: Vetor alvo (série de labels ou valores numéricos).
+    - threshold: Limiar mínimo de importância (padrão = 0.01).
+    - model_type: Tipo de modelo ("Classificação" ou "Regressão").
+
     Retorna:
-    - DataFrame com features importantes
+    - DataFrame contendo apenas as features selecionadas.
     """
-    # Definir o modelo baseado no tipo de problema
+
+    # **1. Definir o modelo conforme o tipo de problema**
     if model_type == "Classificação":
         model = RandomForestClassifier(n_estimators=100, random_state=42)
     elif model_type == "Regressão":
         model = RandomForestRegressor(n_estimators=100, random_state=42)
     else:
-        raise ValueError("Tipo de modelo deve ser 'Classificação' ou 'Regressão'")
-    
-    # Usar SimpleImputer para lidar com valores ausentes
-    imputer = SimpleImputer(strategy='mean')
+        raise ValueError("O tipo de modelo deve ser 'Classificação' ou 'Regressão'.")
+
+    # **2. Tratar valores ausentes utilizando SimpleImputer**
+    imputer = SimpleImputer(strategy='mean')  # Substitui valores ausentes pela média
     X_imputed = imputer.fit_transform(X)
-    
-    # Treinar o modelo
+
+    # **3. Treinar o modelo RandomForest**
     model.fit(X_imputed, y)
-    
-    # Calcular importância das features
+
+    # **4. Obter a importância de cada feature**
     importances = model.feature_importances_
-    
-    # Criar DataFrame de importância das features
+
+    # **5. Criar um DataFrame com as importâncias ordenadas**
     feature_importance = pd.DataFrame({
         'feature': X.columns,
         'importance': importances
     }).sort_values('importance', ascending=False)
-    
-    # Selecionar features com importância acima do threshold
+
+    # **6. Selecionar apenas as features que ultrapassam o threshold**
     important_features = feature_importance[feature_importance['importance'] > threshold]['feature']
-    
-    # Informar quais features foram selecionadas
+
+    # **7. Exibir as features selecionadas ao utilizador**
     st.info(f"Features selecionadas: {list(important_features)}")
-    
+
+    # **8. Retornar o DataFrame contendo apenas as features selecionadas**
     return X[important_features]
 
 
-# Função principal de seleção de features
+# **Função principal para seleção de features**
 def feature_selection():
-    st.header("Seleção de Features")
+    """
+    Interface para a seleção de features em modelos de Machine Learning.
     
+    - Permite ao utilizador escolher a métrica de scoring.
+    - Dá a opção de selecionar as features automaticamente ou manualmente.
+    - Mostra um DataFrame com as importâncias das features.
+    """
+
+    st.header("Seleção de Features")
+
+    # Inicializar o estado de seleção de features
     if 'feature_selection_done' not in st.session_state:
         st.session_state.feature_selection_done = False
-    
+
+    # Obter o tipo de modelo armazenado na sessão (Classificação ou Regressão)
     model_type = st.session_state.get('model_type', 'Classificação')
-    scoring_options = {"Classificação": ['Accuracy', 'Precision', 'Recall', 'F1-Score'], "Regressão": ['R²', 'MAE', 'MSE']}
-    
-    selected_scoring = st.selectbox("Escolha a métrica de scoring:", scoring_options.get(model_type, []))
-    
+
+    # Definir opções de scoring disponíveis conforme o tipo de modelo
+    scoring_options = {
+        "Classificação": ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+        "Regressão": ['R²', 'MAE', 'MSE']
+    }
+
+    # **1. Escolha da métrica de avaliação**
+    selected_scoring = st.selectbox(
+        "Escolha a métrica de scoring:",
+        scoring_options.get(model_type, [])  # Exibe opções conforme o tipo de modelo
+    )
+
+    # **Confirmar a escolha da métrica**
     if st.button("Confirmar Scoring"):
         st.session_state.selected_scoring = selected_scoring
         st.session_state.scoring_confirmed = True
         st.success(f"Métrica de scoring {selected_scoring} confirmada!")
-    
+
+    # **2. Escolha do método de seleção de features**
     if st.session_state.scoring_confirmed:
-        method_selection = st.radio("Escolha o método de seleção de features:", ["Automático", "Manual"])
-        
+        method_selection = st.radio(
+            "Escolha o método de seleção de features:",
+            ["Automático", "Manual"]
+        )
+
+        # **Confirmar método escolhido**
         if st.button("Confirmar Método"):
             st.session_state.method_selection = method_selection
             st.success(f"Método {method_selection} confirmado!")
 
-        X_train, X_test, y_train, y_test = st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test
-        
+        # Obter os dados de treino e teste da sessão
+        X_train, X_test, y_train, y_test = (
+            st.session_state.X_train, 
+            st.session_state.X_test, 
+            st.session_state.y_train, 
+            st.session_state.y_test
+        )
+
+        # **3. Seleção Automática de Features**
         if method_selection == "Automático":
-            feature_selector = RandomForestClassifier(n_estimators=100, random_state=42) if model_type == "Classificação" else RandomForestRegressor(n_estimators=100, random_state=42)
+            feature_selector = (
+                RandomForestClassifier(n_estimators=100, random_state=42)
+                if model_type == "Classificação"
+                else RandomForestRegressor(n_estimators=100, random_state=42)
+            )
+
+            # Treinar o modelo para obter importâncias
             feature_selector.fit(X_train, y_train)
-            
-            feature_importances = pd.DataFrame({'feature': X_train.columns, 'importance': feature_selector.feature_importances_}).sort_values('importance', ascending=False)
+
+            # Criar DataFrame com as importâncias ordenadas
+            feature_importances = pd.DataFrame({
+                'feature': X_train.columns,
+                'importance': feature_selector.feature_importances_
+            }).sort_values('importance', ascending=False)
+
+            # Exibir o DataFrame com as importâncias das features
             st.dataframe(feature_importances)
-            
+
+            # **Selecionar as features mais importantes com threshold > 0.01**
             selected_features = feature_importances[feature_importances['importance'] > 0.01]['feature'].tolist()
+
+        # **4. Seleção Manual de Features**
         else:
-            feature_selector = RandomForestClassifier(n_estimators=100, random_state=42) if model_type == "Classificação" else RandomForestRegressor(n_estimators=100, random_state=42)
+            feature_selector = (
+                RandomForestClassifier(n_estimators=100, random_state=42)
+                if model_type == "Classificação"
+                else RandomForestRegressor(n_estimators=100, random_state=42)
+            )
+
+            # Treinar o modelo para obter importâncias
             feature_selector.fit(X_train, y_train)
-            
-            feature_importances = pd.DataFrame({'feature': X_train.columns, 'importance': feature_selector.feature_importances_}).sort_values('importance', ascending=False)
+
+            # Criar DataFrame com as importâncias ordenadas
+            feature_importances = pd.DataFrame({
+                'feature': X_train.columns,
+                'importance': feature_selector.feature_importances_
+            }).sort_values('importance', ascending=False)
+
+            # Exibir o DataFrame com as importâncias das features
             st.dataframe(feature_importances)
-            
-            num_features = st.slider("Número de Features a Selecionar", 1, X_train.shape[1], min(5, X_train.shape[1]))
+
+            # **Permitir ao utilizador escolher quantas features deseja manter**
+            num_features = st.slider(
+                "Número de Features a Selecionar",
+                1, X_train.shape[1], min(5, X_train.shape[1])
+            )
+
+            # Selecionar as top-N features com base na escolha do utilizador
             selected_features = feature_importances['feature'].head(num_features).tolist()
 
+        # **5. Atualizar o estado global com as features selecionadas**
         st.session_state.X_train_selected = X_train[selected_features]
         st.session_state.X_test_selected = X_test[selected_features]
         st.session_state.selected_features = selected_features
         st.session_state.feature_selection_done = True
 
+        # **6. Botão para treinar o modelo com as features selecionadas**
         if st.button("Treinar Modelo com Features Selecionadas"):
             st.session_state.step = 'train_with_selected_features'
             st.rerun()
 
+# **Função para treinar o modelo com as features selecionadas**
 def train_with_selected_features_page():
     st.title("Treino do Modelo com Features Selecionadas")
     
-    # Mapeamento de modelos bidirecional
+    # **Mapeamento de modelos para evitar inconsistências nos nomes**
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
@@ -3340,6 +4358,7 @@ def train_with_selected_features_page():
         "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
     
+    # **Verificar se há modelos disponíveis**
     if 'models' not in st.session_state or not st.session_state.models:
         st.error("Erro: Nenhum modelo foi treinado ou selecionado.")
         return
@@ -3348,6 +4367,7 @@ def train_with_selected_features_page():
         st.error("Nenhum modelo foi selecionado. Por favor, selecione um modelo antes de continuar.")
         return
 
+    # **Obter o nome do modelo selecionado e verificar a sua existência**
     selected_model_name = st.session_state.selected_model_name.strip()
     model_class_name = model_name_map.get(selected_model_name, selected_model_name)
 
@@ -3356,15 +4376,21 @@ def train_with_selected_features_page():
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
+    # **Recuperar o modelo**
     model = st.session_state.models[model_class_name]
     
+    # **Recuperar os dados selecionados**
     X_train_selected, X_test_selected = st.session_state.X_train_selected, st.session_state.X_test_selected
     y_train, y_test = st.session_state.y_train, st.session_state.y_test
     
     st.write(f"Treinando o modelo {selected_model_name} com {len(st.session_state.selected_features)} features selecionadas...")
     
-    selected_metrics = train_and_store_metrics(model, X_train_selected, y_train, X_test_selected, y_test, "Com Seleção", False)
+    # **Treinar e armazenar métricas**
+    selected_metrics = train_and_store_metrics(
+        model, X_train_selected, y_train, X_test_selected, y_test, "Com Seleção", False
+    )
     
+    # **Exibir métricas se o treino for bem-sucedido**
     if selected_metrics:
         st.session_state['resultado_com_selecao'] = selected_metrics
         st.success("Treinamento concluído!")
@@ -3374,26 +4400,35 @@ def train_with_selected_features_page():
         metrics_df.insert(0, "Modelo", "Com Seleção de Features")
         st.table(metrics_df)
     
+    # **Botão para comparar modelos**
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
 
-#Função para Treinar e Armazenar as metricas
 
+# **Função para treinar o modelo e armazenar métricas**
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
+    """
+    Treina o modelo e armazena as métricas de desempenho.
+    
+    Parâmetros:
+    - model: Modelo a ser treinado.
+    - X_train, y_train: Dados de treino.
+    - X_test, y_test: Dados de teste.
+    - metric_type: Tipo de treino ("Com Seleção" ou "Sem Seleção").
+    - use_grid_search: Se True, aplica GridSearchCV.
+    - manual_params: Parâmetros manuais a serem aplicados.
+    
+    Retorna:
+    - Dicionário com métricas do modelo.
+    """
     try:
-        # Imports necessários
-        from sklearn.impute import SimpleImputer
-        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-        from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-        from sklearn.model_selection import GridSearchCV, KFold
-
-        # Imputar valores ausentes
-        imputer = SimpleImputer(strategy="mean")
+        # **1. Tratar valores ausentes**
+        imputer = SimpleImputer(strategy="mean")  # Preenche valores ausentes com a média
         X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
         X_test = pd.DataFrame(imputer.transform(X_test), columns=X_test.columns)
 
-        # Garantir que y_train e y_test sejam válidos
+        # **2. Converter variáveis categóricas**
         if y_train.dtype == 'object':
             from sklearn.preprocessing import LabelEncoder
             le = LabelEncoder()
@@ -3403,40 +4438,33 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             y_train = y_train.fillna(y_train.mean())
             y_test = y_test.fillna(y_test.mean())
 
-        # **RECUPERAR PARÂMETROS SALVOS**
+        # **3. Aplicar parâmetros salvos ao modelo, se existirem**
         if metric_type == "Com Seleção":
             saved_params = st.session_state.get('best_params_selected', None) or st.session_state.get('best_params', None)
         else:
             saved_params = st.session_state.get('best_params', None)
 
-        # **APLICAR PARÂMETROS SALVOS APENAS SE COMPATÍVEIS COM O MODELO**
         if saved_params and hasattr(model, 'get_params') and all(param in model.get_params() for param in saved_params):
             st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
             model.set_params(**saved_params)
 
-
-        # **TREINO COM GRIDSEARCH OU DIRETO**
+        # **4. Treinar o modelo com ou sem GridSearch**
         if use_grid_search and metric_type == "Sem Seleção":
             param_grid = st.session_state.get('param_grid', {
                 'n_neighbors': [3, 5, 7, 9],
                 'weights': ['uniform', 'distance']
             })
 
-            # Definir estratégia de validação cruzada
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-            if st.session_state.model_type == "Classificação":
-                scoring = 'accuracy'
-            else:
-                scoring = 'r2'
+            scoring = 'accuracy' if st.session_state.model_type == "Classificação" else 'r2'
 
-            # Aplicar GridSearch
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
 
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
 
-            # **SALVAR PARÂMETROS NO ESTADO GLOBAL**
+            # **Salvar os melhores parâmetros no estado global**
             st.session_state['best_params'] = best_params
             st.session_state['best_params_selected'] = best_params
 
@@ -3445,14 +4473,14 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             best_model = model
             best_params = saved_params if saved_params else {}
 
-        # **SALVAR MODELO TREINADO NO ESTADO GLOBAL**
+        # **5. Armazenar o modelo treinado na sessão**
         st.session_state['trained_model'] = best_model
         st.session_state['trained_model_name'] = best_model.__class__.__name__
         
-
-        # **AVALIAR O MODELO**
+        # **6. Fazer previsões**
         y_pred = best_model.predict(X_test)
 
+        # **7. Calcular as métricas de desempenho**
         if st.session_state.model_type == "Classificação":
             metrics = {
                 'F1-Score': f1_score(y_test, y_pred, average='weighted'),
@@ -3469,7 +4497,7 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
                 'Best Parameters': best_params
             }
 
-        # **SALVAR MÉTRICAS NO ESTADO GLOBAL**
+        # **8. Armazenar métricas no estado global**
         if 'metrics' not in st.session_state:
             st.session_state['metrics'] = {}
         st.session_state['metrics'][metric_type] = metrics
@@ -3479,11 +4507,11 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
-
+        
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
-    # Mapeamento de modelos bidirecional
+    # **Mapeamento de modelos para garantir compatibilidade de nomenclatura**
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
@@ -3497,50 +4525,47 @@ def evaluate_and_compare_models():
         "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
 
-    # Verificações preliminares
+    # **Verificações preliminares para garantir que todas as etapas anteriores foram concluídas**
     if 'selected_features' not in st.session_state:
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
         return
 
-    # Verificar se os modelos estão definidos  
     if 'models' not in st.session_state or not st.session_state.models:
         st.error("Configuração de modelos não encontrada. Por favor, reinicie o processo de seleção de modelos.")
         return
 
-    # Recuperar o tipo de modelo
+    # **Obter tipo de modelo e métrica escolhida**
     model_type = st.session_state.get('model_type', 'Indefinido')
-
-    # Recuperar a métrica escolhida pelo usuário para seleção de features
     scoring_metric = st.session_state.get("selected_scoring", None)
+    
     if not scoring_metric:
         st.error("Nenhuma métrica de avaliação foi escolhida. Por favor, volte à etapa de seleção de métricas.")
         return
 
-    # Recuperar o nome do modelo selecionado
+    # **Recuperar o nome do modelo selecionado**
     model_name = st.session_state.get('selected_model_name')
     if not model_name:
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Encontrar o nome correto do modelo a partir do mapeamento
+    # **Verificar se o modelo está no mapeamento**
     model_class_name = model_name_map.get(model_name)
     if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(model_name_map.keys()))
         return
 
-    # Recuperar o modelo da sessão com base no nome correto da classe
+    # **Recuperar o modelo treinado**
     model = st.session_state.models.get(model_class_name)
     if model is None:
         st.error(f"O modelo {model_class_name} não foi encontrado na sessão.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
-    # Recuperar métricas originais e com seleção de features
+    # **Obter as métricas dos modelos treinados**
     original_metrics = st.session_state.get('resultado_sem_selecao', {}) 
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
-    # Verificar se as métricas existem
     if not original_metrics:
         st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento.")
         return
@@ -3549,7 +4574,7 @@ def evaluate_and_compare_models():
         st.error("Não foi possível encontrar as métricas com seleção de features. Por favor, execute o treino com features selecionadas.")
         return
 
-    # Criar DataFrame de comparação
+    # **Criar DataFrame de comparação**
     if model_type == "Classificação":
         comparison_df = pd.DataFrame({
             'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
@@ -3571,296 +4596,278 @@ def evaluate_and_compare_models():
         st.error(f"Tipo de modelo não reconhecido: {model_type}")
         return
 
-    # Exibir tabela de comparação
+    # **Exibir tabela de comparação**
     st.subheader("📈 Comparação dos Resultados:")
     
-    # Formatar todas as colunas numéricas
     format_dict = {}
     for col in comparison_df.columns:
         if col != 'Modelo' and col != 'Best Parameters':
             format_dict[col] = '{:.4f}'
     
     st.dataframe(
-    comparison_df.style.format(format_dict).set_table_styles(
-        [{'selector': 'th', 'props': [('font-size', '18px')]}, 
-         {'selector': 'td', 'props': [('font-size', '12px')]},  
-         {'selector': 'table', 'props': [('width', '100%')]},    
-        ]
+        comparison_df.style.format(format_dict).set_table_styles(
+            [{'selector': 'th', 'props': [('font-size', '18px')]}, 
+             {'selector': 'td', 'props': [('font-size', '12px')]},  
+             {'selector': 'table', 'props': [('width', '100%')]},    
+            ]
+        )
     )
-)
     
-    # Determinar as métricas disponíveis com base no tipo de modelo
-    if model_type == "Classificação":
-        metric_columns = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-    elif model_type == "Regressão":
-        metric_columns = ['R²', 'MAE', 'MSE']
-    else:
-        metric_columns = []
-    
-    # Garantir que a métrica escolhida existe nas colunas disponíveis
-    if scoring_metric not in metric_columns:
-        st.warning(f"A métrica selecionada '{scoring_metric}' não está disponível. Usando a primeira métrica disponível.")
-        scoring_metric = metric_columns[0] if metric_columns else None
-    
-    if scoring_metric:
-        # Gráfico de comparação usando a métrica escolhida pelo usuário
-
-        x = comparison_df['Modelo']
-        y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
-        y2 = comparison_df[scoring_metric].iloc[1]  # Com Seleção de Features (índice 1)
-
-        # Gráfico de comparação com melhorias no layout e visibilidade dos rótulos
+    # **Criar gráfico de comparação com base na métrica selecionada**
+    if scoring_metric in comparison_df.columns:
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Posições das barras
-        x_pos = [0, 1]  # Definindo a posição das barras para garantir que fiquem ao lado
-        width = 0.4  # Largura das barras
+        x_pos = [0, 1]
+        width = 0.4
 
-        # Ajustar as barras para uma boa visibilidade
-        bars1 = ax.bar(x_pos[0], y1, width=width, label="Sem Seleção de Features", color='#90EE90', align='center')
-        bars2 = ax.bar(x_pos[1], y2, width=width, label="Com Seleção de Features", color='#006400', align='center')
+        bars1 = ax.bar(x_pos[0], comparison_df[scoring_metric].iloc[0], width=width, label="Sem Seleção de Features", color='#90EE90', align='center')
+        bars2 = ax.bar(x_pos[1], comparison_df[scoring_metric].iloc[1], width=width, label="Com Seleção de Features", color='#006400', align='center')
 
-        # Adicionar rótulos de valor nas barras com melhorias
         for bar in bars1:
-            height = bar.get_height()
-            ax.annotate(f'{height:.4f}',
-                        xy=(bar.get_x() + bar.get_width() / 2, height),
-                        xytext=(0, 3),
-                        textcoords="offset points",
-                        ha='center', va='bottom',
-                        fontsize=12, color='black')
+            ax.annotate(f'{bar.get_height():.4f}', xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()), 
+                        xytext=(0, 3), textcoords="offset points", ha='center', fontsize=12, color='black')
 
         for bar in bars2:
-            height = bar.get_height()
-            ax.annotate(f'{height:.4f}',
-                        xy=(bar.get_x() + bar.get_width() / 2, height),
-                        xytext=(0, 3),
-                        textcoords="offset points",
-                        ha='center', va='bottom',
-                        fontsize=12, color='black')  # Altere a cor para garantir contraste
+            ax.annotate(f'{bar.get_height():.4f}', xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()), 
+                        xytext=(0, 3), textcoords="offset points", ha='center', fontsize=12, color='black')
 
-        # Melhorando o título e as labels
         ax.set_title(f'Comparação de {scoring_metric}', fontsize=16, fontweight='bold')
         ax.set_ylabel(scoring_metric, fontsize=14)
         ax.set_xlabel("Modelos", fontsize=14)
 
-        # Ajuste nos rótulos do eixo X e Y
         plt.xticks(x_pos, ['Sem Seleção de Features', 'Com Seleção de Features'], fontsize=12)
         plt.yticks(fontsize=12)
 
-        # Legenda
         ax.legend()
-
-        # Ajuste do layout para garantir que tudo fique visível
         plt.tight_layout()
 
-        # Exibir o gráfico
         st.pyplot(fig)
 
+    # **Determinar o melhor modelo com base na métrica escolhida**
+    score_without = comparison_df[scoring_metric].iloc[0]
+    score_with = comparison_df[scoring_metric].iloc[1]
 
-    # Determinar o melhor modelo baseado na métrica escolhida
-    if scoring_metric:
-        score_without = comparison_df[scoring_metric].iloc[0]
-        score_with = comparison_df[scoring_metric].iloc[1]
-        
-        better_model = "Com Seleção de Features" if score_with > score_without else "Sem Seleção de Features"
-        better_score = max(score_with, score_without)
-        
-        st.success(f"🏆 **Melhor modelo:** {better_model} com {scoring_metric} = {better_score:.4f}")
+    better_model = "Com Seleção de Features" if score_with > score_without else "Sem Seleção de Features"
+    better_score = max(score_with, score_without)
+
+    st.success(f"🏆 **Melhor modelo:** {better_model} com {scoring_metric} = {better_score:.4f}")
     
-    # Botão para próxima etapa
+    # **Botão para avançar para a próxima etapa**
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
 
-# Função para gerar interpretação personalizada das métricas
+# Função para gerar interpretação personalizada das métricas de classificação
 def generate_metrics_interpretation(metrics):
-    """Função para gerar interpretação personalizada das métricas"""
+    """Gera interpretação personalizada para métricas de modelos de classificação."""
     interpretacao = []
 
-    # Verificar se as métricas estão no formato esperado
+    # **Verificar se as métricas estão no formato esperado**
     if not isinstance(metrics, dict):
         return "Formato de métricas inválido."
 
-    # Accuracy
+    # **Interpretação para Acurácia (Accuracy)**
     if 'Accuracy' in metrics:
         try:
             accuracy = float(metrics['Accuracy'])
             if accuracy > 0.9:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto muito elevada.")
             elif accuracy > 0.75:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas pode ser otimizado.")
             elif accuracy > 0.5:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Moderada. O modelo apresenta um nível de erro considerável.")
             else:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Fraca. O modelo falha em muitas previsões e precisa de ajustes.")
         except (ValueError, TypeError):
             interpretacao.append("- Acurácia: Não disponível ou inválida.")
 
-    # Precision
+    # **Interpretação para Precisão (Precision)**
     if 'Precision' in metrics:
         try:
             precision = float(metrics['Precision'])
             if precision > 0.9:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Excelente! O modelo evita falsos positivos com alta confiança.")
             elif precision > 0.75:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Boa. O modelo é confiável, mas pode ser mais rigoroso na seleção.")
             elif precision > 0.5:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Moderada. O modelo ainda produz muitos falsos positivos.")
             else:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Fraca. Muitos falsos positivos comprometem a confiabilidade.")
         except (ValueError, TypeError):
             interpretacao.append("- Precisão: Não disponível ou inválida.")
 
-    # Recall
+    # **Interpretação para Recall (Sensibilidade)**
     if 'Recall' in metrics:
         try:
             recall = float(metrics['Recall'])
             if recall > 0.9:
-                interpretacao.append(f"- Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Excelente! O modelo deteta quase todos os casos positivos.")
             elif recall > 0.75:
-                interpretacao.append(f"- Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Bom. A maioria dos positivos são identificados.")
             elif recall > 0.5:
-                interpretacao.append(f"- Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Moderado. O modelo está a perder muitos casos positivos.")
             else:
-                interpretacao.append(f"- Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros. Pode ser necessário ajustar os pesos ou thresholds.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Fraco. O modelo falha em detetar muitos casos positivos.")
         except (ValueError, TypeError):
             interpretacao.append("- Recall: Não disponível ou inválido.")
-    
-    # F1-Score
+
+    # **Interpretação para F1-Score**
     if 'F1-Score' in metrics:
         try:
             f1_score = float(metrics['F1-Score'])
             if f1_score > 0.9:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade. O modelo está altamente otimizado.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e recall.")
             elif f1_score > 0.75:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias nos falsos positivos ou negativos.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Bom, mas pode ser melhorado.")
             elif f1_score > 0.5:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho moderado. Ajustes no treino ou balanceamento dos dados podem ajudar.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Moderado. Ajustes podem melhorar o desempenho.")
             else:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho fraco. Recomenda-se rever os dados, ajustar hiperparâmetros ou otimizar o modelo.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Fraco. Ajustes profundos são necessários.")
         except (ValueError, TypeError):
             interpretacao.append("- F1-Score: Não disponível ou inválido.")
 
-    # Se nenhuma métrica conhecida foi encontrada
-    if not interpretacao:
-        interpretacao.append("Nenhuma métrica de classificação reconhecida encontrada nos dados.")
-
-    # Conclusão Geral
+    # **Conclusão Geral**
     if all(key in metrics for key in ['F1-Score', 'Precision', 'Recall']):
         try:
             f1_score = float(metrics['F1-Score'])
             precision = float(metrics['Precision'])
             recall = float(metrics['Recall'])
-            
+
             if f1_score > 0.9 and precision > 0.9 and recall > 0.9:
-                interpretacao.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excecional em todas as métricas. Está pronto para produção!")
+                interpretacao.append("\nConclusão: 🎉 O modelo tem um desempenho excecional!")
             elif f1_score > 0.75 and precision > 0.75 and recall > 0.75:
-                interpretacao.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral, mas pode ser ligeiramente melhorado com ajustes finos.")
+                interpretacao.append("\nConclusão: 👍 O modelo tem um bom desempenho geral.")
             elif f1_score > 0.5 or precision > 0.5 or recall > 0.5:
-                interpretacao.append("\nConclusão Geral:⚠️ O modelo tem um desempenho moderado. Recomenda-se ajustar os hiperparâmetros ou melhorar os dados de treino.")
+                interpretacao.append("\nConclusão: ⚠️ O modelo é funcional, mas pode ser melhorado.")
             else:
-                interpretacao.append("\nConclusão Geral: ❗ O modelo apresenta um desempenho fraco. Será necessário rever o processo de treino, os dados e os parâmetros.")
+                interpretacao.append("\nConclusão: ❗ O modelo apresenta desempenho insatisfatório.")
         except (ValueError, TypeError):
             pass
 
     return "\n".join(interpretacao)
 
+
+# Função para gerar interpretação personalizada das métricas de regressão
 def generate_regression_interpretation(metrics):
-    """Função para gerar interpretação personalizada das métricas de regressão"""
+    """Gera interpretação personalizada para métricas de regressão."""
     interpretation = []
 
-    # Verificar se as métricas estão no formato esperado
+    # **Verificar se as métricas estão no formato esperado**
     if not isinstance(metrics, dict):
         return "Formato de métricas inválido."
 
-    # R² (Coeficiente de Determinação)
+    # **Interpretação para R² (Coeficiente de Determinação)**
     if 'R²' in metrics:
         try:
             r2 = float(metrics['R²'])
             if r2 > 0.9:
-                interpretation.append(f"- R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados. Isso indica um forte ajuste entre as previsões e os valores reais.")
+                interpretation.append(f"- R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados.")
             elif r2 > 0.75:
-                interpretation.append(f"- R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados, mas ainda pode ser melhorado.")
+                interpretation.append(f"- R²: {r2:.4f} - Muito bom! O modelo tem um ótimo ajuste.")
             elif r2 > 0.5:
-                interpretation.append(f"- R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade, mas há limitações importantes no ajuste.")
+                interpretation.append(f"- R²: {r2:.4f} - Moderado. O modelo precisa de ajustes para melhor explicação dos dados.")
             else:
-                interpretation.append(f"- R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados. Considere revisar as features ou usar um modelo mais adequado.")
+                interpretation.append(f"- R²: {r2:.4f} - Fraco. O modelo tem um ajuste insatisfatório.")
         except (ValueError, TypeError):
             interpretation.append("- R²: Não disponível ou inválido.")
 
-    # MAE (Erro Absoluto Médio)
+    # **Interpretação para MAE (Erro Absoluto Médio)**
     if 'MAE' in metrics:
         try:
             mae = float(metrics['MAE'])
             if mae < 0.1:
-                interpretation.append(f"- MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno, sugerindo que as previsões são altamente precisas.")
+                interpretation.append(f"- MAE: {mae:.4f} - Excelente! As previsões estão muito próximas dos valores reais.")
             elif mae < 1:
-                interpretation.append(f"- MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável, mas ainda pode ser otimizado.")
+                interpretation.append(f"- MAE: {mae:.4f} - Bom. O erro é aceitável, mas pode ser reduzido.")
             else:
-                interpretation.append(f"- MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais. Considere ajustar o modelo ou as features.")
+                interpretation.append(f"- MAE: {mae:.4f} - Alto. O modelo apresenta desvios significativos.")
         except (ValueError, TypeError):
             interpretation.append("- MAE: Não disponível ou inválido.")
 
-    # MSE (Erro Quadrático Médio)
+    # **Interpretação para MSE (Erro Quadrático Médio)**
     if 'MSE' in metrics:
         try:
             mse = float(metrics['MSE'])
             if mse < 0.1:
-                interpretation.append(f"- MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo, indicando que as previsões estão próximas dos valores reais.")
+                interpretation.append(f"- MSE: {mse:.4f} - Excelente! As previsões têm erros mínimos.")
             elif mse < 1:
-                interpretation.append(f"- MSE: {mse:.4f} - Bom. O erro é relativamente baixo, mas ainda há espaço para reduzir as discrepâncias.")
+                interpretation.append(f"- MSE: {mse:.4f} - Bom. O erro está sob controlo, mas pode ser otimizado.")
             else:
-                interpretation.append(f"- MSE: {mse:.4f} - Alto. O erro é significativo. Isso pode indicar que o modelo não está capturando bem os padrões nos dados.")
+                interpretation.append(f"- MSE: {mse:.4f} - Alto. As previsões estão significativamente afastadas dos valores reais.")
         except (ValueError, TypeError):
             interpretation.append("- MSE: Não disponível ou inválido.")
 
-    # Se nenhuma métrica conhecida foi encontrada
-    if not interpretation:
-        interpretation.append("Nenhuma métrica de regressão reconhecida encontrada nos dados.")
-
-    # Conclusão geral com base nas métricas
+    # **Conclusão Geral**
     if all(key in metrics for key in ['R²', 'MAE', 'MSE']):
         try:
             r2 = float(metrics['R²'])
             mse = float(metrics['MSE'])
             mae = float(metrics['MAE'])
-            
+
             if r2 > 0.9 and mse < 0.1 and mae < 0.1:
-                interpretation.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excepcional! Está pronto para produção.")
+                interpretation.append("\nConclusão: 🎉 O modelo apresenta um desempenho excecional!")
             elif r2 > 0.75 and mse < 1 and mae < 1:
-                interpretation.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral. Com ajustes menores, pode se tornar ainda melhor.")
+                interpretation.append("\nConclusão: 👍 O modelo tem um bom desempenho geral.")
             elif r2 > 0.5 or mse < 1 or mae < 1:
-                interpretation.append("\nConclusão Geral: ⚠️ O modelo está funcional, mas ainda apresenta limitações. Ajustes adicionais são recomendados.")
+                interpretation.append("\nConclusão: ⚠️ O modelo precisa de melhorias.")
             else:
-                interpretation.append("\nConclusão Geral: ❗ O modelo apresenta desempenho insatisfatório. Considere reavaliar as features, ajustar hiperparâmetros ou explorar modelos alternativos.")
+                interpretation.append("\nConclusão: ❗ O modelo apresenta um desempenho insatisfatório.")
         except (ValueError, TypeError):
             pass
 
     return "\n".join(interpretation)
 
-# Função para salvar o modelo treinado com nome dinâmico
+
+import joblib
+
+# Função para salvar o modelo treinado com um nome dinâmico
 def save_best_model(model, with_feature_selection=True):
+    """
+    Salva o modelo treinado em um ficheiro .pkl, permitindo a recuperação posterior.
+
+    Parâmetros:
+    - model: Modelo treinado a ser salvo.
+    - with_feature_selection (bool): Se True, indica que o modelo foi treinado com seleção de features.
+
+    Retorna:
+    - str: Nome do ficheiro onde o modelo foi salvo, ou None em caso de erro.
+    """
     try:
-        # Determinar o nome do arquivo com base na seleção de features
+        # Determinar o nome do ficheiro dependendo se houve seleção de features
         if with_feature_selection:
             model_filename = "best_model_com_selecao_features.pkl"
         else:
             model_filename = "best_model_sem_selecao_features.pkl"
 
-        # Salvar o modelo usando joblib
+        # Salvar o modelo utilizando joblib
         joblib.dump(model, model_filename)
+        
+        # Mensagem de sucesso
         st.success(f"Modelo salvo com sucesso como {model_filename}")
+        
         return model_filename
     except Exception as e:
+        # Exibir erro caso ocorra alguma falha no processo de salvamento
         st.error(f"Erro ao salvar o modelo: {str(e)}")
         return None
 
 
+# Função para executar o treino e avançar para a etapa final
 def execute_training():
+    """
+    Executa o treino do modelo armazenado no session_state e avança para a página final.
+
+    Esta função:
+    - Recupera o modelo selecionado pelo utilizador.
+    - Treina o modelo e armazena as métricas resultantes.
+    - Exibe informações de depuração.
+    - Redireciona para a página final após o treino.
+    """
     if st.session_state.step == 'train_and_store_metrics':
+        # Recuperar o modelo selecionado
         model = st.session_state.models[st.session_state.selected_model_name]
 
+        # Treinar o modelo e armazenar as métricas
         metrics = train_and_store_metrics(
             model,
             st.session_state.X_train,
@@ -3870,10 +4877,10 @@ def execute_training():
             metric_type="sem_selecao_features"
         )
 
-        # Depuração
+        # **Depuração**: Exibir as métricas armazenadas no session_state após o treino
         st.write("Conteúdo de metrics após treino:", st.session_state.get('metrics', {}))
 
-        # Avançar para a página final
+        # Avançar para a página final após o treino ser concluído
         st.session_state.step = 'final_page'
         st.rerun()
 
@@ -3886,78 +4893,97 @@ import requests
 import tempfile
 from datetime import datetime
 from io import BytesIO
+import matplotlib.pyplot as plt
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Paragraph
 
+# Classe personalizada para a geração de PDFs
 class CustomPDF(FPDF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Baixar o logo no início para reutilizá-lo
+        
+        # Inicializar a variável do caminho do logótipo
         self.logo_path = None
+        
+        # URL do logótipo institucional
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
+        
         try:
+            # Tentar fazer o download do logótipo
             response = requests.get(logo_url)
             if response.status_code == 200:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
                     tmpfile.write(response.content)
                     self.logo_path = tmpfile.name
         except Exception as e:
-            print(f"Erro ao baixar o logo: {e}")
+            print(f"Erro ao baixar o logótipo: {e}")
 
     def header(self):
+        """Cabeçalho do relatório"""
+        
         # Posicionar o cabeçalho no topo da página
         self.set_y(10)
         
-        # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
+        # Inserir o logótipo se foi baixado com sucesso
         if self.logo_path:
             self.image(self.logo_path, 10, 10, 25)
         
-        # Configurar fonte para o título
+        # Definir a fonte e tamanho do título
         self.set_font('Arial', 'B', 12)
         
         # Adicionar o título centralizado
-        # Deixar espaço para o logo
-        self.cell(25)  # Espaço para o logo
+        self.cell(25)  # Criar espaço para o logótipo
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 0, 'C')
         
-        # Adicionar uma linha horizontal após o cabeçalho
+        # Criar uma linha horizontal para separar o cabeçalho do conteúdo
         self.ln(15)
-        self.ln(5)  # Espaço após o cabeçalho
+        self.ln(5)  # Criar espaço após o cabeçalho
 
     def footer(self):
-        # Ir para 1.5 cm da parte inferior
+        """Rodapé do relatório"""
+        
+        # Posicionar o rodapé a 1.5 cm da parte inferior
         self.set_y(-20)
         
-        # Adicionar uma linha horizontal antes do rodapé
+        # Adicionar uma linha horizontal acima do rodapé
         self.line(10, self.get_y(), 200, self.get_y())
         self.ln(3)
         
-        # Definir fonte para o rodapé
+        # Definir a fonte do rodapé
         self.set_font('Arial', 'I', 8)
         
-        # Data atual
+        # Obter a data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
         
-        # Adicionar rodapé com a data e número da página
+        # Adicionar a data e número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', 0, 0, 'C')
+
+
+# Classe responsável pela geração do relatório da performance do modelo
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
         """
-        Initialize the report generator
-        
-        :param output_path: Path to save the PDF
-        :param logo_url: Optional URL for organization logo
+        Inicializa o gerador de relatórios de performance do modelo.
+
+        Parâmetros:
+        - output_path (str): Caminho para salvar o PDF.
+        - logo_url (str, opcional): URL do logótipo da instituição.
         """
         self.output_path = output_path
+        
+        # Definir a URL padrão do logótipo se não for especificada
         self.logo_url = logo_url or 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
         
-        # Fetch logo
+        # Fazer o download do logótipo
         self.logo_path = self._fetch_logo()
         
-        # Prepare styles
+        # Preparar estilos personalizados
         self.styles = getSampleStyleSheet()
         self._create_custom_styles()
     
     def _fetch_logo(self):
-        """Fetch and save logo image"""
+        """Faz o download do logótipo e armazena temporariamente."""
         try:
             response = requests.get(self.logo_url)
             if response.status_code == 200:
@@ -3969,18 +4995,19 @@ class MLCaseModelReportGenerator:
             return None
     
     def _create_custom_styles(self):
-        """Create custom paragraph styles"""
-        # Title style
+        """Define estilos personalizados para os textos do relatório."""
+        
+        # Estilo do título
         self.styles.add(ParagraphStyle(
             name='MLCaseTitle',
             parent=self.styles['Title'],
             fontSize=18,
             textColor=colors.HexColor('#2C3E50'),
-            alignment=1,  # Center alignment
+            alignment=1,  # Centralizado
             spaceAfter=12
         ))
         
-        # Subtitle style
+        # Estilo do subtítulo
         self.styles.add(ParagraphStyle(
             name='MLCaseSubtitle',
             parent=self.styles['Heading2'],
@@ -3989,28 +5016,50 @@ class MLCaseModelReportGenerator:
             spaceAfter=6
         ))
         
-        # Normal text style
+        # Estilo do texto normal
         self.styles.add(ParagraphStyle(
             name='MLCaseNormal',
             parent=self.styles['Normal'],
             fontSize=10,
             textColor=colors.HexColor('#2C3E50'),
-            leading=14
+            leading=14  # Espaçamento entre linhas
         ))
     
     def create_bar_chart(self, data, labels, title):
-        """Create a bar chart using matplotlib and return as an image buffer"""
+        """
+        Gera um gráfico de barras para exibição no relatório.
+
+        Parâmetros:
+        - data (list): Valores das métricas.
+        - labels (list): Nome das métricas.
+        - title (str): Título do gráfico.
+
+        Retorna:
+        - Objeto de buffer com o gráfico gerado.
+        """
+        
+        # Criar o gráfico de barras com tamanho definido
         plt.figure(figsize=(6, 4), dpi=100)
+        
+        # Criar barras com cores diferenciadas
         plt.bar(labels, data, color=['#3498DB', '#2980B9'])
+        
+        # Definir título e rótulos do gráfico
         plt.title(title, fontsize=12, color='#2C3E50')
-        plt.ylabel('Value', color='#2C3E50')
+        plt.ylabel('Valor', color='#2C3E50')
+        
+        # Rotacionar os rótulos do eixo X para melhor visualização
         plt.xticks(rotation=45, ha='right', color='#2C3E50')
+        
+        # Ajustar automaticamente o layout para evitar sobreposição
         plt.tight_layout()
         
-        # Save to a bytes buffer
-        buf = io.BytesIO()
+        # Criar um buffer de memória para armazenar a imagem
+        buf = BytesIO()
         plt.savefig(buf, format='png', bbox_inches='tight')
         buf.seek(0)
+        
+        # Fechar a figura para evitar consumo de memória
         plt.close()
         
         return buf
@@ -4018,23 +5067,23 @@ class MLCaseModelReportGenerator:
 def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     """
     Gera um relatório PDF com os resultados da comparação de modelos.
-    
+
     Args:
-        comparison_df: DataFrame com as métricas comparativas
-        best_model: String com o nome do melhor modelo
-        session_state: Estado da sessão do Streamlit
-        
+        comparison_df: DataFrame contendo as métricas comparativas dos modelos.
+        best_model: Nome do melhor modelo identificado.
+        session_state: Estado da sessão do Streamlit com informações do treino.
+
     Returns:
-        BytesIO: Buffer contendo o PDF gerado
+        BytesIO: Buffer contendo o PDF gerado.
     """
 
-    # Inicialização do PDF com cabeçalho e rodapé
+    # Inicialização do PDF com cabeçalho e rodapé personalizados
     pdf = CustomPDF(format='A4')
-    pdf.set_margins(10, 30, 10)  # left, top, right
+    pdf.set_margins(10, 30, 10)  # Margens: esquerda, topo, direita
     pdf.set_auto_page_break(auto=True, margin=30)  # Margem inferior para o rodapé
     pdf.add_page()
     
-    # Função para limpar texto para compatibilidade com codificação Latin-1
+    # Função auxiliar para limpar texto e evitar erros de codificação Latin-1
     def clean_text(text):
         if not isinstance(text, str):
             return str(text)
@@ -4046,33 +5095,33 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.cell(0, 10, txt=clean_text("Relatório Final do Modelo Treinado"), ln=True, align="C")
     pdf.ln(10)
     
-    # Tipo de Modelo
+    # Tipo de Modelo Utilizado
     model_type = session_state.get('model_type', 'Indefinido')
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Tipo de Modelo:"), ln=False)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, txt=clean_text(model_type), ln=True)
     
-    # Modelo Selecionado
+    # Modelo Selecionado pelo Utilizador
     selected_model_name = session_state.get('selected_model_name', 'Não Selecionado')
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Modelo Selecionado:"), ln=False)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, txt=clean_text(selected_model_name), ln=True)
     
-    # Melhor Modelo
+    # Melhor Modelo Identificado com Base nas Métricas
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Melhor Modelo:"), ln=False)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, txt=clean_text(best_model), ln=True)
     pdf.ln(10)
     
-    # Informações do Conjunto de Dados
+    # Informações sobre os Conjuntos de Dados Utilizados no Treino
     if 'X_train' in session_state and 'X_test' in session_state:
         X_train = session_state.X_train
         X_test = session_state.X_test
         
-        # Calcular percentuais e tamanhos
+        # Calcular percentagem de amostras de treino e teste
         total_samples = X_train.shape[0] + X_test.shape[0]
         train_percent = (X_train.shape[0] / total_samples) * 100
         test_percent = (X_test.shape[0] / total_samples) * 100
@@ -4081,23 +5130,23 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         pdf.cell(0, 10, txt=clean_text("Informações dos Conjuntos de Dados"), ln=True)
         pdf.ln(5)
         
-        # Tabela de informações do conjunto de dados
+        # Criar tabela com informações do conjunto de dados
         data_info = [
             ["Amostras de Treino", f"{X_train.shape[0]} ({train_percent:.1f}%)"],
             ["Amostras de Teste", f"{X_test.shape[0]} ({test_percent:.1f}%)"],
             ["Features Originais", f"{X_train.shape[1]}"]
         ]
         
-        # Adicionar features após seleção se estiverem disponíveis
+        # Adicionar número de features após a seleção, se disponível
         if 'X_train_selected' in session_state:
             data_info.append(["Features Após Seleção", f"{session_state.X_train_selected.shape[1]}"])
         
-        # Formatar a tabela de informações
+        # Formatar e adicionar a tabela ao PDF
         pdf.set_font("Arial", size=10)
-        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
         
         for i, (label, value) in enumerate(data_info):
-            if i % 2 == 0:  # Linhas alternadas
+            if i % 2 == 0:  # Linhas alternadas para melhor leitura
                 pdf.set_fill_color(240, 240, 240)
             else:
                 pdf.set_fill_color(255, 255, 255)
@@ -4107,12 +5156,12 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         pdf.ln(10)
     
-    # Features Selecionadas
+    # Features Selecionadas no Processo de Seleção de Features
     if 'selected_features' in session_state:
         pdf.set_font("Arial", style="B", size=14)
         pdf.cell(0, 10, txt=clean_text("Features Selecionadas"), ln=True)
         
-        # Listar as features
+        # Listar todas as features utilizadas após a seleção
         features = session_state.selected_features
         pdf.set_font("Arial", size=10)
         for i, feature in enumerate(features):
@@ -4120,29 +5169,29 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         pdf.ln(10)
     
-    # Tabela de Métricas
+    # Comparação de Métricas entre Modelos
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Comparação de Métricas"), ln=True)
     
-    # Verificar o tipo de modelo para determinar quais métricas exibir
+    # Determinar o tipo de modelo (Regressão ou Classificação) para escolher as métricas adequadas
     is_regression = model_type == "Regressão"
     metric_columns = ['R²', 'MAE', 'MSE'] if is_regression else ['Accuracy', 'Precision', 'Recall', 'F1-Score']
     
-    # Criar tabela de métricas
+    # Criar tabela de métricas no relatório
     pdf.set_font("Arial", style="B", size=10)
-    pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+    pdf.set_fill_color(144, 238, 144)  # Definir cor do cabeçalho
     
-    # Definir a largura das colunas
+    # Definir largura das colunas
     column_width = 30
     first_column_width = 60
     
-    # Cabeçalho da tabela
+    # Criar cabeçalho da tabela
     pdf.cell(first_column_width, 10, "Modelo", 1, 0, 'C', True)
     for col in metric_columns:
         pdf.cell(column_width, 10, clean_text(col), 1, 0, 'C', True)
     pdf.ln()
     
-    # Linhas da tabela
+    # Preencher as linhas da tabela com os valores das métricas
     pdf.set_font("Arial", size=10)
     for _, row in comparison_df.iterrows():
         model_name = row['Modelo']
@@ -4150,7 +5199,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         for col in metric_columns:
             if col in row:
-                # Formatar o valor numérico com 4 casas decimais
+                # Formatar valores numéricos para 4 casas decimais
                 if isinstance(row[col], (int, float)):
                     value = f"{row[col]:.4f}"
                 else:
@@ -4160,172 +5209,164 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         pdf.ln()
     
     pdf.ln(10)
-    
+
     # Gráficos de Métricas
     for metric in metric_columns:
         if metric in comparison_df.columns:
-            # Criar o gráfico com tamanho ajustado
+            # Criar o gráfico com tamanho adequado
             plt.figure(figsize=(10, 6))
             
-            # Dados para o gráfico
+            # Obter os modelos e os valores da métrica atual
             models = comparison_df['Modelo'].tolist()
             values = comparison_df[metric].tolist()
             
-            # Criar barras com espaçamento adequado
+            # Criar gráfico de barras com cores diferenciadas para melhor visualização
             plt.bar(models, values, color=['#90EE90', '#006400'], width=0.4)
             
-            # Adicionar valores sobre as barras
+            # Adicionar valores sobre as barras para melhor compreensão
             for i, v in enumerate(values):
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, float)):  # Garantir que o valor é numérico
                     plt.text(i, v + 0.01, f"{v:.4f}", ha='center', fontsize=10)
             
-            # MUDANÇA PRINCIPAL: Configuração do eixo X sem rotação
-            plt.xticks(rotation=0, ha='center', fontsize=8)  # Mudar rotation=45 para rotation=0
+            # Configuração do eixo X sem rotação para manter alinhamento claro
+            plt.xticks(rotation=0, ha='center', fontsize=8)  # Antes era rotation=45, alterado para 0
             
-            # Estilização com mais espaço
-            plt.title(f"Comparação de {metric}", fontsize=14, pad=15)  # Aumentar pad para dar mais espaço
+            # Estilização do gráfico
+            plt.title(f"Comparação de {metric}", fontsize=14, pad=15)  # Aumentar o espaço acima do título
             plt.ylabel(metric, fontsize=12)
             
-            # Garantir espaço para o conteúdo
-            plt.subplots_adjust(bottom=0.2, left=0.15)  # Aumentar margem inferior
+            # Ajustar espaço do gráfico para garantir melhor apresentação
+            plt.subplots_adjust(bottom=0.2, left=0.15)  # Aumentar margem inferior e lateral esquerda
             
-            # Ajustar a altura do gráfico para evitar corte
-            plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20%
+            # Ajustar a altura do gráfico para evitar cortes no eixo Y
+            plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20% para evitar sobrecarga visual
             
-            plt.tight_layout()  # Ajusta automaticamente o layout
+            plt.tight_layout()  # Ajustar automaticamente o layout para evitar sobreposições
             
-            # Salvar o gráfico em um arquivo temporário com DPI maior
+            # Guardar o gráfico num ficheiro temporário com DPI superior para melhor qualidade
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(temp_file.name, bbox_inches='tight', dpi=150)  # Aumentar DPI e garantir que nada seja cortado
+            plt.savefig(temp_file.name, bbox_inches='tight', dpi=150)  # DPI aumentado para evitar pixelização
             plt.close()
         
-            # Adicionar o gráfico ao PDF - AJUSTADO
+            # Adicionar o gráfico ao PDF
             pdf.add_page()
             pdf.set_font("Arial", style="B", size=14)
             pdf.cell(0, 10, txt=clean_text(f"Gráfico de Comparação - {metric}"), ln=True, align="C")
             
-            # Posicionar o gráfico mais para baixo para evitar sobreposição com o cabeçalho
-            pdf.image(temp_file.name, x=10, y=45, w=180)  # Posição Y aumentada
+            # Posicionar o gráfico mais abaixo para evitar sobreposição com o cabeçalho
+            pdf.image(temp_file.name, x=10, y=45, w=180)  # Posição Y ajustada para evitar cortes
             
-            # Fechar e remover o arquivo temporário
+            # Fechar e eliminar o ficheiro temporário após utilização
             temp_file.close()
             try:
-                os.remove(temp_file.name)
+                os.remove(temp_file.name)  # Remover o ficheiro temporário para evitar acumulação de arquivos
             except:
-                pass  # Ignorar erros ao remover arquivos temporários
-        
-    # Interpretação das Métricas
+                pass  # Se houver erro ao eliminar, ignorar e seguir em frente
+    
+    # Adicionar uma nova página ao PDF para interpretação das métricas
     pdf.add_page()
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True, align="C")
-    
+
     # Função para gerar interpretação de métricas
     def generate_metrics_interpretation(metrics, model_type):
+        """
+        Gera uma interpretação personalizada das métricas do modelo.
+        
+        Args:
+            metrics (dict): Dicionário contendo as métricas do modelo.
+            model_type (str): Tipo do modelo ('Classificação' ou 'Regressão').
+        
+        Returns:
+            list: Lista de strings com a interpretação das métricas.
+        """
         interpretacao = []
         
+        # Caso o modelo seja de Classificação
         if model_type == "Classificação":
-            # Accuracy
+            # Interpretar a Acurácia (Accuracy)
             accuracy = float(metrics.get('Accuracy', 0))
             if accuracy > 0.9:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto muito elevada.")
             elif accuracy > 0.75:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Boa, mas ainda há margem para otimização.")
             elif accuracy > 0.5:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Moderada. O modelo apresenta erros significativos.")
             else:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
-        
-            # Precision
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Fraca. O modelo precisa ser revisto e melhorado.")
+            
+            # Interpretar a Precisão (Precision)
             precision = float(metrics.get('Precision', 0))
             if precision > 0.9:
-                interpretacao.append(f"Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
+                interpretacao.append(f"Precisão: {precision:.4f} - Excelente! Poucos falsos positivos.")
             elif precision > 0.75:
-                interpretacao.append(f"Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
+                interpretacao.append(f"Precisão: {precision:.4f} - Bom, mas ainda pode melhorar.")
             elif precision > 0.5:
-                interpretacao.append(f"Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
+                interpretacao.append(f"Precisão: {precision:.4f} - Moderada. O modelo tem um número significativo de falsos positivos.")
             else:
-                interpretacao.append(f"Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
-        
-            # Recall
+                interpretacao.append(f"Precisão: {precision:.4f} - Fraca. Muitos falsos positivos prejudicam o desempenho.")
+    
+            # Interpretar o Recall (Sensibilidade)
             recall = float(metrics.get('Recall', 0))
             if recall > 0.9:
-                interpretacao.append(f"Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
+                interpretacao.append(f"Recall: {recall:.4f} - Excelente! A maioria dos positivos verdadeiros são identificados.")
             elif recall > 0.75:
-                interpretacao.append(f"Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
+                interpretacao.append(f"Recall: {recall:.4f} - Bom. O modelo capta a maioria dos casos positivos.")
             elif recall > 0.5:
-                interpretacao.append(f"Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
+                interpretacao.append(f"Recall: {recall:.4f} - Moderado. Alguns positivos verdadeiros não estão a ser reconhecidos.")
             else:
-                interpretacao.append(f"Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros.")
-            
-            # F1-Score
+                interpretacao.append(f"Recall: {recall:.4f} - Fraco. O modelo perde muitos casos positivos.")
+    
+            # Interpretar o F1-Score
             f1_score = float(metrics.get('F1-Score', 0))
             if f1_score > 0.9:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade.")
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e recall.")
             elif f1_score > 0.75:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias.")
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Bom, mas ainda há margem para melhorias.")
             elif f1_score > 0.5:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Desempenho moderado.")
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Moderado.")
             else:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Desempenho fraco.")
-        
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Fraco.")
+    
+        # Caso o modelo seja de Regressão
         elif model_type == "Regressão":
-            # R² (Coeficiente de Determinação)
+            # Interpretar o Coeficiente de Determinação R²
             r2 = float(metrics.get('R²', 0))
             if r2 > 0.9:
                 interpretacao.append(f"R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados.")
             elif r2 > 0.75:
-                interpretacao.append(f"R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados.")
+                interpretacao.append(f"R²: {r2:.4f} - Muito bom! Explica a maioria da variabilidade dos dados.")
             elif r2 > 0.5:
-                interpretacao.append(f"R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade.")
+                interpretacao.append(f"R²: {r2:.4f} - Moderado. Ainda há limitações no ajuste do modelo.")
             else:
-                interpretacao.append(f"R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados.")
-        
-            # MAE (Erro Absoluto Médio)
+                interpretacao.append(f"R²: {r2:.4f} - Fraco. O modelo não está a explicar bem a variabilidade dos dados.")
+    
+            # Interpretar o Erro Absoluto Médio (MAE)
             mae = float(metrics.get('MAE', 0))
             if mae < 0.1:
-                interpretacao.append(f"MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno.")
+                interpretacao.append(f"MAE: {mae:.4f} - Excelente! O erro médio é muito pequeno.")
             elif mae < 1:
-                interpretacao.append(f"MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável.")
+                interpretacao.append(f"MAE: {mae:.4f} - Bom. O erro médio é aceitável.")
             else:
-                interpretacao.append(f"MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais.")
-        
-            # MSE (Erro Quadrático Médio)
+                interpretacao.append(f"MAE: {mae:.4f} - Alto. As previsões desviam-se significativamente dos valores reais.")
+    
+            # Interpretar o Erro Quadrático Médio (MSE)
             mse = float(metrics.get('MSE', 0))
             if mse < 0.1:
                 interpretacao.append(f"MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo.")
             elif mse < 1:
                 interpretacao.append(f"MSE: {mse:.4f} - Bom. O erro é relativamente baixo.")
             else:
-                interpretacao.append(f"MSE: {mse:.4f} - Alto. O erro é significativo.")
-        
+                interpretacao.append(f"MSE: {mse:.4f} - Alto. O modelo tem um erro significativo.")
+    
         return interpretacao
     
-    # Obter dados das métricas originais e selecionadas
-    original_metrics = {}
-    selected_metrics = {}
-    
-    # Separar as métricas por tipo de modelo
-    for _, row in comparison_df.iterrows():
-        model_name = row['Modelo']
-        
-        if "Sem Seleção" in model_name:
-            # Extrair métricas do modelo sem seleção de features
-            for col in metric_columns:
-                if col in row:
-                    original_metrics[col] = row[col]
-        
-        if "Com Seleção" in model_name:
-            # Extrair métricas do modelo com seleção de features
-            for col in metric_columns:
-                if col in row:
-                    selected_metrics[col] = row[col]
-    
-    # Interpretações para modelos sem e com seleção de features
+    # Gerar interpretações para os modelos com e sem seleção de features
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Modelo Sem Seleção de Features"), ln=True)
     pdf.set_font("Arial", size=10)
     
-    # Adicionar interpretação do modelo sem seleção
+    # Adicionar interpretação do modelo sem seleção de features
     for line in generate_metrics_interpretation(original_metrics, model_type):
         pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
     
@@ -4334,7 +5375,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.cell(0, 10, txt=clean_text("Modelo Com Seleção de Features"), ln=True)
     pdf.set_font("Arial", size=10)
     
-    # Adicionar interpretação do modelo com seleção
+    # Adicionar interpretação do modelo com seleção de features
     for line in generate_metrics_interpretation(selected_metrics, model_type):
         pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
     
@@ -4343,20 +5384,18 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Conclusão"), ln=True)
     
-    # Determinar a melhor métrica com base na escolha do usuário
+    # Escolher a métrica principal para avaliação do modelo
     scoring_metric = session_state.get("selected_scoring", None)
-
-    # Fallback para métricas padrão se a métrica selecionada não estiver disponível
     if not scoring_metric or scoring_metric not in metric_columns:
-        main_metric = 'R²' if is_regression else 'F1-Score'
+        main_metric = 'R²' if model_type == "Regressão" else 'F1-Score'
     else:
         main_metric = scoring_metric
-
-    # Obter os valores da métrica escolhida
+    
+    # Obter valores da métrica principal
     original_value = original_metrics.get(main_metric, 0)
     selected_value = selected_metrics.get(main_metric, 0)
-
-    # Texto da conclusão
+    
+    # Conclusão baseada no desempenho
     pdf.set_font("Arial", size=10)
     conclusion_text = f"Com base na métrica principal ({main_metric}), o modelo {best_model} apresentou o melhor desempenho."
     pdf.multi_cell(0, 8, txt=clean_text(conclusion_text))
@@ -4369,17 +5408,16 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     pdf.multi_cell(0, 8, txt=clean_text(recommendation_text))
     
-    # Salvar o PDF em um buffer
+    # Guardar o PDF
     pdf_buffer = BytesIO()
     pdf_output = pdf.output(dest='S').encode('latin1', errors='ignore')
     pdf_buffer.write(pdf_output)
     pdf_buffer.seek(0)
     return pdf_buffer
 
-# Função para exibir a página final com o relatório
 
+# Função para exibir a página final com o relatório
 # Mapeamento de nomes de métricas para as colunas do DataFrame
-# Atualizar o dicionário METRIC_MAPPING para garantir que MAE seja reconhecido
 METRIC_MAPPING = {
     "accuracy": "Accuracy",
     "precision": "Precision", 
@@ -4411,7 +5449,7 @@ def get_metric_mapping(metric):
         return None
     
     # Converter para minúsculas, remover espaços, acentos
-    import unidecode
+    import unidecode # Normaliza caracteres acentuados, útil para lidar com strings em diferentes idiomas.
     metric_clean = unidecode.unidecode(metric.lower().replace(' ', '').replace('-', '').replace('_', ''))
     
     # Verificar se a métrica já está diretamente no formato esperado
