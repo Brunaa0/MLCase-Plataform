@@ -4171,111 +4171,180 @@ def remove_highly_correlated_features(df, threshold=0.9):
     # **5. Retornar o DataFrame sem as colunas altamente correlacionadas**
     return df.drop(columns=to_drop)
 
-
-# Função para selecionar features importantes com RandomForest
+# **Função para selecionar features importantes com RandomForest**
 def select_important_features(X, y, threshold=0.01, model_type=None):
     """
-    Seleciona features importantes usando RandomForest.
-    
+    Seleciona as features mais relevantes utilizando RandomForest.
+
     Parâmetros:
-    - X: Matriz de features
-    - y: Vetor de rótulos
-    - threshold: Limiar de importância (padrão 0.01)
-    - model_type: Tipo de modelo (Classificação ou Regressão)
-    
+    - X: Matriz de features (DataFrame).
+    - y: Vetor alvo (série de labels ou valores numéricos).
+    - threshold: Limiar mínimo de importância (padrão = 0.01).
+    - model_type: Tipo de modelo ("Classificação" ou "Regressão").
+
     Retorna:
-    - DataFrame com features importantes
+    - DataFrame contendo apenas as features selecionadas.
     """
-    # Definir o modelo baseado no tipo de problema
+
+    # **1. Definir o modelo conforme o tipo de problema**
     if model_type == "Classificação":
         model = RandomForestClassifier(n_estimators=100, random_state=42)
     elif model_type == "Regressão":
         model = RandomForestRegressor(n_estimators=100, random_state=42)
     else:
-        raise ValueError("Tipo de modelo deve ser 'Classificação' ou 'Regressão'")
-    
-    # Usar SimpleImputer para lidar com valores ausentes
-    imputer = SimpleImputer(strategy='mean')
+        raise ValueError("O tipo de modelo deve ser 'Classificação' ou 'Regressão'.")
+
+    # **2. Tratar valores ausentes utilizando SimpleImputer**
+    imputer = SimpleImputer(strategy='mean')  # Substitui valores ausentes pela média
     X_imputed = imputer.fit_transform(X)
-    
-    # Treinar o modelo
+
+    # **3. Treinar o modelo RandomForest**
     model.fit(X_imputed, y)
-    
-    # Calcular importância das features
+
+    # **4. Obter a importância de cada feature**
     importances = model.feature_importances_
-    
-    # Criar DataFrame de importância das features
+
+    # **5. Criar um DataFrame com as importâncias ordenadas**
     feature_importance = pd.DataFrame({
         'feature': X.columns,
         'importance': importances
     }).sort_values('importance', ascending=False)
-    
-    # Selecionar features com importância acima do threshold
+
+    # **6. Selecionar apenas as features que ultrapassam o threshold**
     important_features = feature_importance[feature_importance['importance'] > threshold]['feature']
-    
-    # Informar quais features foram selecionadas
+
+    # **7. Exibir as features selecionadas ao utilizador**
     st.info(f"Features selecionadas: {list(important_features)}")
-    
+
+    # **8. Retornar o DataFrame contendo apenas as features selecionadas**
     return X[important_features]
 
 
-# Função principal de seleção de features
+# **Função principal para seleção de features**
 def feature_selection():
-    st.header("Seleção de Features")
+    """
+    Interface para a seleção de features em modelos de Machine Learning.
     
+    - Permite ao utilizador escolher a métrica de scoring.
+    - Dá a opção de selecionar as features automaticamente ou manualmente.
+    - Mostra um DataFrame com as importâncias das features.
+    """
+
+    st.header("Seleção de Features")
+
+    # Inicializar o estado de seleção de features
     if 'feature_selection_done' not in st.session_state:
         st.session_state.feature_selection_done = False
-    
+
+    # Obter o tipo de modelo armazenado na sessão (Classificação ou Regressão)
     model_type = st.session_state.get('model_type', 'Classificação')
-    scoring_options = {"Classificação": ['Accuracy', 'Precision', 'Recall', 'F1-Score'], "Regressão": ['R²', 'MAE', 'MSE']}
-    
-    selected_scoring = st.selectbox("Escolha a métrica de scoring:", scoring_options.get(model_type, []))
-    
+
+    # Definir opções de scoring disponíveis conforme o tipo de modelo
+    scoring_options = {
+        "Classificação": ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+        "Regressão": ['R²', 'MAE', 'MSE']
+    }
+
+    # **1. Escolha da métrica de avaliação**
+    selected_scoring = st.selectbox(
+        "Escolha a métrica de scoring:",
+        scoring_options.get(model_type, [])  # Exibe opções conforme o tipo de modelo
+    )
+
+    # **Confirmar a escolha da métrica**
     if st.button("Confirmar Scoring"):
         st.session_state.selected_scoring = selected_scoring
         st.session_state.scoring_confirmed = True
         st.success(f"Métrica de scoring {selected_scoring} confirmada!")
-    
+
+    # **2. Escolha do método de seleção de features**
     if st.session_state.scoring_confirmed:
-        method_selection = st.radio("Escolha o método de seleção de features:", ["Automático", "Manual"])
-        
+        method_selection = st.radio(
+            "Escolha o método de seleção de features:",
+            ["Automático", "Manual"]
+        )
+
+        # **Confirmar método escolhido**
         if st.button("Confirmar Método"):
             st.session_state.method_selection = method_selection
             st.success(f"Método {method_selection} confirmado!")
 
-        X_train, X_test, y_train, y_test = st.session_state.X_train, st.session_state.X_test, st.session_state.y_train, st.session_state.y_test
-        
+        # Obter os dados de treino e teste da sessão
+        X_train, X_test, y_train, y_test = (
+            st.session_state.X_train, 
+            st.session_state.X_test, 
+            st.session_state.y_train, 
+            st.session_state.y_test
+        )
+
+        # **3. Seleção Automática de Features**
         if method_selection == "Automático":
-            feature_selector = RandomForestClassifier(n_estimators=100, random_state=42) if model_type == "Classificação" else RandomForestRegressor(n_estimators=100, random_state=42)
+            feature_selector = (
+                RandomForestClassifier(n_estimators=100, random_state=42)
+                if model_type == "Classificação"
+                else RandomForestRegressor(n_estimators=100, random_state=42)
+            )
+
+            # Treinar o modelo para obter importâncias
             feature_selector.fit(X_train, y_train)
-            
-            feature_importances = pd.DataFrame({'feature': X_train.columns, 'importance': feature_selector.feature_importances_}).sort_values('importance', ascending=False)
+
+            # Criar DataFrame com as importâncias ordenadas
+            feature_importances = pd.DataFrame({
+                'feature': X_train.columns,
+                'importance': feature_selector.feature_importances_
+            }).sort_values('importance', ascending=False)
+
+            # Exibir o DataFrame com as importâncias das features
             st.dataframe(feature_importances)
-            
+
+            # **Selecionar as features mais importantes com threshold > 0.01**
             selected_features = feature_importances[feature_importances['importance'] > 0.01]['feature'].tolist()
+
+        # **4. Seleção Manual de Features**
         else:
-            feature_selector = RandomForestClassifier(n_estimators=100, random_state=42) if model_type == "Classificação" else RandomForestRegressor(n_estimators=100, random_state=42)
+            feature_selector = (
+                RandomForestClassifier(n_estimators=100, random_state=42)
+                if model_type == "Classificação"
+                else RandomForestRegressor(n_estimators=100, random_state=42)
+            )
+
+            # Treinar o modelo para obter importâncias
             feature_selector.fit(X_train, y_train)
-            
-            feature_importances = pd.DataFrame({'feature': X_train.columns, 'importance': feature_selector.feature_importances_}).sort_values('importance', ascending=False)
+
+            # Criar DataFrame com as importâncias ordenadas
+            feature_importances = pd.DataFrame({
+                'feature': X_train.columns,
+                'importance': feature_selector.feature_importances_
+            }).sort_values('importance', ascending=False)
+
+            # Exibir o DataFrame com as importâncias das features
             st.dataframe(feature_importances)
-            
-            num_features = st.slider("Número de Features a Selecionar", 1, X_train.shape[1], min(5, X_train.shape[1]))
+
+            # **Permitir ao utilizador escolher quantas features deseja manter**
+            num_features = st.slider(
+                "Número de Features a Selecionar",
+                1, X_train.shape[1], min(5, X_train.shape[1])
+            )
+
+            # Selecionar as top-N features com base na escolha do utilizador
             selected_features = feature_importances['feature'].head(num_features).tolist()
 
+        # **5. Atualizar o estado global com as features selecionadas**
         st.session_state.X_train_selected = X_train[selected_features]
         st.session_state.X_test_selected = X_test[selected_features]
         st.session_state.selected_features = selected_features
         st.session_state.feature_selection_done = True
 
+        # **6. Botão para treinar o modelo com as features selecionadas**
         if st.button("Treinar Modelo com Features Selecionadas"):
             st.session_state.step = 'train_with_selected_features'
             st.rerun()
 
+# **Função para treinar o modelo com as features selecionadas**
 def train_with_selected_features_page():
     st.title("Treino do Modelo com Features Selecionadas")
     
-    # Mapeamento de modelos bidirecional
+    # **Mapeamento de modelos para evitar inconsistências nos nomes**
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
@@ -4289,6 +4358,7 @@ def train_with_selected_features_page():
         "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
     
+    # **Verificar se há modelos disponíveis**
     if 'models' not in st.session_state or not st.session_state.models:
         st.error("Erro: Nenhum modelo foi treinado ou selecionado.")
         return
@@ -4297,6 +4367,7 @@ def train_with_selected_features_page():
         st.error("Nenhum modelo foi selecionado. Por favor, selecione um modelo antes de continuar.")
         return
 
+    # **Obter o nome do modelo selecionado e verificar a sua existência**
     selected_model_name = st.session_state.selected_model_name.strip()
     model_class_name = model_name_map.get(selected_model_name, selected_model_name)
 
@@ -4305,15 +4376,21 @@ def train_with_selected_features_page():
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
+    # **Recuperar o modelo**
     model = st.session_state.models[model_class_name]
     
+    # **Recuperar os dados selecionados**
     X_train_selected, X_test_selected = st.session_state.X_train_selected, st.session_state.X_test_selected
     y_train, y_test = st.session_state.y_train, st.session_state.y_test
     
     st.write(f"Treinando o modelo {selected_model_name} com {len(st.session_state.selected_features)} features selecionadas...")
     
-    selected_metrics = train_and_store_metrics(model, X_train_selected, y_train, X_test_selected, y_test, "Com Seleção", False)
+    # **Treinar e armazenar métricas**
+    selected_metrics = train_and_store_metrics(
+        model, X_train_selected, y_train, X_test_selected, y_test, "Com Seleção", False
+    )
     
+    # **Exibir métricas se o treino for bem-sucedido**
     if selected_metrics:
         st.session_state['resultado_com_selecao'] = selected_metrics
         st.success("Treinamento concluído!")
@@ -4323,26 +4400,35 @@ def train_with_selected_features_page():
         metrics_df.insert(0, "Modelo", "Com Seleção de Features")
         st.table(metrics_df)
     
+    # **Botão para comparar modelos**
     if st.button("Comparar Modelos"):
         st.session_state.step = 'evaluate_and_compare_models'
         st.rerun()
 
-#Função para Treinar e Armazenar as metricas
 
+# **Função para treinar o modelo e armazenar métricas**
 def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type, use_grid_search=False, manual_params=None):
+    """
+    Treina o modelo e armazena as métricas de desempenho.
+    
+    Parâmetros:
+    - model: Modelo a ser treinado.
+    - X_train, y_train: Dados de treino.
+    - X_test, y_test: Dados de teste.
+    - metric_type: Tipo de treino ("Com Seleção" ou "Sem Seleção").
+    - use_grid_search: Se True, aplica GridSearchCV.
+    - manual_params: Parâmetros manuais a serem aplicados.
+    
+    Retorna:
+    - Dicionário com métricas do modelo.
+    """
     try:
-        # Imports necessários
-        from sklearn.impute import SimpleImputer
-        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-        from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-        from sklearn.model_selection import GridSearchCV, KFold
-
-        # Imputar valores ausentes
-        imputer = SimpleImputer(strategy="mean")
+        # **1. Tratar valores ausentes**
+        imputer = SimpleImputer(strategy="mean")  # Preenche valores ausentes com a média
         X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
         X_test = pd.DataFrame(imputer.transform(X_test), columns=X_test.columns)
 
-        # Garantir que y_train e y_test sejam válidos
+        # **2. Converter variáveis categóricas**
         if y_train.dtype == 'object':
             from sklearn.preprocessing import LabelEncoder
             le = LabelEncoder()
@@ -4352,40 +4438,33 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             y_train = y_train.fillna(y_train.mean())
             y_test = y_test.fillna(y_test.mean())
 
-        # **RECUPERAR PARÂMETROS SALVOS**
+        # **3. Aplicar parâmetros salvos ao modelo, se existirem**
         if metric_type == "Com Seleção":
             saved_params = st.session_state.get('best_params_selected', None) or st.session_state.get('best_params', None)
         else:
             saved_params = st.session_state.get('best_params', None)
 
-        # **APLICAR PARÂMETROS SALVOS APENAS SE COMPATÍVEIS COM O MODELO**
         if saved_params and hasattr(model, 'get_params') and all(param in model.get_params() for param in saved_params):
             st.info(f"Aplicando parâmetros salvos ao modelo: {saved_params}")
             model.set_params(**saved_params)
 
-
-        # **TREINO COM GRIDSEARCH OU DIRETO**
+        # **4. Treinar o modelo com ou sem GridSearch**
         if use_grid_search and metric_type == "Sem Seleção":
             param_grid = st.session_state.get('param_grid', {
                 'n_neighbors': [3, 5, 7, 9],
                 'weights': ['uniform', 'distance']
             })
 
-            # Definir estratégia de validação cruzada
             cv_strategy = KFold(n_splits=5, shuffle=True, random_state=42)
-            if st.session_state.model_type == "Classificação":
-                scoring = 'accuracy'
-            else:
-                scoring = 'r2'
+            scoring = 'accuracy' if st.session_state.model_type == "Classificação" else 'r2'
 
-            # Aplicar GridSearch
             grid_search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv_strategy, n_jobs=-1)
             grid_search.fit(X_train, y_train)
 
             best_model = grid_search.best_estimator_
             best_params = grid_search.best_params_
 
-            # **SALVAR PARÂMETROS NO ESTADO GLOBAL**
+            # **Salvar os melhores parâmetros no estado global**
             st.session_state['best_params'] = best_params
             st.session_state['best_params_selected'] = best_params
 
@@ -4394,14 +4473,14 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
             best_model = model
             best_params = saved_params if saved_params else {}
 
-        # **SALVAR MODELO TREINADO NO ESTADO GLOBAL**
+        # **5. Armazenar o modelo treinado na sessão**
         st.session_state['trained_model'] = best_model
         st.session_state['trained_model_name'] = best_model.__class__.__name__
         
-
-        # **AVALIAR O MODELO**
+        # **6. Fazer previsões**
         y_pred = best_model.predict(X_test)
 
+        # **7. Calcular as métricas de desempenho**
         if st.session_state.model_type == "Classificação":
             metrics = {
                 'F1-Score': f1_score(y_test, y_pred, average='weighted'),
@@ -4418,7 +4497,7 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
                 'Best Parameters': best_params
             }
 
-        # **SALVAR MÉTRICAS NO ESTADO GLOBAL**
+        # **8. Armazenar métricas no estado global**
         if 'metrics' not in st.session_state:
             st.session_state['metrics'] = {}
         st.session_state['metrics'][metric_type] = metrics
@@ -4428,11 +4507,11 @@ def train_and_store_metrics(model, X_train, y_train, X_test, y_test, metric_type
     except Exception as e:
         st.error(f"Erro ao treinar o modelo: {str(e)}")
         return None
-
+        
 def evaluate_and_compare_models():
     st.title("Comparação dos Resultados do Treino dos Modelos")
 
-    # Mapeamento de modelos bidirecional
+    # **Mapeamento de modelos para garantir compatibilidade de nomenclatura**
     model_name_map = {
         "SVC": "Support Vector Classification (SVC)",
         "KNeighborsClassifier": "K-Nearest Neighbors (KNN)",
@@ -4446,50 +4525,47 @@ def evaluate_and_compare_models():
         "Regressão por Vetores de Suporte (SVR)": "SVR"
     }
 
-    # Verificações preliminares
+    # **Verificações preliminares para garantir que todas as etapas anteriores foram concluídas**
     if 'selected_features' not in st.session_state:
         st.error("Nenhuma feature foi selecionada. Por favor, volte à etapa de seleção de features.")
         return
 
-    # Verificar se os modelos estão definidos  
     if 'models' not in st.session_state or not st.session_state.models:
         st.error("Configuração de modelos não encontrada. Por favor, reinicie o processo de seleção de modelos.")
         return
 
-    # Recuperar o tipo de modelo
+    # **Obter tipo de modelo e métrica escolhida**
     model_type = st.session_state.get('model_type', 'Indefinido')
-
-    # Recuperar a métrica escolhida pelo utilizador para seleção de features
     scoring_metric = st.session_state.get("selected_scoring", None)
+    
     if not scoring_metric:
         st.error("Nenhuma métrica de avaliação foi escolhida. Por favor, volte à etapa de seleção de métricas.")
         return
 
-    # Recuperar o nome do modelo selecionado
+    # **Recuperar o nome do modelo selecionado**
     model_name = st.session_state.get('selected_model_name')
     if not model_name:
         st.error("Nenhum modelo foi selecionado. Por favor, volte à etapa de seleção de modelos.")
         return
 
-    # Encontrar o nome correto do modelo a partir do mapeamento
+    # **Verificar se o modelo está no mapeamento**
     model_class_name = model_name_map.get(model_name)
     if model_class_name is None:
         st.error(f"O modelo {model_name} não foi encontrado na lista de modelos disponíveis.")
         st.write("Modelos disponíveis:", list(model_name_map.keys()))
         return
 
-    # Recuperar o modelo da sessão com base no nome correto da classe
+    # **Recuperar o modelo treinado**
     model = st.session_state.models.get(model_class_name)
     if model is None:
         st.error(f"O modelo {model_class_name} não foi encontrado na sessão.")
         st.write("Modelos disponíveis:", list(st.session_state.models.keys()))
         return
 
-    # Recuperar métricas originais e com seleção de features
+    # **Obter as métricas dos modelos treinados**
     original_metrics = st.session_state.get('resultado_sem_selecao', {}) 
     selected_metrics = st.session_state.get('resultado_com_selecao', {})
 
-    # Verificar se as métricas existem
     if not original_metrics:
         st.error("Não foi possível encontrar as métricas originais. Por favor, refaça o treinamento.")
         return
@@ -4498,7 +4574,7 @@ def evaluate_and_compare_models():
         st.error("Não foi possível encontrar as métricas com seleção de features. Por favor, execute o treino com features selecionadas.")
         return
 
-    # Criar DataFrame de comparação
+    # **Criar DataFrame de comparação**
     if model_type == "Classificação":
         comparison_df = pd.DataFrame({
             'Modelo': ['Sem Seleção de Features', 'Com Seleção de Features'],
@@ -4520,296 +4596,278 @@ def evaluate_and_compare_models():
         st.error(f"Tipo de modelo não reconhecido: {model_type}")
         return
 
-    # Exibir tabela de comparação
+    # **Exibir tabela de comparação**
     st.subheader("📈 Comparação dos Resultados:")
     
-    # Formatar todas as colunas numéricas
     format_dict = {}
     for col in comparison_df.columns:
         if col != 'Modelo' and col != 'Best Parameters':
             format_dict[col] = '{:.4f}'
     
     st.dataframe(
-    comparison_df.style.format(format_dict).set_table_styles(
-        [{'selector': 'th', 'props': [('font-size', '18px')]}, 
-         {'selector': 'td', 'props': [('font-size', '12px')]},  
-         {'selector': 'table', 'props': [('width', '100%')]},    
-        ]
+        comparison_df.style.format(format_dict).set_table_styles(
+            [{'selector': 'th', 'props': [('font-size', '18px')]}, 
+             {'selector': 'td', 'props': [('font-size', '12px')]},  
+             {'selector': 'table', 'props': [('width', '100%')]},    
+            ]
+        )
     )
-)
     
-    # Determinar as métricas disponíveis com base no tipo de modelo
-    if model_type == "Classificação":
-        metric_columns = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-    elif model_type == "Regressão":
-        metric_columns = ['R²', 'MAE', 'MSE']
-    else:
-        metric_columns = []
-    
-    # Garantir que a métrica escolhida existe nas colunas disponíveis
-    if scoring_metric not in metric_columns:
-        st.warning(f"A métrica selecionada '{scoring_metric}' não está disponível. Usando a primeira métrica disponível.")
-        scoring_metric = metric_columns[0] if metric_columns else None
-    
-    if scoring_metric:
-        # Gráfico de comparação usando a métrica escolhida pelo utilizador
-
-        x = comparison_df['Modelo']
-        y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
-        y2 = comparison_df[scoring_metric].iloc[1]  # Com Seleção de Features (índice 1)
-
-        # Gráfico de comparação com melhorias no layout e visibilidade dos rótulos
+    # **Criar gráfico de comparação com base na métrica selecionada**
+    if scoring_metric in comparison_df.columns:
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Posições das barras
-        x_pos = [0, 1]  # Definindo a posição das barras para garantir que fiquem ao lado
-        width = 0.4  # Largura das barras
+        x_pos = [0, 1]
+        width = 0.4
 
-        # Ajustar as barras para uma boa visibilidade
-        bars1 = ax.bar(x_pos[0], y1, width=width, label="Sem Seleção de Features", color='#90EE90', align='center')
-        bars2 = ax.bar(x_pos[1], y2, width=width, label="Com Seleção de Features", color='#006400', align='center')
+        bars1 = ax.bar(x_pos[0], comparison_df[scoring_metric].iloc[0], width=width, label="Sem Seleção de Features", color='#90EE90', align='center')
+        bars2 = ax.bar(x_pos[1], comparison_df[scoring_metric].iloc[1], width=width, label="Com Seleção de Features", color='#006400', align='center')
 
-        # Adicionar rótulos de valor nas barras com melhorias
         for bar in bars1:
-            height = bar.get_height()
-            ax.annotate(f'{height:.4f}',
-                        xy=(bar.get_x() + bar.get_width() / 2, height),
-                        xytext=(0, 3),
-                        textcoords="offset points",
-                        ha='center', va='bottom',
-                        fontsize=12, color='black')
+            ax.annotate(f'{bar.get_height():.4f}', xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()), 
+                        xytext=(0, 3), textcoords="offset points", ha='center', fontsize=12, color='black')
 
         for bar in bars2:
-            height = bar.get_height()
-            ax.annotate(f'{height:.4f}',
-                        xy=(bar.get_x() + bar.get_width() / 2, height),
-                        xytext=(0, 3),
-                        textcoords="offset points",
-                        ha='center', va='bottom',
-                        fontsize=12, color='black')  # Altere a cor para garantir contraste
+            ax.annotate(f'{bar.get_height():.4f}', xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()), 
+                        xytext=(0, 3), textcoords="offset points", ha='center', fontsize=12, color='black')
 
-        # Melhorando o título e as labels
         ax.set_title(f'Comparação de {scoring_metric}', fontsize=16, fontweight='bold')
         ax.set_ylabel(scoring_metric, fontsize=14)
         ax.set_xlabel("Modelos", fontsize=14)
 
-        # Ajuste nos rótulos do eixo X e Y
         plt.xticks(x_pos, ['Sem Seleção de Features', 'Com Seleção de Features'], fontsize=12)
         plt.yticks(fontsize=12)
 
-        # Legenda
         ax.legend()
-
-        # Ajuste do layout para garantir que tudo fique visível
         plt.tight_layout()
 
-        # Exibir o gráfico
         st.pyplot(fig)
 
+    # **Determinar o melhor modelo com base na métrica escolhida**
+    score_without = comparison_df[scoring_metric].iloc[0]
+    score_with = comparison_df[scoring_metric].iloc[1]
 
-    # Determinar o melhor modelo baseado na métrica escolhida
-    if scoring_metric:
-        score_without = comparison_df[scoring_metric].iloc[0]
-        score_with = comparison_df[scoring_metric].iloc[1]
-        
-        better_model = "Com Seleção de Features" if score_with > score_without else "Sem Seleção de Features"
-        better_score = max(score_with, score_without)
-        
-        st.success(f"🏆 **Melhor modelo:** {better_model} com {scoring_metric} = {better_score:.4f}")
+    better_model = "Com Seleção de Features" if score_with > score_without else "Sem Seleção de Features"
+    better_score = max(score_with, score_without)
+
+    st.success(f"🏆 **Melhor modelo:** {better_model} com {scoring_metric} = {better_score:.4f}")
     
-    # Botão para próxima etapa
+    # **Botão para avançar para a próxima etapa**
     if st.button("Seguir para Resumo Final", key="btn_resumo_final"):
         st.session_state.step = 'final_page'
         st.rerun()
 
-# Função para gerar interpretação personalizada das métricas
+# Função para gerar interpretação personalizada das métricas de classificação
 def generate_metrics_interpretation(metrics):
-    """Função para gerar interpretação personalizada das métricas"""
+    """Gera interpretação personalizada para métricas de modelos de classificação."""
     interpretacao = []
 
-    # Verificar se as métricas estão no formato esperado
+    # **Verificar se as métricas estão no formato esperado**
     if not isinstance(metrics, dict):
         return "Formato de métricas inválido."
 
-    # Accuracy
+    # **Interpretação para Acurácia (Accuracy)**
     if 'Accuracy' in metrics:
         try:
             accuracy = float(metrics['Accuracy'])
             if accuracy > 0.9:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto muito elevada.")
             elif accuracy > 0.75:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas pode ser otimizado.")
             elif accuracy > 0.5:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Moderada. O modelo apresenta um nível de erro considerável.")
             else:
-                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
+                interpretacao.append(f"- Acurácia: {accuracy:.4f} - Fraca. O modelo falha em muitas previsões e precisa de ajustes.")
         except (ValueError, TypeError):
             interpretacao.append("- Acurácia: Não disponível ou inválida.")
 
-    # Precision
+    # **Interpretação para Precisão (Precision)**
     if 'Precision' in metrics:
         try:
             precision = float(metrics['Precision'])
             if precision > 0.9:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Excelente! O modelo evita falsos positivos com alta confiança.")
             elif precision > 0.75:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Boa. O modelo é confiável, mas pode ser mais rigoroso na seleção.")
             elif precision > 0.5:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Moderada. O modelo ainda produz muitos falsos positivos.")
             else:
-                interpretacao.append(f"- Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
+                interpretacao.append(f"- Precisão: {precision:.4f} - Fraca. Muitos falsos positivos comprometem a confiabilidade.")
         except (ValueError, TypeError):
             interpretacao.append("- Precisão: Não disponível ou inválida.")
 
-    # Recall
+    # **Interpretação para Recall (Sensibilidade)**
     if 'Recall' in metrics:
         try:
             recall = float(metrics['Recall'])
             if recall > 0.9:
-                interpretacao.append(f"- Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Excelente! O modelo deteta quase todos os casos positivos.")
             elif recall > 0.75:
-                interpretacao.append(f"- Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Bom. A maioria dos positivos são identificados.")
             elif recall > 0.5:
-                interpretacao.append(f"- Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Moderado. O modelo está a perder muitos casos positivos.")
             else:
-                interpretacao.append(f"- Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros. Pode ser necessário ajustar os pesos ou thresholds.")
+                interpretacao.append(f"- Recall: {recall:.4f} - Fraco. O modelo falha em detetar muitos casos positivos.")
         except (ValueError, TypeError):
             interpretacao.append("- Recall: Não disponível ou inválido.")
-    
-    # F1-Score
+
+    # **Interpretação para F1-Score**
     if 'F1-Score' in metrics:
         try:
             f1_score = float(metrics['F1-Score'])
             if f1_score > 0.9:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade. O modelo está altamente otimizado.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e recall.")
             elif f1_score > 0.75:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias nos falsos positivos ou negativos.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Bom, mas pode ser melhorado.")
             elif f1_score > 0.5:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho moderado. Ajustes no treino ou balanceamento dos dados podem ajudar.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Moderado. Ajustes podem melhorar o desempenho.")
             else:
-                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Desempenho fraco. Recomenda-se rever os dados, ajustar hiperparâmetros ou otimizar o modelo.")
+                interpretacao.append(f"- F1-Score: {f1_score:.4f} - Fraco. Ajustes profundos são necessários.")
         except (ValueError, TypeError):
             interpretacao.append("- F1-Score: Não disponível ou inválido.")
 
-    # Se nenhuma métrica conhecida foi encontrada
-    if not interpretacao:
-        interpretacao.append("Nenhuma métrica de classificação reconhecida encontrada nos dados.")
-
-    # Conclusão Geral
+    # **Conclusão Geral**
     if all(key in metrics for key in ['F1-Score', 'Precision', 'Recall']):
         try:
             f1_score = float(metrics['F1-Score'])
             precision = float(metrics['Precision'])
             recall = float(metrics['Recall'])
-            
+
             if f1_score > 0.9 and precision > 0.9 and recall > 0.9:
-                interpretacao.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excecional em todas as métricas. Está pronto para produção!")
+                interpretacao.append("\nConclusão: 🎉 O modelo tem um desempenho excecional!")
             elif f1_score > 0.75 and precision > 0.75 and recall > 0.75:
-                interpretacao.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral, mas pode ser ligeiramente melhorado com ajustes finos.")
+                interpretacao.append("\nConclusão: 👍 O modelo tem um bom desempenho geral.")
             elif f1_score > 0.5 or precision > 0.5 or recall > 0.5:
-                interpretacao.append("\nConclusão Geral:⚠️ O modelo tem um desempenho moderado. Recomenda-se ajustar os hiperparâmetros ou melhorar os dados de treino.")
+                interpretacao.append("\nConclusão: ⚠️ O modelo é funcional, mas pode ser melhorado.")
             else:
-                interpretacao.append("\nConclusão Geral: ❗ O modelo apresenta um desempenho fraco. Será necessário rever o processo de treino, os dados e os parâmetros.")
+                interpretacao.append("\nConclusão: ❗ O modelo apresenta desempenho insatisfatório.")
         except (ValueError, TypeError):
             pass
 
     return "\n".join(interpretacao)
 
+
+# Função para gerar interpretação personalizada das métricas de regressão
 def generate_regression_interpretation(metrics):
-    """Função para gerar interpretação personalizada das métricas de regressão"""
+    """Gera interpretação personalizada para métricas de regressão."""
     interpretation = []
 
-    # Verificar se as métricas estão no formato esperado
+    # **Verificar se as métricas estão no formato esperado**
     if not isinstance(metrics, dict):
         return "Formato de métricas inválido."
 
-    # R² (Coeficiente de Determinação)
+    # **Interpretação para R² (Coeficiente de Determinação)**
     if 'R²' in metrics:
         try:
             r2 = float(metrics['R²'])
             if r2 > 0.9:
-                interpretation.append(f"- R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados. Isso indica um forte ajuste entre as previsões e os valores reais.")
+                interpretation.append(f"- R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados.")
             elif r2 > 0.75:
-                interpretation.append(f"- R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados, mas ainda pode ser melhorado.")
+                interpretation.append(f"- R²: {r2:.4f} - Muito bom! O modelo tem um ótimo ajuste.")
             elif r2 > 0.5:
-                interpretation.append(f"- R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade, mas há limitações importantes no ajuste.")
+                interpretation.append(f"- R²: {r2:.4f} - Moderado. O modelo precisa de ajustes para melhor explicação dos dados.")
             else:
-                interpretation.append(f"- R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados. Considere revisar as features ou usar um modelo mais adequado.")
+                interpretation.append(f"- R²: {r2:.4f} - Fraco. O modelo tem um ajuste insatisfatório.")
         except (ValueError, TypeError):
             interpretation.append("- R²: Não disponível ou inválido.")
 
-    # MAE (Erro Absoluto Médio)
+    # **Interpretação para MAE (Erro Absoluto Médio)**
     if 'MAE' in metrics:
         try:
             mae = float(metrics['MAE'])
             if mae < 0.1:
-                interpretation.append(f"- MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno, sugerindo que as previsões são altamente precisas.")
+                interpretation.append(f"- MAE: {mae:.4f} - Excelente! As previsões estão muito próximas dos valores reais.")
             elif mae < 1:
-                interpretation.append(f"- MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável, mas ainda pode ser otimizado.")
+                interpretation.append(f"- MAE: {mae:.4f} - Bom. O erro é aceitável, mas pode ser reduzido.")
             else:
-                interpretation.append(f"- MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais. Considere ajustar o modelo ou as features.")
+                interpretation.append(f"- MAE: {mae:.4f} - Alto. O modelo apresenta desvios significativos.")
         except (ValueError, TypeError):
             interpretation.append("- MAE: Não disponível ou inválido.")
 
-    # MSE (Erro Quadrático Médio)
+    # **Interpretação para MSE (Erro Quadrático Médio)**
     if 'MSE' in metrics:
         try:
             mse = float(metrics['MSE'])
             if mse < 0.1:
-                interpretation.append(f"- MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo, indicando que as previsões estão próximas dos valores reais.")
+                interpretation.append(f"- MSE: {mse:.4f} - Excelente! As previsões têm erros mínimos.")
             elif mse < 1:
-                interpretation.append(f"- MSE: {mse:.4f} - Bom. O erro é relativamente baixo, mas ainda há espaço para reduzir as discrepâncias.")
+                interpretation.append(f"- MSE: {mse:.4f} - Bom. O erro está sob controlo, mas pode ser otimizado.")
             else:
-                interpretation.append(f"- MSE: {mse:.4f} - Alto. O erro é significativo. Isso pode indicar que o modelo não está capturando bem os padrões nos dados.")
+                interpretation.append(f"- MSE: {mse:.4f} - Alto. As previsões estão significativamente afastadas dos valores reais.")
         except (ValueError, TypeError):
             interpretation.append("- MSE: Não disponível ou inválido.")
 
-    # Se nenhuma métrica conhecida foi encontrada
-    if not interpretation:
-        interpretation.append("Nenhuma métrica de regressão reconhecida encontrada nos dados.")
-
-    # Conclusão geral com base nas métricas
+    # **Conclusão Geral**
     if all(key in metrics for key in ['R²', 'MAE', 'MSE']):
         try:
             r2 = float(metrics['R²'])
             mse = float(metrics['MSE'])
             mae = float(metrics['MAE'])
-            
+
             if r2 > 0.9 and mse < 0.1 and mae < 0.1:
-                interpretation.append("\nConclusão Geral: 🎉 O modelo apresenta um desempenho excepcional! Está pronto para produção.")
+                interpretation.append("\nConclusão: 🎉 O modelo apresenta um desempenho excecional!")
             elif r2 > 0.75 and mse < 1 and mae < 1:
-                interpretation.append("\nConclusão Geral: 👍 O modelo tem um bom desempenho geral. Com ajustes menores, pode se tornar ainda melhor.")
+                interpretation.append("\nConclusão: 👍 O modelo tem um bom desempenho geral.")
             elif r2 > 0.5 or mse < 1 or mae < 1:
-                interpretation.append("\nConclusão Geral: ⚠️ O modelo está funcional, mas ainda apresenta limitações. Ajustes adicionais são recomendados.")
+                interpretation.append("\nConclusão: ⚠️ O modelo precisa de melhorias.")
             else:
-                interpretation.append("\nConclusão Geral: ❗ O modelo apresenta desempenho insatisfatório. Considere reavaliar as features, ajustar hiperparâmetros ou explorar modelos alternativos.")
+                interpretation.append("\nConclusão: ❗ O modelo apresenta um desempenho insatisfatório.")
         except (ValueError, TypeError):
             pass
 
     return "\n".join(interpretation)
 
-# Função para salvar o modelo treinado com nome dinâmico
+
+import joblib
+
+# Função para salvar o modelo treinado com um nome dinâmico
 def save_best_model(model, with_feature_selection=True):
+    """
+    Salva o modelo treinado em um ficheiro .pkl, permitindo a recuperação posterior.
+
+    Parâmetros:
+    - model: Modelo treinado a ser salvo.
+    - with_feature_selection (bool): Se True, indica que o modelo foi treinado com seleção de features.
+
+    Retorna:
+    - str: Nome do ficheiro onde o modelo foi salvo, ou None em caso de erro.
+    """
     try:
-        # Determinar o nome do arquivo com base na seleção de features
+        # Determinar o nome do ficheiro dependendo se houve seleção de features
         if with_feature_selection:
             model_filename = "best_model_com_selecao_features.pkl"
         else:
             model_filename = "best_model_sem_selecao_features.pkl"
 
-        # Salvar o modelo usando joblib
+        # Salvar o modelo utilizando joblib
         joblib.dump(model, model_filename)
+        
+        # Mensagem de sucesso
         st.success(f"Modelo salvo com sucesso como {model_filename}")
+        
         return model_filename
     except Exception as e:
+        # Exibir erro caso ocorra alguma falha no processo de salvamento
         st.error(f"Erro ao salvar o modelo: {str(e)}")
         return None
 
 
+# Função para executar o treino e avançar para a etapa final
 def execute_training():
+    """
+    Executa o treino do modelo armazenado no session_state e avança para a página final.
+
+    Esta função:
+    - Recupera o modelo selecionado pelo utilizador.
+    - Treina o modelo e armazena as métricas resultantes.
+    - Exibe informações de depuração.
+    - Redireciona para a página final após o treino.
+    """
     if st.session_state.step == 'train_and_store_metrics':
+        # Recuperar o modelo selecionado
         model = st.session_state.models[st.session_state.selected_model_name]
 
+        # Treinar o modelo e armazenar as métricas
         metrics = train_and_store_metrics(
             model,
             st.session_state.X_train,
@@ -4819,10 +4877,10 @@ def execute_training():
             metric_type="sem_selecao_features"
         )
 
-        # Depuração
+        # **Depuração**: Exibir as métricas armazenadas no session_state após o treino
         st.write("Conteúdo de metrics após treino:", st.session_state.get('metrics', {}))
 
-        # Avançar para a página final
+        # Avançar para a página final após o treino ser concluído
         st.session_state.step = 'final_page'
         st.rerun()
 
@@ -4835,78 +4893,97 @@ import requests
 import tempfile
 from datetime import datetime
 from io import BytesIO
+import matplotlib.pyplot as plt
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Paragraph
 
+# Classe personalizada para a geração de PDFs
 class CustomPDF(FPDF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Baixar o logo no início para reutilizá-lo
+        
+        # Inicializar a variável do caminho do logótipo
         self.logo_path = None
+        
+        # URL do logótipo institucional
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
+        
         try:
+            # Tentar fazer o download do logótipo
             response = requests.get(logo_url)
             if response.status_code == 200:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
                     tmpfile.write(response.content)
                     self.logo_path = tmpfile.name
         except Exception as e:
-            print(f"Erro ao baixar o logo: {e}")
+            print(f"Erro ao baixar o logótipo: {e}")
 
     def header(self):
+        """Cabeçalho do relatório"""
+        
         # Posicionar o cabeçalho no topo da página
         self.set_y(10)
         
-        # Adicionar a imagem no cabeçalho se o logo foi baixado com sucesso
+        # Inserir o logótipo se foi baixado com sucesso
         if self.logo_path:
             self.image(self.logo_path, 10, 10, 25)
         
-        # Configurar fonte para o título
+        # Definir a fonte e tamanho do título
         self.set_font('Arial', 'B', 12)
         
         # Adicionar o título centralizado
-        # Deixar espaço para o logo
-        self.cell(25)  # Espaço para o logo
+        self.cell(25)  # Criar espaço para o logótipo
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', 0, 0, 'C')
         
-        # Adicionar uma linha horizontal após o cabeçalho
+        # Criar uma linha horizontal para separar o cabeçalho do conteúdo
         self.ln(15)
-        self.ln(5)  # Espaço após o cabeçalho
+        self.ln(5)  # Criar espaço após o cabeçalho
 
     def footer(self):
-        # Ir para 1.5 cm da parte inferior
+        """Rodapé do relatório"""
+        
+        # Posicionar o rodapé a 1.5 cm da parte inferior
         self.set_y(-20)
         
-        # Adicionar uma linha horizontal antes do rodapé
+        # Adicionar uma linha horizontal acima do rodapé
         self.line(10, self.get_y(), 200, self.get_y())
         self.ln(3)
         
-        # Definir fonte para o rodapé
+        # Definir a fonte do rodapé
         self.set_font('Arial', 'I', 8)
         
-        # Data atual
+        # Obter a data atual
         current_date = datetime.now().strftime('%d/%m/%Y')
         
-        # Adicionar rodapé com a data e número da página
+        # Adicionar a data e número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', 0, 0, 'C')
+
+
+# Classe responsável pela geração do relatório da performance do modelo
 class MLCaseModelReportGenerator:
     def __init__(self, output_path='model_performance_report.pdf', logo_url=None):
         """
-        Initialize the report generator
-        
-        :param output_path: Path to save the PDF
-        :param logo_url: Optional URL for organization logo
+        Inicializa o gerador de relatórios de performance do modelo.
+
+        Parâmetros:
+        - output_path (str): Caminho para salvar o PDF.
+        - logo_url (str, opcional): URL do logótipo da instituição.
         """
         self.output_path = output_path
+        
+        # Definir a URL padrão do logótipo se não for especificada
         self.logo_url = logo_url or 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
         
-        # Fetch logo
+        # Fazer o download do logótipo
         self.logo_path = self._fetch_logo()
         
-        # Prepare styles
+        # Preparar estilos personalizados
         self.styles = getSampleStyleSheet()
         self._create_custom_styles()
     
     def _fetch_logo(self):
-        """Fetch and save logo image"""
+        """Faz o download do logótipo e armazena temporariamente."""
         try:
             response = requests.get(self.logo_url)
             if response.status_code == 200:
@@ -4918,18 +4995,19 @@ class MLCaseModelReportGenerator:
             return None
     
     def _create_custom_styles(self):
-        """Create custom paragraph styles"""
-        # Title style
+        """Define estilos personalizados para os textos do relatório."""
+        
+        # Estilo do título
         self.styles.add(ParagraphStyle(
             name='MLCaseTitle',
             parent=self.styles['Title'],
             fontSize=18,
             textColor=colors.HexColor('#2C3E50'),
-            alignment=1,  # Center alignment
+            alignment=1,  # Centralizado
             spaceAfter=12
         ))
         
-        # Subtitle style
+        # Estilo do subtítulo
         self.styles.add(ParagraphStyle(
             name='MLCaseSubtitle',
             parent=self.styles['Heading2'],
@@ -4938,28 +5016,50 @@ class MLCaseModelReportGenerator:
             spaceAfter=6
         ))
         
-        # Normal text style
+        # Estilo do texto normal
         self.styles.add(ParagraphStyle(
             name='MLCaseNormal',
             parent=self.styles['Normal'],
             fontSize=10,
             textColor=colors.HexColor('#2C3E50'),
-            leading=14
+            leading=14  # Espaçamento entre linhas
         ))
     
     def create_bar_chart(self, data, labels, title):
-        """Create a bar chart using matplotlib and return as an image buffer"""
+        """
+        Gera um gráfico de barras para exibição no relatório.
+
+        Parâmetros:
+        - data (list): Valores das métricas.
+        - labels (list): Nome das métricas.
+        - title (str): Título do gráfico.
+
+        Retorna:
+        - Objeto de buffer com o gráfico gerado.
+        """
+        
+        # Criar o gráfico de barras com tamanho definido
         plt.figure(figsize=(6, 4), dpi=100)
+        
+        # Criar barras com cores diferenciadas
         plt.bar(labels, data, color=['#3498DB', '#2980B9'])
+        
+        # Definir título e rótulos do gráfico
         plt.title(title, fontsize=12, color='#2C3E50')
-        plt.ylabel('Value', color='#2C3E50')
+        plt.ylabel('Valor', color='#2C3E50')
+        
+        # Rotacionar os rótulos do eixo X para melhor visualização
         plt.xticks(rotation=45, ha='right', color='#2C3E50')
+        
+        # Ajustar automaticamente o layout para evitar sobreposição
         plt.tight_layout()
         
-        # Save to a bytes buffer
-        buf = io.BytesIO()
+        # Criar um buffer de memória para armazenar a imagem
+        buf = BytesIO()
         plt.savefig(buf, format='png', bbox_inches='tight')
         buf.seek(0)
+        
+        # Fechar a figura para evitar consumo de memória
         plt.close()
         
         return buf
@@ -4967,23 +5067,23 @@ class MLCaseModelReportGenerator:
 def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     """
     Gera um relatório PDF com os resultados da comparação de modelos.
-    
+
     Args:
-        comparison_df: DataFrame com as métricas comparativas
-        best_model: String com o nome do melhor modelo
-        session_state: Estado da sessão do Streamlit
-        
+        comparison_df: DataFrame contendo as métricas comparativas dos modelos.
+        best_model: Nome do melhor modelo identificado.
+        session_state: Estado da sessão do Streamlit com informações do treino.
+
     Returns:
-        BytesIO: Buffer contendo o PDF gerado
+        BytesIO: Buffer contendo o PDF gerado.
     """
 
-    # Inicialização do PDF com cabeçalho e rodapé
+    # Inicialização do PDF com cabeçalho e rodapé personalizados
     pdf = CustomPDF(format='A4')
-    pdf.set_margins(10, 30, 10)  # left, top, right
+    pdf.set_margins(10, 30, 10)  # Margens: esquerda, topo, direita
     pdf.set_auto_page_break(auto=True, margin=30)  # Margem inferior para o rodapé
     pdf.add_page()
     
-    # Função para limpar texto para compatibilidade com codificação Latin-1
+    # Função auxiliar para limpar texto e evitar erros de codificação Latin-1
     def clean_text(text):
         if not isinstance(text, str):
             return str(text)
@@ -4995,33 +5095,33 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.cell(0, 10, txt=clean_text("Relatório Final do Modelo Treinado"), ln=True, align="C")
     pdf.ln(10)
     
-    # Tipo de Modelo
+    # Tipo de Modelo Utilizado
     model_type = session_state.get('model_type', 'Indefinido')
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Tipo de Modelo:"), ln=False)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, txt=clean_text(model_type), ln=True)
     
-    # Modelo Selecionado
+    # Modelo Selecionado pelo Utilizador
     selected_model_name = session_state.get('selected_model_name', 'Não Selecionado')
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Modelo Selecionado:"), ln=False)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, txt=clean_text(selected_model_name), ln=True)
     
-    # Melhor Modelo
+    # Melhor Modelo Identificado com Base nas Métricas
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(60, 10, txt=clean_text("Melhor Modelo:"), ln=False)
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, txt=clean_text(best_model), ln=True)
     pdf.ln(10)
     
-    # Informações do Conjunto de Dados
+    # Informações sobre os Conjuntos de Dados Utilizados no Treino
     if 'X_train' in session_state and 'X_test' in session_state:
         X_train = session_state.X_train
         X_test = session_state.X_test
         
-        # Calcular percentuais e tamanhos
+        # Calcular percentagem de amostras de treino e teste
         total_samples = X_train.shape[0] + X_test.shape[0]
         train_percent = (X_train.shape[0] / total_samples) * 100
         test_percent = (X_test.shape[0] / total_samples) * 100
@@ -5030,23 +5130,23 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         pdf.cell(0, 10, txt=clean_text("Informações dos Conjuntos de Dados"), ln=True)
         pdf.ln(5)
         
-        # Tabela de informações do conjunto de dados
+        # Criar tabela com informações do conjunto de dados
         data_info = [
             ["Amostras de Treino", f"{X_train.shape[0]} ({train_percent:.1f}%)"],
             ["Amostras de Teste", f"{X_test.shape[0]} ({test_percent:.1f}%)"],
             ["Features Originais", f"{X_train.shape[1]}"]
         ]
         
-        # Adicionar features após seleção se estiverem disponíveis
+        # Adicionar número de features após a seleção, se disponível
         if 'X_train_selected' in session_state:
             data_info.append(["Features Após Seleção", f"{session_state.X_train_selected.shape[1]}"])
         
-        # Formatar a tabela de informações
+        # Formatar e adicionar a tabela ao PDF
         pdf.set_font("Arial", size=10)
-        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
         
         for i, (label, value) in enumerate(data_info):
-            if i % 2 == 0:  # Linhas alternadas
+            if i % 2 == 0:  # Linhas alternadas para melhor leitura
                 pdf.set_fill_color(240, 240, 240)
             else:
                 pdf.set_fill_color(255, 255, 255)
@@ -5056,12 +5156,12 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         pdf.ln(10)
     
-    # Features Selecionadas
+    # Features Selecionadas no Processo de Seleção de Features
     if 'selected_features' in session_state:
         pdf.set_font("Arial", style="B", size=14)
         pdf.cell(0, 10, txt=clean_text("Features Selecionadas"), ln=True)
         
-        # Listar as features
+        # Listar todas as features utilizadas após a seleção
         features = session_state.selected_features
         pdf.set_font("Arial", size=10)
         for i, feature in enumerate(features):
@@ -5069,29 +5169,29 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         pdf.ln(10)
     
-    # Tabela de Métricas
+    # Comparação de Métricas entre Modelos
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Comparação de Métricas"), ln=True)
     
-    # Verificar o tipo de modelo para determinar quais métricas exibir
+    # Determinar o tipo de modelo (Regressão ou Classificação) para escolher as métricas adequadas
     is_regression = model_type == "Regressão"
     metric_columns = ['R²', 'MAE', 'MSE'] if is_regression else ['Accuracy', 'Precision', 'Recall', 'F1-Score']
     
-    # Criar tabela de métricas
+    # Criar tabela de métricas no relatório
     pdf.set_font("Arial", style="B", size=10)
-    pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+    pdf.set_fill_color(144, 238, 144)  # Definir cor do cabeçalho
     
-    # Definir a largura das colunas
+    # Definir largura das colunas
     column_width = 30
     first_column_width = 60
     
-    # Cabeçalho da tabela
+    # Criar cabeçalho da tabela
     pdf.cell(first_column_width, 10, "Modelo", 1, 0, 'C', True)
     for col in metric_columns:
         pdf.cell(column_width, 10, clean_text(col), 1, 0, 'C', True)
     pdf.ln()
     
-    # Linhas da tabela
+    # Preencher as linhas da tabela com os valores das métricas
     pdf.set_font("Arial", size=10)
     for _, row in comparison_df.iterrows():
         model_name = row['Modelo']
@@ -5099,7 +5199,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         
         for col in metric_columns:
             if col in row:
-                # Formatar o valor numérico com 4 casas decimais
+                # Formatar valores numéricos para 4 casas decimais
                 if isinstance(row[col], (int, float)):
                     value = f"{row[col]:.4f}"
                 else:
@@ -5109,172 +5209,164 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
         pdf.ln()
     
     pdf.ln(10)
-    
+
     # Gráficos de Métricas
     for metric in metric_columns:
         if metric in comparison_df.columns:
-            # Criar o gráfico com tamanho ajustado
+            # Criar o gráfico com tamanho adequado
             plt.figure(figsize=(10, 6))
             
-            # Dados para o gráfico
+            # Obter os modelos e os valores da métrica atual
             models = comparison_df['Modelo'].tolist()
             values = comparison_df[metric].tolist()
             
-            # Criar barras com espaçamento adequado
+            # Criar gráfico de barras com cores diferenciadas para melhor visualização
             plt.bar(models, values, color=['#90EE90', '#006400'], width=0.4)
             
-            # Adicionar valores sobre as barras
+            # Adicionar valores sobre as barras para melhor compreensão
             for i, v in enumerate(values):
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, float)):  # Garantir que o valor é numérico
                     plt.text(i, v + 0.01, f"{v:.4f}", ha='center', fontsize=10)
             
-            # MUDANÇA PRINCIPAL: Configuração do eixo X sem rotação
-            plt.xticks(rotation=0, ha='center', fontsize=8)  # Mudar rotation=45 para rotation=0
+            # Configuração do eixo X sem rotação para manter alinhamento claro
+            plt.xticks(rotation=0, ha='center', fontsize=8)  # Antes era rotation=45, alterado para 0
             
-            # Estilização com mais espaço
-            plt.title(f"Comparação de {metric}", fontsize=14, pad=15)  # Aumentar pad para dar mais espaço
+            # Estilização do gráfico
+            plt.title(f"Comparação de {metric}", fontsize=14, pad=15)  # Aumentar o espaço acima do título
             plt.ylabel(metric, fontsize=12)
             
-            # Garantir espaço para o conteúdo
-            plt.subplots_adjust(bottom=0.2, left=0.15)  # Aumentar margem inferior
+            # Ajustar espaço do gráfico para garantir melhor apresentação
+            plt.subplots_adjust(bottom=0.2, left=0.15)  # Aumentar margem inferior e lateral esquerda
             
-            # Ajustar a altura do gráfico para evitar corte
-            plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20%
+            # Ajustar a altura do gráfico para evitar cortes no eixo Y
+            plt.ylim(0, max(values) * 1.2)  # Aumenta o limite superior em 20% para evitar sobrecarga visual
             
-            plt.tight_layout()  # Ajusta automaticamente o layout
+            plt.tight_layout()  # Ajustar automaticamente o layout para evitar sobreposições
             
-            # Salvar o gráfico em um arquivo temporário com DPI maior
+            # Guardar o gráfico num ficheiro temporário com DPI superior para melhor qualidade
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(temp_file.name, bbox_inches='tight', dpi=150)  # Aumentar DPI e garantir que nada seja cortado
+            plt.savefig(temp_file.name, bbox_inches='tight', dpi=150)  # DPI aumentado para evitar pixelização
             plt.close()
         
-            # Adicionar o gráfico ao PDF - AJUSTADO
+            # Adicionar o gráfico ao PDF
             pdf.add_page()
             pdf.set_font("Arial", style="B", size=14)
             pdf.cell(0, 10, txt=clean_text(f"Gráfico de Comparação - {metric}"), ln=True, align="C")
             
-            # Posicionar o gráfico mais para baixo para evitar sobreposição com o cabeçalho
-            pdf.image(temp_file.name, x=10, y=45, w=180)  # Posição Y aumentada
+            # Posicionar o gráfico mais abaixo para evitar sobreposição com o cabeçalho
+            pdf.image(temp_file.name, x=10, y=45, w=180)  # Posição Y ajustada para evitar cortes
             
-            # Fechar e remover o arquivo temporário
+            # Fechar e eliminar o ficheiro temporário após utilização
             temp_file.close()
             try:
-                os.remove(temp_file.name)
+                os.remove(temp_file.name)  # Remover o ficheiro temporário para evitar acumulação de arquivos
             except:
-                pass  # Ignorar erros ao remover arquivos temporários
-        
-    # Interpretação das Métricas
+                pass  # Se houver erro ao eliminar, ignorar e seguir em frente
+    
+    # Adicionar uma nova página ao PDF para interpretação das métricas
     pdf.add_page()
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Interpretação das Métricas"), ln=True, align="C")
-    
+
     # Função para gerar interpretação de métricas
     def generate_metrics_interpretation(metrics, model_type):
+        """
+        Gera uma interpretação personalizada das métricas do modelo.
+        
+        Args:
+            metrics (dict): Dicionário contendo as métricas do modelo.
+            model_type (str): Tipo do modelo ('Classificação' ou 'Regressão').
+        
+        Returns:
+            list: Lista de strings com a interpretação das métricas.
+        """
         interpretacao = []
         
+        # Caso o modelo seja de Classificação
         if model_type == "Classificação":
-            # Accuracy
+            # Interpretar a Acurácia (Accuracy)
             accuracy = float(metrics.get('Accuracy', 0))
             if accuracy > 0.9:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto global muito elevada.")
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Excelente! O modelo tem uma taxa de acerto muito elevada.")
             elif accuracy > 0.75:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Boa. O modelo está a funcionar bem, mas ainda há margem para otimização.")
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Boa, mas ainda há margem para otimização.")
             elif accuracy > 0.5:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Moderada. Os erros ainda são significativos e devem ser corrigidos.")
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Moderada. O modelo apresenta erros significativos.")
             else:
-                interpretacao.append(f"Acurácia: {accuracy:.4f} - Fraca. O modelo está a falhar em muitas previsões e precisa de ser revisto.")
-        
-            # Precision
+                interpretacao.append(f"Acurácia: {accuracy:.4f} - Fraca. O modelo precisa ser revisto e melhorado.")
+            
+            # Interpretar a Precisão (Precision)
             precision = float(metrics.get('Precision', 0))
             if precision > 0.9:
-                interpretacao.append(f"Precisão: {precision:.4f} - Excelente! O modelo está a evitar a maioria dos falsos positivos.")
+                interpretacao.append(f"Precisão: {precision:.4f} - Excelente! Poucos falsos positivos.")
             elif precision > 0.75:
-                interpretacao.append(f"Precisão: {precision:.4f} - Bom. O modelo evita falsos positivos, mas pode ser mais rigoroso.")
+                interpretacao.append(f"Precisão: {precision:.4f} - Bom, mas ainda pode melhorar.")
             elif precision > 0.5:
-                interpretacao.append(f"Precisão: {precision:.4f} - Moderada. Há um número considerável de falsos positivos a corrigir.")
+                interpretacao.append(f"Precisão: {precision:.4f} - Moderada. O modelo tem um número significativo de falsos positivos.")
             else:
-                interpretacao.append(f"Precisão: {precision:.4f} - Fraca. Muitos falsos positivos estão a prejudicar a confiança nas previsões.")
-        
-            # Recall
+                interpretacao.append(f"Precisão: {precision:.4f} - Fraca. Muitos falsos positivos prejudicam o desempenho.")
+    
+            # Interpretar o Recall (Sensibilidade)
             recall = float(metrics.get('Recall', 0))
             if recall > 0.9:
-                interpretacao.append(f"Recall: {recall:.4f} - Excelente! O modelo está a identificar quase todos os positivos verdadeiros.")
+                interpretacao.append(f"Recall: {recall:.4f} - Excelente! A maioria dos positivos verdadeiros são identificados.")
             elif recall > 0.75:
-                interpretacao.append(f"Recall: {recall:.4f} - Bom. A maioria dos positivos verdadeiros é identificada, mas há espaço para melhorias.")
+                interpretacao.append(f"Recall: {recall:.4f} - Bom. O modelo capta a maioria dos casos positivos.")
             elif recall > 0.5:
-                interpretacao.append(f"Recall: {recall:.4f} - Moderado. O modelo está a perder demasiados positivos verdadeiros.")
+                interpretacao.append(f"Recall: {recall:.4f} - Moderado. Alguns positivos verdadeiros não estão a ser reconhecidos.")
             else:
-                interpretacao.append(f"Recall: {recall:.4f} - Fraco. O modelo falha em identificar a maioria dos positivos verdadeiros.")
-            
-            # F1-Score
+                interpretacao.append(f"Recall: {recall:.4f} - Fraco. O modelo perde muitos casos positivos.")
+    
+            # Interpretar o F1-Score
             f1_score = float(metrics.get('F1-Score', 0))
             if f1_score > 0.9:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e sensibilidade.")
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Excelente equilíbrio entre precisão e recall.")
             elif f1_score > 0.75:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Bom desempenho. Contudo, há espaço para melhorias.")
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Bom, mas ainda há margem para melhorias.")
             elif f1_score > 0.5:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Desempenho moderado.")
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Moderado.")
             else:
-                interpretacao.append(f"F1-Score: {f1_score:.4f} - Desempenho fraco.")
-        
+                interpretacao.append(f"F1-Score: {f1_score:.4f} - Fraco.")
+    
+        # Caso o modelo seja de Regressão
         elif model_type == "Regressão":
-            # R² (Coeficiente de Determinação)
+            # Interpretar o Coeficiente de Determinação R²
             r2 = float(metrics.get('R²', 0))
             if r2 > 0.9:
                 interpretacao.append(f"R²: {r2:.4f} - Excelente! O modelo explica quase toda a variabilidade dos dados.")
             elif r2 > 0.75:
-                interpretacao.append(f"R²: {r2:.4f} - Muito bom! O modelo explica a maior parte da variabilidade dos dados.")
+                interpretacao.append(f"R²: {r2:.4f} - Muito bom! Explica a maioria da variabilidade dos dados.")
             elif r2 > 0.5:
-                interpretacao.append(f"R²: {r2:.4f} - Moderado. O modelo consegue explicar uma parte significativa da variabilidade.")
+                interpretacao.append(f"R²: {r2:.4f} - Moderado. Ainda há limitações no ajuste do modelo.")
             else:
-                interpretacao.append(f"R²: {r2:.4f} - Fraco. O modelo explica pouca variabilidade dos dados.")
-        
-            # MAE (Erro Absoluto Médio)
+                interpretacao.append(f"R²: {r2:.4f} - Fraco. O modelo não está a explicar bem a variabilidade dos dados.")
+    
+            # Interpretar o Erro Absoluto Médio (MAE)
             mae = float(metrics.get('MAE', 0))
             if mae < 0.1:
-                interpretacao.append(f"MAE: {mae:.4f} - Excelente! O erro absoluto médio é muito pequeno.")
+                interpretacao.append(f"MAE: {mae:.4f} - Excelente! O erro médio é muito pequeno.")
             elif mae < 1:
-                interpretacao.append(f"MAE: {mae:.4f} - Bom. O erro absoluto médio é aceitável.")
+                interpretacao.append(f"MAE: {mae:.4f} - Bom. O erro médio é aceitável.")
             else:
-                interpretacao.append(f"MAE: {mae:.4f} - Alto. As previsões estão frequentemente desviando dos valores reais.")
-        
-            # MSE (Erro Quadrático Médio)
+                interpretacao.append(f"MAE: {mae:.4f} - Alto. As previsões desviam-se significativamente dos valores reais.")
+    
+            # Interpretar o Erro Quadrático Médio (MSE)
             mse = float(metrics.get('MSE', 0))
             if mse < 0.1:
                 interpretacao.append(f"MSE: {mse:.4f} - Excelente! O erro quadrático médio é muito baixo.")
             elif mse < 1:
                 interpretacao.append(f"MSE: {mse:.4f} - Bom. O erro é relativamente baixo.")
             else:
-                interpretacao.append(f"MSE: {mse:.4f} - Alto. O erro é significativo.")
-        
+                interpretacao.append(f"MSE: {mse:.4f} - Alto. O modelo tem um erro significativo.")
+    
         return interpretacao
     
-    # Obter dados das métricas originais e selecionadas
-    original_metrics = {}
-    selected_metrics = {}
-    
-    # Separar as métricas por tipo de modelo
-    for _, row in comparison_df.iterrows():
-        model_name = row['Modelo']
-        
-        if "Sem Seleção" in model_name:
-            # Extrair métricas do modelo sem seleção de features
-            for col in metric_columns:
-                if col in row:
-                    original_metrics[col] = row[col]
-        
-        if "Com Seleção" in model_name:
-            # Extrair métricas do modelo com seleção de features
-            for col in metric_columns:
-                if col in row:
-                    selected_metrics[col] = row[col]
-    
-    # Interpretações para modelos sem e com seleção de features
+    # Gerar interpretações para os modelos com e sem seleção de features
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Modelo Sem Seleção de Features"), ln=True)
     pdf.set_font("Arial", size=10)
     
-    # Adicionar interpretação do modelo sem seleção
+    # Adicionar interpretação do modelo sem seleção de features
     for line in generate_metrics_interpretation(original_metrics, model_type):
         pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
     
@@ -5283,7 +5375,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.cell(0, 10, txt=clean_text("Modelo Com Seleção de Features"), ln=True)
     pdf.set_font("Arial", size=10)
     
-    # Adicionar interpretação do modelo com seleção
+    # Adicionar interpretação do modelo com seleção de features
     for line in generate_metrics_interpretation(selected_metrics, model_type):
         pdf.multi_cell(0, 8, txt=clean_text(f"• {line}"))
     
@@ -5292,20 +5384,18 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Conclusão"), ln=True)
     
-    # Determinar a melhor métrica com base na escolha do utilizador
+    # Escolher a métrica principal para avaliação do modelo
     scoring_metric = session_state.get("selected_scoring", None)
-
-    # Fallback para métricas padrão se a métrica selecionada não estiver disponível
     if not scoring_metric or scoring_metric not in metric_columns:
-        main_metric = 'R²' if is_regression else 'F1-Score'
+        main_metric = 'R²' if model_type == "Regressão" else 'F1-Score'
     else:
         main_metric = scoring_metric
-
-    # Obter os valores da métrica escolhida
+    
+    # Obter valores da métrica principal
     original_value = original_metrics.get(main_metric, 0)
     selected_value = selected_metrics.get(main_metric, 0)
-
-    # Texto da conclusão
+    
+    # Conclusão baseada no desempenho
     pdf.set_font("Arial", size=10)
     conclusion_text = f"Com base na métrica principal ({main_metric}), o modelo {best_model} apresentou o melhor desempenho."
     pdf.multi_cell(0, 8, txt=clean_text(conclusion_text))
@@ -5318,17 +5408,16 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     
     pdf.multi_cell(0, 8, txt=clean_text(recommendation_text))
     
-    # Salvar o PDF em um buffer
+    # Guardar o PDF
     pdf_buffer = BytesIO()
     pdf_output = pdf.output(dest='S').encode('latin1', errors='ignore')
     pdf_buffer.write(pdf_output)
     pdf_buffer.seek(0)
     return pdf_buffer
 
-# Função para exibir a página final com o relatório
 
+# Função para exibir a página final com o relatório
 # Mapeamento de nomes de métricas para as colunas do DataFrame
-# Atualizar o dicionário METRIC_MAPPING para garantir que MAE seja reconhecido
 METRIC_MAPPING = {
     "accuracy": "Accuracy",
     "precision": "Precision", 
