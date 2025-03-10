@@ -1205,54 +1205,105 @@ def outlier_detection():
         st.session_state.step = 'data_summary'
         st.rerun()
 
+# -------------------------------------
+# 📌 FUNÇÃO DE SUGESTÃO AUTOMÁTICA PARA TRATAMENTO DE OUTLIERS
+# -------------------------------------
 
-# Função de sugestão automática corrigida
 def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
-    """Função para sugerir tratamento de outliers com base nos dados"""
-    # Proporção de outliers
-    total = len(data)
+    """
+    Sugere automaticamente o melhor método de tratamento de outliers com base na distribuição dos dados.
+
+    Parâmetros:
+    - col: Nome da coluna a ser analisada.
+    - data: DataFrame contendo os dados.
+    - lower_bound: Limite inferior dos valores considerados normais (IQR 1.5x abaixo do Q1).
+    - upper_bound: Limite superior dos valores considerados normais (IQR 1.5x acima do Q3).
+
+    Retorna:
+    - Método sugerido para tratamento dos outliers.
+    """
+
+    # -------------------------------------
+    # 📌 Cálculo da Proporção de Outliers
+    # -------------------------------------
+
+    total = len(data)  # Número total de registos
+
+    # Contar outliers normais (fora do intervalo de 1.5 * IQR)
     total_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
+
+    # Contar outliers severos (fora do intervalo de 3 * IQR)
     total_severe_outliers = len(data[(data[col] < (lower_bound - 1.5 * (upper_bound - lower_bound))) |
                                      (data[col] > (upper_bound + 1.5 * (upper_bound - lower_bound)))])
-    percentage = total_outliers / total
-    severe_percentage = total_severe_outliers / total
 
-    # Verificar simetria dos dados
-    skewness = data[col].skew()
+    # Calcular percentagens
+    percentage = total_outliers / total  # Percentagem de outliers normais
+    severe_percentage = total_severe_outliers / total  # Percentagem de outliers severos
 
-    # Regras baseadas na proporção de outliers
-    if severe_percentage > 0.10:  # Se a proporção de outliers severos for alta (>10%), sugere remover apenas os extremos
+    # -------------------------------------
+    # 📌 Verificação da Assimetria dos Dados (Skewness)
+    # -------------------------------------
+
+    skewness = data[col].skew()  # Medida de assimetria da distribuição dos dados
+
+    # -------------------------------------
+    # 📌 Definição das Regras para Sugerir o Melhor Método
+    # -------------------------------------
+
+    if severe_percentage > 0.10:
+        # Se mais de 10% dos valores forem outliers severos, recomenda-se remover apenas os extremos
         return "Remover Outliers Severos"
-    elif percentage > 0.20:  # Mais de 20% são outliers
+    elif percentage > 0.20:
+        # Se mais de 20% dos valores forem outliers, recomenda-se remover todos os outliers
         return "Remover Outliers"
-    elif percentage > 0.05:  # Entre 5% e 20%
+    elif percentage > 0.05:
+        # Se entre 5% e 20% forem outliers, recomenda-se substituí-los pelos limites aceitáveis
         return "Substituir por Limites"
     else:
-        # Escolha entre média e mediana com base na assimetria
+        # Se houver menos de 5% de outliers, a escolha entre média e mediana é baseada na simetria
         if abs(skewness) > 1:
-            return "Substituir por Mediana"
+            return "Substituir por Mediana"  # Se houver alta assimetria, usa-se a mediana
         else:
-            return "Substituir por Média"
+            return "Substituir por Média"  # Caso contrário, a média é uma escolha razoável
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA APLICAR TRATAMENTO DE OUTLIERS
+# -------------------------------------
 
 def apply_outlier_treatment(col, method, lower_bound, upper_bound):
-    """Aplica o tratamento de outliers na coluna especificada."""
-    # Obter os dados do estado
+    """
+    Aplica o tratamento de outliers na coluna especificada, conforme o método escolhido.
+
+    Parâmetros:
+    - col: Nome da coluna a ser tratada.
+    - method: Método de tratamento selecionado.
+    - lower_bound: Limite inferior considerado aceitável.
+    - upper_bound: Limite superior considerado aceitável.
+    """
+
+    # Obter os dados do estado global
     data = st.session_state.data
+
+    # -------------------------------------
+    # 📌 Remover Todos os Outliers (Fora do Intervalo 1.5 * IQR)
+    # -------------------------------------
     
     if method == "Remover Outliers":
-        # Remover todos os outliers (valores além de 1.5 * IQR)
         st.session_state.data = data[
             (data[col] >= lower_bound) & (data[col] <= upper_bound)
         ]
         st.success(f"Todos os outliers removidos na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Remover Apenas Outliers Severos (Fora do Intervalo 3 * IQR)
+    # -------------------------------------
+
     elif method == "Remover Outliers Severos":
-        # Remover apenas outliers severos (>3xIQR)
         Q1 = data[col].quantile(0.25)
         Q3 = data[col].quantile(0.75)
         IQR = Q3 - Q1
-        
-        # Definição correta de outliers severos (3 * IQR)
+
+        # Definir limites mais rigorosos para outliers severos (3 * IQR)
         severe_lower = Q1 - 3.0 * IQR
         severe_upper = Q3 + 3.0 * IQR
 
@@ -1261,246 +1312,332 @@ def apply_outlier_treatment(col, method, lower_bound, upper_bound):
         ]
         st.success(f"Outliers severos removidos na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Substituir Outliers pelos Limites Aceitáveis
+    # -------------------------------------
+
     elif method == "Substituir por Limites":
-        # Substituir valores fora dos limites pelos próprios limites
         st.session_state.data[col] = data[col].clip(lower_bound, upper_bound)
         st.success(f"Valores substituídos pelos limites na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Substituir Outliers pela Média da Coluna
+    # -------------------------------------
+
     elif method == "Substituir por Média":
-        # Substituir valores fora dos limites pela média
         mean_value = data[col].mean()
         mask = (data[col] < lower_bound) | (data[col] > upper_bound)
         st.session_state.data.loc[mask, col] = mean_value
         st.success(f"Valores substituídos pela média ({mean_value:.2f}) na coluna '{col}'.")
 
+    # -------------------------------------
+    # 📌 Substituir Outliers pela Mediana da Coluna
+    # -------------------------------------
+
     elif method == "Substituir por Mediana":
-        # Substituir valores fora dos limites pela mediana
         median_value = data[col].median()
         mask = (data[col] < lower_bound) | (data[col] > upper_bound)
         st.session_state.data.loc[mask, col] = median_value
         st.success(f"Valores substituídos pela mediana ({median_value:.2f}) na coluna '{col}'.")
 
+
 ##########################################################
-# FUNÇÃO DE GUARDAR O DATASET DEPOIS DO PRÉ-PROCESSAMENTO
+# -------------------------------------
+# 📌 FUNÇÃO PARA GUARDAR O DATASET APÓS O PRÉ-PROCESSAMENTO
+# -------------------------------------
 
 def save_modified_dataset_in_memory():
-    # Salvar o dataset tratado diretamente no session_state
-    st.session_state.data_tratada = st.session_state.data.copy()  # Copiar o dataset tratado
-    st.success("Dataset tratado foi salvo na memória para uso posterior.")
+    """
+    Salva o dataset tratado na memória (session_state) para uso posterior.
+    """
 
-# Função de download 
+    # Criar uma cópia do dataset tratado e armazená-lo no estado da sessão
+    st.session_state.data_tratada = st.session_state.data.copy()
+
+    # Exibir uma mensagem de sucesso
+    st.success("O dataset tratado foi salvo na memória para uso posterior.")
+
+# -------------------------------------
+# 📌 FUNÇÃO PARA PERMITIR O DOWNLOAD DO DATASET TRATADO
+# -------------------------------------
+
 def download_button(df, filename="dataset_tratado.csv"):
-    """Função para permitir o download do dataset tratado em formato CSV"""
+    """
+    Permite ao utilizador descarregar o dataset tratado em formato CSV.
+
+    Parâmetros:
+    - df: DataFrame tratado a ser disponibilizado para download.
+    - filename: Nome do ficheiro CSV a ser descarregado (padrão: "dataset_tratado.csv").
+    """
+
+    # Converter o DataFrame para formato CSV (sem índice)
     csv = df.to_csv(index=False)
+
+    # Criar um buffer de memória para armazenar o conteúdo do ficheiro
     buf = io.BytesIO()
-    buf.write(csv.encode())
-    buf.seek(0)
-    
+
+    # Escrever o conteúdo do CSV no buffer e posicionar o cursor no início
+    buf.write(csv.encode())  # Converter para bytes e armazenar no buffer
+    buf.seek(0)  # Definir a posição do cursor para o início do ficheiro
+
+    # Criar um botão de download no Streamlit
     st.download_button(
-        label="Baixar Dataset Tratado",
-        data=buf,
-        file_name=filename,
-        mime="text/csv"
+        label="Baixar Dataset Tratado",  # Texto do botão
+        data=buf,  # Ficheiro a ser descarregado
+        file_name=filename,  # Nome do ficheiro ao fazer o download
+        mime="text/csv"  # Tipo MIME do ficheiro
     )
 
 
 ##########################################################
-# FUNÇÃO DE RESUMO APÓS PRÉ-PROCESSAMENTO
+# -------------------------------------
+# 📌 CLASSE PARA CRIAR O PDF COM O RESUMO APÓS O PRÉ-PROCESSAMENTO
+# -------------------------------------
+
+from fpdf import FPDF
+import requests
+import tempfile
+from datetime import datetime
+
 class CustomPDF(FPDF):
+    """
+    Classe personalizada para gerar um relatório em PDF com cabeçalho e rodapé customizados.
+    """
+
     def header(self):
-        # Baixar a imagem do logo e salvar localmente
+        """
+        Método para gerar o cabeçalho do PDF, incluindo o logótipo da instituição.
+        """
+
+        # URL do logótipo da instituição
         logo_url = 'https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg'
+
+        # Fazer o download da imagem
         response = requests.get(logo_url)
+
         if response.status_code == 200:
+            # Criar um ficheiro temporário para armazenar a imagem baixada
             with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmpfile:
-                tmpfile.write(response.content)
-                tmpfile_path = tmpfile.name
-                # Adicionar a imagem no cabeçalho
-                self.image(tmpfile_path, 10, 8, 20) 
+                tmpfile.write(response.content)  # Escrever o conteúdo da imagem no ficheiro temporário
+                tmpfile_path = tmpfile.name  # Obter o caminho do ficheiro
+
+                # Adicionar a imagem no cabeçalho do PDF
+                self.image(tmpfile_path, x=10, y=8, w=20)  # Definir posição e tamanho da imagem
         else:
+            # Se a imagem não for baixada corretamente, exibir mensagem no PDF
             self.set_font('Arial', 'B', 12)
             self.cell(0, 10, "Logo não disponível", align='C')
-        
-        # Definir fonte para o cabeçalho
+
+        # Definir a fonte do cabeçalho
         self.set_font('Arial', 'B', 12)
+
+        # Adicionar o título da plataforma no cabeçalho
         self.cell(0, 10, 'MLCase - Plataforma de Machine Learning', align='C', ln=True)
-        self.ln(15)  # Espaço após o cabeçalho
+
+        # Criar um espaço entre o cabeçalho e o conteúdo
+        self.ln(15)
 
     def footer(self):
-        # Ir para 1.5 cm da parte inferior
+        """
+        Método para gerar o rodapé do PDF, incluindo a data e número da página.
+        """
+
+        # Definir a posição do rodapé a 1.5 cm do final da página
         self.set_y(-15)
-        # Definir fonte para o rodapé
+
+        # Definir a fonte do rodapé
         self.set_font('Arial', 'I', 10)
-        # Data atual
+
+        # Obter a data atual no formato dia/mês/ano
         current_date = datetime.now().strftime('%d/%m/%Y')
-        # Adicionar rodapé com a data e número da página
+
+        # Adicionar rodapé com a data e o número da página
         self.cell(0, 10, f'{current_date} - Página {self.page_no()}  |  Autora da Plataforma: Bruna Sousa', align='C')
 
-# Função para gerar o PDF com a imagem da tabela
+# -------------------------------------
+# 📌 FUNÇÃO PARA GERAR O PDF COM O RESUMO DO PRÉ-PROCESSAMENTO
+# -------------------------------------
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from io import BytesIO
 
-# Função para gerar o PDF com a tabela simplificada, correlação e boxplot
 def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
+    """
+    Gera um relatório em PDF com informações estatísticas do dataset, valores ausentes, outliers,
+    matriz de correlação e boxplot.
+
+    Parâmetros:
+    - dataset: DataFrame original após pré-processamento.
+    - summary_df: DataFrame com estatísticas descritivas do dataset.
+    - missing_data: Série contendo a contagem de valores ausentes por coluna.
+    - outlier_summary: Lista contendo o resumo dos outliers identificados.
+
+    Retorna:
+    - Um buffer de memória contendo o PDF gerado.
+    """
+
+    # -------------------------------------
+    # 📌 Função Auxiliar para Limpar Texto
+    # -------------------------------------
+
     def clean_text(text):
+        """Remove caracteres incompatíveis com a codificação do PDF."""
         if not isinstance(text, str):
             return text
         return text.encode('latin-1', errors='ignore').decode('latin-1')
 
-    # Inicialização do PDF
+    # -------------------------------------
+    # 📌 Inicialização do PDF
+    # -------------------------------------
+
     pdf = CustomPDF(format='A4')
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-    pdf.set_font("Arial", size=8)  
+    pdf.set_font("Arial", size=8)
 
-    # Título do Relatório
+    # -------------------------------------
+    # 📌 Título do Relatório
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Relatório Resumo dos Dados"), ln=True, align="C")
     pdf.ln(5)
 
-    # Estatísticas Descritivas Simplificadas
+    # -------------------------------------
+    # 📌 Estatísticas Descritivas Simplificadas
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Estatísticas Descritivas"), ln=True)
-    pdf.set_font("Arial", size=8)  
+    pdf.set_font("Arial", size=8)
 
-    # Criar um DataFrame simplificado com as colunas solicitadas: Nome da Coluna, Tipo de Dados, Count, e Média
+    # Criar DataFrame simplificado com estatísticas principais
     summary_simplified = pd.DataFrame({
         'Coluna': dataset.columns,
         'Tipo de Dados': dataset.dtypes,
         'Count': dataset.count(),
-        'Top': dataset.mode().iloc[0],  # Valor mais frequente (top)
+        'Top': dataset.mode().iloc[0],  # Valor mais frequente (moda)
     })
 
-    # Inicializar as colunas 'std', 'min' e 'max' como valores nulos
+    # Inicializar colunas estatísticas apenas para colunas numéricas
     summary_simplified['std'] = None
     summary_simplified['min'] = None
     summary_simplified['max'] = None
-    summary_simplified['Média'] = None  # Para garantir que a média seja inicializada
+    summary_simplified['Média'] = None
 
-    # Calcular as estatísticas apenas para as colunas numéricas
     numeric_columns = dataset.select_dtypes(include=['float64', 'int64']).columns
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'Média'] = dataset[numeric_columns].mean()
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'std'] = dataset[numeric_columns].std()
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'min'] = dataset[numeric_columns].min()
     summary_simplified.loc[summary_simplified['Coluna'].isin(numeric_columns), 'max'] = dataset[numeric_columns].max()
 
-    # Formatar as colunas numéricas para 4 casas decimais
+    # Formatar valores numéricos para 4 casas decimais
     for col in ['Média', 'std', 'min', 'max']:
         summary_simplified[col] = summary_simplified[col].apply(lambda x: f"{x:.4f}" if isinstance(x, (int, float)) else x)
 
     # Substituir 'nan' por vazio
     summary_simplified = summary_simplified.fillna('')
 
-    # Gerar a tabela diretamente no PDF
-    pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
-    col_widths = [pdf.get_string_width(col) for col in summary_simplified.columns]  # Largura das colunas
-    max_width = 180  # Largura máxima disponível (ajustável para caber na largura do PDF)
+    # -------------------------------------
+    # 📌 Adicionar Tabela das Estatísticas ao PDF
+    # -------------------------------------
 
-    # Ajustar largura das colunas proporcionalmente
+    pdf.set_fill_color(144, 238, 144)  # Cor de fundo do cabeçalho
+    col_widths = [pdf.get_string_width(col) for col in summary_simplified.columns]
+    max_width = 180
+
     total_width = sum(col_widths)
     scale_factor = max_width / total_width
     col_widths = [width * scale_factor for width in col_widths]
 
-    # Cabeçalho
     for i, col in enumerate(summary_simplified.columns):
         pdf.cell(col_widths[i], 10, clean_text(col), 1, 0, 'C', True)
     pdf.ln()
 
-    # Linhas de dados
     for i, row in summary_simplified.iterrows():
         for j, cell in enumerate(row):
             pdf.cell(col_widths[j], 8, clean_text(str(cell)), 1, 0, 'C')
         pdf.ln()
 
-    pdf.ln(10)  # Espaço após a tabela de estatísticas
+    pdf.ln(10)
 
-    # Resumo de Valores Ausentes
+    # -------------------------------------
+    # 📌 Resumo de Valores Ausentes
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Resumo de Valores Ausentes"), ln=True)
     pdf.set_font("Arial", size=8)
 
-    if not missing_data.empty:  # Verifica se os dados estão vazios
-        # Tabela de Valores Ausentes
-        missing_data_list = [(col, str(count)) for col, count in missing_data.items()]
-        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+    if not missing_data.empty:
+        pdf.set_fill_color(144, 238, 144)
         pdf.cell(50, 10, clean_text("Variável"), 1, 0, 'C', True)
         pdf.cell(50, 10, clean_text("Total de Ausentes"), 1, 1, 'C', True)
-        for col, count in missing_data_list:
+        for col, count in missing_data.items():
             pdf.cell(50, 10, clean_text(col), 1)
-            pdf.cell(50, 10, clean_text(count), 1, 1)
+            pdf.cell(50, 10, clean_text(str(count)), 1, 1)
         pdf.ln(10)
     else:
-        pdf.set_font("Arial", style="I", size=10)
         pdf.cell(0, 10, txt=clean_text("Não há valores ausentes."), ln=True)
-        pdf.ln(5)
 
-    # Resumo de Outliers
+    # -------------------------------------
+    # 📌 Resumo de Outliers
+    # -------------------------------------
+
     pdf.set_font("Arial", style="B", size=12)
     pdf.cell(0, 10, txt=clean_text("Resumo de Outliers"), ln=True)
     pdf.set_font("Arial", size=8)
 
     if outlier_summary:
-        # Tabela de Outliers
-        outlier_list = [(entry["Variável"], str(entry["Total de Outliers"])) for entry in outlier_summary]
-        pdf.set_fill_color(144, 238, 144) # Cor de fundo do cabeçalho
+        pdf.set_fill_color(144, 238, 144)
         pdf.cell(50, 10, clean_text("Variável"), 1, 0, 'C', True)
         pdf.cell(50, 10, clean_text("Total de Outliers"), 1, 1, 'C', True)
-        for variable, total_outliers in outlier_list:
-            pdf.cell(50, 10, clean_text(variable), 1)
-            pdf.cell(50, 10, clean_text(total_outliers), 1, 1)
+        for entry in outlier_summary:
+            pdf.cell(50, 10, clean_text(entry["Variável"]), 1)
+            pdf.cell(50, 10, clean_text(str(entry["Total de Outliers"])), 1, 1)
         pdf.ln(10)
     else:
-        pdf.set_font("Arial", style="I", size=10)
         pdf.cell(0, 10, txt=clean_text("Não há outliers."), ln=True)
-        pdf.ln(75)
 
-    # **Matriz de Correlação (Heatmap)**
-    pdf.set_font("Arial", style="B", size=12)
+    # -------------------------------------
+    # 📌 Matriz de Correlação (Heatmap)
+    # -------------------------------------
+
     pdf.cell(0, 10, txt=clean_text("Matriz de Correlação das Variáveis"), ln=True)
-    pdf.set_font("Arial", size=8)
-
-    # Selecionar apenas as colunas numéricas para correlação
     numeric_data = dataset.select_dtypes(include=['float64', 'int64'])
-
-    # Calcular a correlação
     correlation_matrix = numeric_data.corr()
 
-    # Gerar o heatmap da correlação
     plt.figure(figsize=(8, 6))
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".4f", cbar=True, square=True)
     plt.title('Matriz de Correlação das Variáveis', fontsize=14, fontweight='bold')
 
-    # Salvar o heatmap como imagem temporária
     temp_filename = "correlation_heatmap.png"
     plt.savefig(temp_filename)
     plt.close()
-
-    # Adicionar o heatmap ao PDF
     pdf.image(temp_filename, x=10, w=180)
-    pdf.ln(95)  # Ajustar o espaço após o gráfico
+    pdf.ln(95)
 
-    # **Boxplot combinado de todas as variáveis numéricas**
-    pdf.set_font("Arial", style="B", size=12)
+    # -------------------------------------
+    # 📌 Boxplot das Variáveis Numéricas
+    # -------------------------------------
+
     pdf.cell(0, 10, txt=clean_text("Boxplot das Variáveis Numéricas"), ln=True)
-    pdf.set_font("Arial", size=8)
-
-    # Gerar boxplot para todas as variáveis numéricas no mesmo gráfico
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=numeric_data)
     plt.title('Boxplot das Variáveis Numéricas')
 
-    # Salvar o boxplot combinado como imagem temporária
     temp_filename_boxplot = "boxplot_combined.png"
     plt.savefig(temp_filename_boxplot)
     plt.close()
-
-    # Adicionar o boxplot ao PDF
     pdf.image(temp_filename_boxplot, x=10, w=180)
-    pdf.ln(75)  # Ajustar o espaço após o gráfico
+    pdf.ln(75)
 
-    # **Salvar o PDF no buffer**
+    # -------------------------------------
+    # 📌 Gerar o PDF no Buffer de Memória
+    # -------------------------------------
+
     pdf_buffer = BytesIO()
     pdf_output = pdf.output(dest='S').encode('latin-1', errors='ignore')
     pdf_buffer.write(pdf_output)
@@ -1508,68 +1645,116 @@ def generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary):
 
     return pdf_buffer
 
-# Função para salvar a tabela como imagem, com ajustes de formatação
+# -------------------------------------
+# 📌 FUNÇÃO PARA SALVAR UMA TABELA COMO IMAGEM (PNG)
+# -------------------------------------
+
+import matplotlib.pyplot as plt
+
 def save_table_as_image(df, filename="table_image.png"):
-    # Substituir `nan` por valores vazios
+    """
+    Converte um DataFrame Pandas numa imagem (PNG), formatando os valores para melhor visualização.
+
+    Parâmetros:
+    - df: DataFrame contendo a tabela a ser convertida em imagem.
+    - filename: Nome do ficheiro da imagem a ser salva (padrão: "table_image.png").
+    """
+
+    # -------------------------------------
+    # 📌 Tratamento de Valores no DataFrame Antes da Geração da Imagem
+    # -------------------------------------
+
+    # Substituir valores `NaN` por valores vazios para evitar exibições incorretas
     df = df.fillna('')
-    
+
     # Formatar valores numéricos para 4 casas decimais
     for col in df.select_dtypes(include=['float64', 'int64']).columns:
         df[col] = df[col].apply(lambda x: f"{x:.4f}" if isinstance(x, (int, float)) else x)
 
-    # Gerar a imagem da tabela
-    fig, ax = plt.subplots(figsize=(8, 4))  # Tamanho ajustado
-    ax.axis('tight')
-    ax.axis('off')
+    # -------------------------------------
+    # 📌 Configuração da Figura para Geração da Tabela
+    # -------------------------------------
 
-    # Criando a tabela com o estilo adequado
-    table = ax.table(cellText=df.values,
-                    colLabels=df.columns,
-                    loc='center',
-                    cellLoc='center',
-                    colColours=['#D9EAF7'] * len(df.columns))  # Cor do cabeçalho da tabela
+    fig, ax = plt.subplots(figsize=(8, 4))  # Define o tamanho da imagem gerada
+    ax.axis('tight')  # Ajusta os limites para caber na figura
+    ax.axis('off')  # Remove os eixos para melhor visualização
 
-    # Ajustando o layout da tabela
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)  # Tamanho da fonte
-    table.auto_set_column_width(col=list(range(len(df.columns))))
+    # Criar a tabela no gráfico
+    table = ax.table(
+        cellText=df.values,  # Conteúdo da tabela
+        colLabels=df.columns,  # Cabeçalhos das colunas
+        loc='center',  # Centralizar a tabela na imagem
+        cellLoc='center',  # Centralizar o texto nas células
+        colColours=['#D9EAF7'] * len(df.columns)  # Definir cor do cabeçalho da tabela
+    )
 
-    # Salvando a tabela como imagem
-    plt.savefig(filename, format='png', bbox_inches='tight')
-    plt.close()
+    # -------------------------------------
+    # 📌 Ajustes de Formatação da Tabela
+    # -------------------------------------
+
+    table.auto_set_font_size(False)  # Desativar ajuste automático do tamanho da fonte
+    table.set_fontsize(10)  # Definir tamanho da fonte manualmente
+    table.auto_set_column_width(col=list(range(len(df.columns))))  # Ajustar automaticamente a largura das colunas
+
+    # -------------------------------------
+    # 📌 Salvamento da Tabela Como Imagem (PNG)
+    # -------------------------------------
+
+    plt.savefig(filename, format='png', bbox_inches='tight')  # Salvar imagem no formato PNG
+    plt.close()  # Fechar a figura para evitar sobrecarga de memória
 
 # Resumo do Pré-processamento de dados:
+# -------------------------------------
+# 📌 FUNÇÃO PARA GERAR O RESUMO DOS DADOS
+# -------------------------------------
+
 def data_summary():
+    """
+    Apresenta um resumo dos dados tratados, incluindo estatísticas descritivas, valores ausentes,
+    detecção de outliers, boxplots e matriz de correlação. Além disso, permite o download do resumo
+    em PDF e do dataset tratado.
+    """
+
     st.subheader("Resumo dos Dados")
 
-    # Usa diretamente st.session_state.data
+    # -------------------------------------
+    # 📌 Verificar Disponibilidade do Dataset
+    # -------------------------------------
+
     if 'data' in st.session_state and st.session_state.data is not None:
         dataset = st.session_state.data
         st.success("Usando o dataset tratado!")
     else:
         st.error("Nenhum dataset está disponível. Por favor, execute o tratamento de dados antes.")
-        return
+        return  # Encerra a função caso não haja dados disponíveis
 
-    # Verifica se há variáveis selecionadas
+    # -------------------------------------
+    # 📌 Seleção de Colunas para Exibição
+    # -------------------------------------
+
+    # Obter colunas selecionadas ou usar todas as colunas do dataset
     selected_columns = st.session_state.get('selected_columns', [])
     if not selected_columns:
         selected_columns = dataset.columns.tolist()
 
-    # Selecionar variáveis para exibição
+    # Permitir que o utilizador selecione as colunas para visualização
     selected_columns_to_display = st.multiselect(
         "Selecione as variáveis para visualizar as estatísticas",
         options=selected_columns,
         default=selected_columns
     )
 
-    # Informações gerais
+    # Exibir o número de linhas e colunas do dataset filtrado
     st.write("Número de linhas e colunas:", dataset[selected_columns_to_display].shape)
 
-    # Filtra apenas as colunas numéricas (ignorando as categóricas)
+    # -------------------------------------
+    # 📌 Estatísticas Descritivas
+    # -------------------------------------
+
+    # Identificar colunas numéricas
     numeric_columns = dataset[selected_columns_to_display].select_dtypes(include=['number']).columns
 
-    # Estatísticas Descritivas (calculando manualmente para cada tipo)
-    data_types = dataset[selected_columns_to_display].dtypes
+    # Criar um dicionário para armazenar estatísticas
     summary_data = {
         'Count': dataset[selected_columns_to_display].count(),
         'Mean': dataset[numeric_columns].mean(),
@@ -1581,83 +1766,106 @@ def data_summary():
         'Max': dataset[numeric_columns].max(),
     }
 
-    # Transformar em DataFrame
+    # Converter para DataFrame e adicionar os tipos de dados
     summary_df = pd.DataFrame(summary_data)
-    summary_df['Tipo de Dados'] = data_types
+    summary_df['Tipo de Dados'] = dataset[selected_columns_to_display].dtypes
 
-    # Arredondar os valores para 4 casas decimais
-    summary_df = summary_df.round(4)
+    # Arredondar valores numéricos para 4 casas decimais e preencher valores ausentes com 0
+    summary_df = summary_df.round(4).fillna(0)
 
-    # Preencher valores ausentes nas colunas numéricas com 0
-    summary_df = summary_df.fillna(0)
-
+    # Exibir a tabela de estatísticas descritivas
     st.write("Estatísticas Descritivas e Tipos de Dados")
     st.dataframe(fix_dataframe_types(summary_df))
-    
-    # **Valores Ausentes**
+
+    # -------------------------------------
+    # 📌 Análise de Valores Ausentes
+    # -------------------------------------
+
     st.subheader("Resumo de Valores Ausentes")
+
+    # Identificar colunas com valores ausentes
     missing_data = dataset[selected_columns_to_display].isnull().sum()
     missing_data = missing_data[missing_data > 0]
+
     if not missing_data.empty:
         st.write("Valores ausentes encontrados:")
         st.dataframe(fix_dataframe_types(missing_data.rename("Total de Valores Ausentes")))
     else:
         st.write("Não há valores ausentes nas variáveis selecionadas.")
 
-    # **Resumo de Outliers**
+    # -------------------------------------
+    # 📌 Análise de Outliers
+    # -------------------------------------
+
     st.subheader("Resumo de Outliers")
+
+    # Selecionar apenas colunas numéricas
     numeric_data = dataset[selected_columns_to_display].select_dtypes(include=['number'])
-    
-    # Obter a lista de colunas já tratadas (se existir)
+
+    # Obter colunas já tratadas
     treated_columns = st.session_state.get('treated_columns', [])
-        
+
+    # Criar lista para armazenar o resumo dos outliers
+    outlier_summary = []
+
     if not numeric_data.empty:
-        outlier_summary = []
         for column in numeric_data.columns:
-            # Se a coluna já foi tratada, pula a análise
-            if column in treated_columns:
+            if column in treated_columns:  # Ignorar colunas já tratadas
                 continue
-                
-            # Análise normal para colunas não tratadas
+
+            # Cálculo dos quartis e do intervalo interquartil (IQR)
             Q1 = numeric_data[column].quantile(0.25)
             Q3 = numeric_data[column].quantile(0.75)
             IQR = Q3 - Q1
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
-    
+
+            # Identificar outliers
             outliers = numeric_data[(numeric_data[column] < lower_bound) | (numeric_data[column] > upper_bound)]
-            if len(outliers) > 0:  # Adiciona apenas se houver outliers
+            if len(outliers) > 0:
                 outlier_summary.append({
                     "Variável": column,
                     "Total de Outliers": len(outliers)
                 })
-    
-        # Verifica se há outliers detectados
+
+        # Exibir o resumo dos outliers encontrados
         if outlier_summary:
             st.dataframe(fix_dataframe_types(pd.DataFrame(outlier_summary)))
         else:
-            st.write("Não há outliers nas variáveis selecionadas.")  # Mensagem quando não há outliers
+            st.write("Não há outliers nas variáveis selecionadas.")
     else:
         st.write("Nenhuma variável numérica para análise de outliers.")
-    # **Boxplot** - Gráfico
+
+    # -------------------------------------
+    # 📌 Gráfico Boxplot das Variáveis Numéricas
+    # -------------------------------------
+
     st.subheader("Boxplot das Variáveis Numéricas")
+
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=numeric_data)
     plt.title('Boxplot das Variáveis Numéricas')
     st.pyplot(plt)
 
-    # **Matriz de Correlação (Heatmap)**
+    # -------------------------------------
+    # 📌 Matriz de Correlação (Heatmap)
+    # -------------------------------------
+
     st.subheader("Matriz de Correlação das Variáveis")
-    # Calcular a correlação
+
+    # Calcular a correlação entre variáveis numéricas
     correlation_matrix = numeric_data.corr()
 
-    # Gerar o heatmap da correlação
+    # Gerar e exibir o heatmap da correlação
     plt.figure(figsize=(8, 6))
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".4f", cbar=True, square=True)
     plt.title('Matriz de Correlação das Variáveis', fontsize=14, fontweight='bold', fontname='Arial')
     st.pyplot(plt)
-    
-    # **Função de Download do PDF**
+
+    # -------------------------------------
+    # 📌 Download do Resumo em PDF
+    # -------------------------------------
+
     pdf_buffer = generate_pdf_resumo(dataset, summary_df, missing_data, outlier_summary)
     st.download_button(
         label="Baixar PDF com o Resumo",
@@ -1666,12 +1874,19 @@ def data_summary():
         mime="application/pdf"
     )
 
-    # Função de Download
+    # -------------------------------------
+    # 📌 Download do Dataset Tratado
+    # -------------------------------------
+
     dataset_to_download = dataset[selected_columns_to_display]
     download_button(dataset_to_download)
 
-    # Navegação
+    # -------------------------------------
+    # 📌 Navegação Entre Etapas
+    # -------------------------------------
+
     col1, col2 = st.columns([1, 1])
+
     with col1:
         if st.button("Voltar"):
             st.session_state.step = 'outlier_detection'
@@ -1682,47 +1897,89 @@ def data_summary():
             st.session_state.step = 'model_selection'
             st.rerun()
 
+
 ##########################################################
-# FUNÇÃO DE MODELOS
+# -------------------------------------
+# 📌 FUNÇÃO PARA PLOTAR MÉTRICAS DE DESEMPENHO DOS MODELOS
+# -------------------------------------
+
+import streamlit as st
+import matplotlib.pyplot as plt
+
 def plot_metrics(metrics_df):
+    """
+    Gera gráficos para visualizar as métricas de desempenho dos modelos, diferenciando entre
+    tarefas de classificação e regressão.
+
+    Parâmetros:
+    - metrics_df: DataFrame contendo as métricas de desempenho dos modelos.
+
+    Retorno:
+    - Exibe os gráficos no Streamlit.
+    """
+
     try:
-        # Inicializa a chave 'metrics' se não estiver no session_state
+        # -------------------------------------
+        # 📌 Inicializar Armazenamento de Métricas no Estado da Sessão
+        # -------------------------------------
+
+        # Se a chave 'metrics' ainda não estiver no session_state, inicializá-la
         if 'metrics' not in st.session_state:
             st.session_state['metrics'] = {}
 
         # Verificar se o DataFrame está vazio
         if metrics_df.empty:
-            st.warning("Nenhum dado para plotar.")
+            st.warning("Nenhum dado para exibir no gráfico.")
             return
 
-        # Armazenar métricas no session_state
+        # Armazenar as métricas no estado da sessão para referência posterior
         for _, row in metrics_df.iterrows():
             model_name = row.name  # Assumindo que o índice contém o nome do modelo
             st.session_state['metrics'][model_name] = row.to_dict()
 
-        # Definir o índice do DataFramex
+        # -------------------------------------
+        # 📌 Configuração do Índice e Identificação do Tipo de Modelo
+        # -------------------------------------
+
+        # Definir a coluna 'Modelo' como índice, se ainda não estiver
         metrics_df.set_index('Modelo', inplace=True)
 
-        # Verificar se as colunas de classificação estão presentes
+        # Listas de métricas típicas para classificação e regressão
         classification_columns = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
         regression_columns = ['MSE', 'MAE', 'R²']
 
+        # -------------------------------------
+        # 📌 Plotagem de Gráficos de Classificação
+        # -------------------------------------
+
         if all(col in metrics_df.columns for col in classification_columns):
-            # Plotar métricas de classificação
+            # Criar a figura do gráfico de barras
             fig, ax = plt.subplots(figsize=(10, 6))
+            
+            # Plotar as métricas de classificação
             metrics_df[classification_columns].plot(kind='bar', ax=ax)
+
+            # Configuração do gráfico
             plt.title('Métricas de Desempenho dos Modelos (Classificação)', fontsize=16)
             plt.ylabel('Valor', fontsize=14)
             plt.xlabel('Modelos', fontsize=14)
             plt.xticks(rotation=45, ha='right', fontsize=12)
-            plt.ylim(0, 1)
+            plt.ylim(0, 1)  # As métricas de classificação geralmente variam entre 0 e 1
             plt.legend(loc='lower right', fontsize=12)
             plt.grid(axis='y', linestyle='--', alpha=0.7)
 
+        # -------------------------------------
+        # 📌 Plotagem de Gráficos de Regressão
+        # -------------------------------------
+
         elif all(col in metrics_df.columns for col in regression_columns):
-            # Plotar métricas de regressão
+            # Criar a figura do gráfico de barras
             fig, ax = plt.subplots(figsize=(10, 6))
+
+            # Plotar as métricas de regressão
             metrics_df[regression_columns].plot(kind='bar', ax=ax)
+
+            # Configuração do gráfico
             plt.title('Métricas de Desempenho dos Modelos (Regressão)', fontsize=16)
             plt.ylabel('Valor', fontsize=14)
             plt.xlabel('Modelos', fontsize=14)
@@ -1732,50 +1989,88 @@ def plot_metrics(metrics_df):
 
         else:
             st.error("O DataFrame não contém métricas válidas para classificação ou regressão.")
-            return
+            return  # Se não há métricas válidas, encerra a função
 
-        # Mostrar o gráfico no Streamlit
+        # -------------------------------------
+        # 📌 Exibir o Gráfico no Streamlit
+        # -------------------------------------
+
         st.pyplot(fig)
 
     except Exception as e:
+        # Tratamento de erros genérico para evitar falhas inesperadas
         st.error(f"Ocorreu um erro ao plotar as métricas: {str(e)}")
-    
+
     finally:
-        plt.clf()  # Limpar a figura para evitar sobreposições
+        # Limpar a figura para evitar sobreposição de gráficos na interface do Streamlit
+        plt.clf()
 
+# -------------------------------------
+# 📌 FUNÇÃO PARA DEFINIR O GRID DE HIPERPARÂMETROS PADRÃO PARA CADA MODELO
+# -------------------------------------
 
-
-# Adicionar os modelos de regressão na função get_default_param_grid
 def get_default_param_grid(model_name):
+    """
+    Retorna um dicionário contendo os hiperparâmetros padrão para cada modelo de Machine Learning.
+
+    Parâmetros:
+    - model_name: Nome do modelo para o qual se deseja obter o conjunto de hiperparâmetros.
+
+    Retorno:
+    - Dicionário com os hiperparâmetros e os respetivos intervalos de valores para otimização.
+    """
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para Support Vector Classification (SVC)
+    # -------------------------------------
     if model_name == "Support Vector Classification (SVC)":
         return {
-            'C': [0.1, 1, 10],
-            'kernel': ['linear', 'rbf'],
-            'gamma': ['scale', 'auto']  # Apenas para kernel 'rbf'
+            'C': [0.1, 1, 10],  # Define a penalização do erro
+            'kernel': ['linear', 'rbf'],  # Tipos de kernel utilizados
+            'gamma': ['scale', 'auto']  # Apenas utilizado quando kernel='rbf'
         }
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para K-Nearest Neighbors (KNN)
+    # -------------------------------------
     elif model_name == "K-Nearest Neighbors (KNN)":
         return {
-            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20
-            'weights': ['uniform', 'distance']
+            'n_neighbors': list(range(1, 21)),  # Testa todos os valores de 1 a 20 para o número de vizinhos
+            'weights': ['uniform', 'distance']  # Define a forma de ponderação das distâncias
         }
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para Random Forest
+    # -------------------------------------
     elif model_name == "Random Forest":
-        # Geração dinâmica de max_depth como range
+        # Geração dinâmica do parâmetro `max_depth`
         max_depth_range = [None] + list(range(5, 21, 5))  # [None, 5, 10, 15, 20]
         return {
-            'max_depth': max_depth_range,
-            'n_estimators': [10, 50, 100]
+            'max_depth': max_depth_range,  # Profundidade máxima da árvore
+            'n_estimators': [10, 50, 100]  # Número de árvores na floresta
         }
+
+    # -------------------------------------
+    # 📌 Configuração do Grid Search para Suporte de Vetores em Regressão (SVR)
+    # -------------------------------------
     elif model_name == "Regressão por Vetores de Suporte (SVR)":
         return {
-            'C': [ 1, 10],
-            'epsilon': [0.1, 0.2],
-            'kernel': ['linear', 'rbf']
+            'C': [1, 10],  # Penalização do erro
+            'epsilon': [0.1, 0.2],  # Margem de tolerância para erro
+            'kernel': ['linear', 'rbf']  # Tipos de kernel utilizados
         }
-    elif model_name in ["Regressão Linear Simples (RLS)"]:
-        return {}  # Regressão Linear geralmente não tem hiperparâmetros ajustáveis
-    else:
-        return {}
 
+    # -------------------------------------
+    # 📌 Configuração para Regressão Linear Simples (RLS)
+    # -------------------------------------
+    elif model_name == "Regressão Linear Simples (RLS)":
+        return {}  # A regressão linear geralmente não requer ajuste de hiperparâmetros
+
+    # -------------------------------------
+    # 📌 Retorno para modelos não especificados
+    # -------------------------------------
+    else:
+        return {}  # Se o modelo não for reconhecido, retorna um dicionário vazio
 
 def configure_manual_params(model_key, param_grid, manual_params):
     """
