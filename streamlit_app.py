@@ -1,175 +1,201 @@
 ########### Bibliotecas Necessárias ###########
 
+# -------------------------------------
+# 📌 Bibliotecas para Interface com Utilizador (Streamlit)
+# -------------------------------------
+import streamlit as st  # Framework para criação de interfaces web interativas
+import streamlit.components.v1 as components  # Permite adicionar componentes HTML/CSS personalizados
 
 # -------------------------------------
-# Bibliotecas do Streamlit
+# 📌 Manipulação e Análise de Dados
 # -------------------------------------
-import streamlit as st
-import streamlit.components.v1 as components
+import pandas as pd  # Manipulação de DataFrames e séries temporais
+import numpy as np  # Operações numéricas e matrizes eficientes
 
 # -------------------------------------
-# Manipulação e Análise de Dados
+# 📌 Visualização de Dados
 # -------------------------------------
-import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt  # Criação de gráficos estáticos
+import seaborn as sns  # Gráficos estatísticos avançados baseados no Matplotlib
+import plotly.express as px  # Gráficos interativos e visualizações dinâmicas
 
 # -------------------------------------
-# Visualização de Dados
+# 📌 Modelos de Machine Learning
 # -------------------------------------
-import matplotlib.pyplot as plt
-import seaborn as sns
-import plotly.express as px
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor  # Modelos baseados em árvores de decisão
+from sklearn.linear_model import LogisticRegression, LinearRegression  # Modelos lineares para classificação e regressão
+from sklearn.svm import SVC, SVR  # Modelos de Support Vector Machine (SVM) para classificação e regressão
+from sklearn.cluster import KMeans, AgglomerativeClustering  # Algoritmos de clustering
+from sklearn.neighbors import KNeighborsClassifier  # Modelo de vizinhos mais próximos (KNN)
+from sklearn import svm, tree, neighbors  # Modelos adicionais do sklearn
 
 # -------------------------------------
-# Modelos de Machine Learning
+# 📌 Seleção de Features (Atributos)
 # -------------------------------------
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.svm import SVC, SVR
-from sklearn.cluster import KMeans, AgglomerativeClustering
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn import svm, tree, neighbors
+from mlxtend.feature_selection import SequentialFeatureSelector  # Seleção sequencial de variáveis para otimizar modelos
 
 # -------------------------------------
-# Seleção de Features
-# -------------------------------------
-from mlxtend.feature_selection import SequentialFeatureSelector
-
-# -------------------------------------
-# Métricas de Avaliação
+# 📌 Métricas de Avaliação
 # -------------------------------------
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, 
-    confusion_matrix, classification_report, roc_auc_score,
-    mean_squared_error, mean_absolute_error, r2_score,
-    silhouette_score, davies_bouldin_score, calinski_harabasz_score
+    accuracy_score, precision_score, recall_score, f1_score,  # Métricas para classificação
+    confusion_matrix, classification_report, roc_auc_score,  # Matriz de confusão e análise ROC
+    mean_squared_error, mean_absolute_error, r2_score,  # Métricas para regressão
+    silhouette_score, davies_bouldin_score, calinski_harabasz_score  # Métricas para clustering
 )
 
 # -------------------------------------
-# Pré-Processamento e Pipeline
+# 📌 Pré-Processamento e Pipeline
 # -------------------------------------
 from sklearn.model_selection import (
-    train_test_split, KFold, LeaveOneOut, cross_val_score, GridSearchCV
+    train_test_split,  # Separação entre dados de treino e teste
+    KFold, LeaveOneOut, cross_val_score,  # Validação cruzada para avaliar modelos
+    GridSearchCV  # Procura de melhores hiperparâmetros usando Grid Search
 )
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, LabelEncoder  # Normalização e codificação de variáveis categóricas
+from sklearn.impute import SimpleImputer  # Tratamento de valores ausentes
 
 # -------------------------------------
-# Utilitários
+# 📌 Utilitários Diversos
 # -------------------------------------
-import os
-import joblib
-import pickle
-import io
-from io import BytesIO
-import tempfile
-from datetime import datetime
-from decimal import Decimal
-from fractions import Fraction
-from scipy.sparse import csr_matrix
-import scipy
-import time
-import json
-import requests
-import unidecode
+import os  # Operações no sistema de arquivos (criação de pastas, leitura de arquivos)
+import joblib  # Guardar e carregar  modelos treinados
+import pickle  # Serialização e desserialização de objetos Python
+import json  # Manipulação de arquivos JSON
+import requests  # Requisições HTTP para acesso a APIs externas
+import unidecode  # Remoção de acentos e normalização de caracteres especiais
 
 # -------------------------------------
-# Bibliotecas Adicionais para Geração de Relatórios
+# 📌 Manipulação de Arquivos e Dados Binários
 # -------------------------------------
-from fpdf import FPDF
-import io
-import tempfile
-import requests
-from datetime import datetime
-import matplotlib.pyplot as plt
+from io import BytesIO  # Manipulação de streams binários para arquivos em memória
+import tempfile  # Criação de arquivos e diretórios temporários
 
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
-from reportlab.lib import colors
-from reportlab.lib.units import inch
+# -------------------------------------
+# 📌 Manipulação de Datas e Cálculos Matemáticos
+# -------------------------------------
+from datetime import datetime  # Manipulação de datas e horas
+from decimal import Decimal  # Precisão extra em cálculos decimais
+from fractions import Fraction  # Trabalha com frações matemáticas exatas
+from scipy.sparse import csr_matrix  # Representação eficiente de matrizes esparsas
+import scipy  # Biblioteca científica para estatísticas, álgebra linear e otimização
+import time  # Medição do tempo de execução de processos
+
+# -------------------------------------
+# 📌 Bibliotecas para Geração de Relatórios
+# -------------------------------------
+from fpdf import FPDF  # Criação de documentos PDF programaticamente
+from reportlab.lib.pagesizes import letter  # Definição do tamanho da página nos relatórios
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle  # Estilos para formatação de texto
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image  # Estruturação de documentos PDF
+from reportlab.lib import colors  # Definição de cores em relatórios
+from reportlab.lib.units import inch  # Unidades de medida para layout de documentos
+
 
 
 ##############################################
+# -------------------------------------
+# 📌 Função JavaScript para voltar ao topo da página
+# -------------------------------------
 
-# Função JavaScript para a página voltar ao topo
+# Script JavaScript que permite rolar automaticamente para o topo da página
 scroll_to_top_js = """
 <script>
     function scrollToTop() {
-        window.scrollTo(0, 0);
+        window.scrollTo(0, 0);  // Move a página para o topo (coordenadas 0,0)
     }
 </script>
 """
 
-# Adiciona o JavaScript na página
-components.html(scroll_to_top_js, height=0, width=0)  # Define altura e largura para manter invisível
+# Insere o JavaScript na página com Streamlit
+# Definição de height=0 e width=0 para evitar que o código ocupe espaço visível na interface
+components.html(scroll_to_top_js, height=0, width=0)  
 
-# Ajuste das opções de exibição do Pandas Styler
-pd.set_option("styler.render.max_elements", 2000000)  # Ajuste conforme necessário
-pd.set_option("display.max_rows", None)
-pd.set_option("display.max_columns", None)
+# -------------------------------------
+# 📌 Ajustes de Exibição do Pandas Styler
+# -------------------------------------
+
+# Define o número máximo de elementos a serem renderizados no Styler do Pandas
+pd.set_option("styler.render.max_elements", 2000000)  # Ajustar se necessário para grandes DataFrames
+
+# Configura a exibição de todas as linhas e colunas de um DataFrame
+pd.set_option("display.max_rows", None)  # Permite visualizar todas as linhas sem truncamento
+pd.set_option("display.max_columns", None)  # Permite visualizar todas as colunas sem truncamento
+
 
 ##############################################
 def fix_dataframe_types(df):
-    """Corrigir tipos de dados em um DataFrame para compatibilidade com PyArrow"""
-    # Verificar se é um objeto Styler e extrair o DataFrame
-    if hasattr(df, 'data'):  # Styler objects have a .data attribute
+    """Corrigir tipos de dados num DataFrame para compatibilidade com PyArrow"""
+
+    # Verificar se o objeto é um Styler e extrair o DataFrame
+    if hasattr(df, 'data'):  # Objetos Styler possuem um atributo .data
         df = df.data
-    elif hasattr(df, 'render') and not hasattr(df, 'copy'):  # Another way to detect Styler
+    elif hasattr(df, 'render') and not hasattr(df, 'copy'):  # Outra forma de identificar um Styler
         # Para versões mais recentes do pandas
         if hasattr(df, '_data'):
             df = df._data
-        # Para versões bem recentes do pandas onde pode ser diferente
+        # Para versões ainda mais recentes do pandas, onde a estrutura pode ser diferente
         elif hasattr(df, 'data'):
             df = df.data
-        # Se ainda não conseguiu extrair o DataFrame
+        # Se ainda não for possível extrair o DataFrame
         else:
-            # Tentar converter para dict primeiro e depois para DataFrame
+            # Tentar converter primeiro para dicionário e depois para DataFrame
             try:
                 df = pd.DataFrame(df.to_dict())
             except:
-                # Se tudo falhar, retornar um DataFrame vazio
+                # Se falhar, retornar um DataFrame vazio
                 return pd.DataFrame()
     
-    # Se não for DataFrame, retornar vazio
+    # Se o objeto final não for um DataFrame, retornar um DataFrame vazio
     if not isinstance(df, pd.DataFrame):
         return pd.DataFrame()
         
-    # Criar uma cópia para não modificar o original
+    # Criar uma cópia do DataFrame para evitar modificar o original
     df_fixed = df.copy()
     
-    # Converter colunas problemáticas
+    # Percorrer todas as colunas para corrigir tipos de dados problemáticos
     for col in df_fixed.columns:
-        # Converter Int64 para int64 padrão
+        # Converter colunas do tipo Int64 para int64 padrão (evita problemas de compatibilidade)
         if hasattr(df_fixed[col], 'dtype') and str(df_fixed[col].dtype) == 'Int64':
-            df_fixed[col] = df_fixed[col].fillna(-1).astype('int64')
+            df_fixed[col] = df_fixed[col].fillna(-1).astype('int64')  # Substituir valores nulos por -1 antes da conversão
         
-        # Converter objetos complexos para string
+        # Converter colunas do tipo objeto (strings e dados complexos) para string
         elif df_fixed[col].dtype == 'object':
             try:
-                # Tentar converter para string
+                # Tentar converter diretamente para string
                 df_fixed[col] = df_fixed[col].astype(str)
             except:
-                # Se falhar, aplicar uma conversão manual
+                # Se falhar, aplicar uma conversão manual, garantindo que valores None sejam tratados
                 df_fixed[col] = df_fixed[col].apply(lambda x: str(x) if x is not None else "")
     
+    # Retornar o DataFrame corrigido
     return df_fixed
 
+
 ##############################################
-# Função para configurar a sidebar fixa
+# -------------------------------------
+# 📌 Função para Configurar a Barra Lateral
+# -------------------------------------
+
 def configure_sidebar():
-    with st.sidebar:
+    """Configura a barra lateral com o logótipo da instituição e informações sobre a plataforma."""
+    
+    with st.sidebar:  # Define que os elementos serão adicionados na barra lateral
         st.image(
-            "https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg",
-            width=80,  # Define o tamanho da imagem diretamente
-            caption="Logótipo da Escola"
+            "https://www.ipleiria.pt/normasgraficas/wp-content/uploads/sites/80/2017/09/estg_v-01.jpg",  # URL da imagem
+            width=80,  # Define o tamanho da imagem (largura em pixels)
+            caption="Logótipo da Escola"  # Texto exibido abaixo da imagem
         )
+        
+        # Exibe o nome da plataforma em formato HTML para maior personalização
         st.markdown("<p>MLCase - Plataforma de Machine Learning</p>", unsafe_allow_html=True)
+        
+        # Exibe o nome da autora com destaque em negrito usando HTML
         st.markdown("<p><b>Autora:</b> Bruna Sousa</p>", unsafe_allow_html=True)
 
-
-# Configurar a sidebar
+# Chamada da função para configurar a barra lateral
 configure_sidebar()
+
 
 ##############################################
 import matplotlib
@@ -179,404 +205,645 @@ plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
 ##############################################
 
-# FUNÇÃO DE UPLOAD 
+# -------------------------------------
+# 📌 FUNÇÃO DE UPLOAD DE FICHEIROS
+# -------------------------------------
 
-# Função para inicializar variáveis de estado
+# Função para inicializar variáveis de estado na aplicação
 def initialize_state():
-    st.session_state.step = 'data_preview'
-    st.session_state.selected_columns = []
-    st.session_state.numeric_types = {}
-    st.session_state.variable_types = {}
-    st.session_state.treatment_state = {}
-    st.session_state.all_treated = False
+    """Inicializa variáveis de estado utilizadas na aplicação para gerir diferentes etapas do processo."""
+    st.session_state.step = 'data_preview'  # Define o estado inicial como pré-visualização dos dados
+    st.session_state.selected_columns = []  # Lista para armazenar colunas selecionadas pelo utilizador
+    st.session_state.numeric_types = {}  # Dicionário para armazenar tipos numéricos das variáveis
+    st.session_state.variable_types = {}  # Dicionário para armazenar os tipos das variáveis
+    st.session_state.treatment_state = {}  # Dicionário para armazenar o estado do tratamento dos dados
+    st.session_state.all_treated = False  # Flag para indicar se todos os dados foram tratados
 
-# Função auxiliar para escolher o delimitador para ficheiros CSV
+# -------------------------------------
+# 📌 Função auxiliar para escolher o delimitador de ficheiros CSV
+# -------------------------------------
+
 def choose_delimiter():
-    # Lista de delimitadores possíveis, incluindo a opção em branco
-    delimiters = [",", ";", "\t", "|", "Outro"]  # Adiciona a opção "Outro"
+    """Permite ao utilizador escolher um delimitador para ficheiros CSV carregados."""
     
-    # Cria o selectbox para o utilizador escolher o delimitador
+    # Lista de delimitadores comuns, incluindo a opção personalizada
+    delimiters = [",", ";", "\t", "|", "Outro"]
+    
+    # Cria um seletor na barra lateral para escolha do delimitador
     delimiter = st.sidebar.selectbox("Escolha o delimitador para CSV", delimiters, index=0)
     
-    # Se o utilizador escolher a opção "Outro", permite que ele insira um delimitador personalizado
+    # Se o utilizador escolher a opção "Outro", permite inserir um delimitador personalizado
     if delimiter == "Outro":
         delimiter = st.sidebar.text_input("Digite o delimitador personalizado:")
     
     return delimiter
 
+# -------------------------------------
+# 📌 Função para a etapa de upload do ficheiro
+# -------------------------------------
 
-# Função para a etapa de upload do arquivo
 def upload_file():
-    st.title("MLCase - Plataforma de Machine Learning")
+    """Permite ao utilizador carregar um ficheiro de dados para a plataforma."""
+    
+    st.title("MLCase - Plataforma de Machine Learning")  # Título principal da aplicação
 
-    # Seleção de tipo de arquivo e definição de delimitador padrão
+    # Seleção do tipo de ficheiro a ser carregado
     file_type = st.sidebar.selectbox("Selecione o tipo de arquivo", ["CSV", "Excel", "JSON"])
-    delimiter = ","  # Padrão para CSV
+    delimiter = ","  # Define o delimitador padrão para CSV
 
-    # Upload de arquivo e escolha do delimitador, se CSV
+    # Processo de upload conforme o tipo de ficheiro selecionado
     if file_type == "CSV":
-        delimiter = choose_delimiter()
-        file = st.sidebar.file_uploader("Carregar arquivo", type=["csv"])
+        delimiter = choose_delimiter()  # Permite selecionar um delimitador para o CSV
+        file = st.sidebar.file_uploader("Carregar arquivo", type=["csv"])  # Botão de upload
     elif file_type == "Excel":
-        file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx", "xls"])
+        file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx", "xls"])  # Upload de ficheiro Excel
     elif file_type == "JSON":
-        file = st.sidebar.file_uploader("Carregar arquivo", type=["json"])
+        file = st.sidebar.file_uploader("Carregar arquivo", type=["json"])  # Upload de ficheiro JSON
 
-    # Carrega o arquivo, se fornecido, e configura o estado
+    # Se um ficheiro for carregado, tenta processá-lo
     if file is not None:
         try:
+            # Chama a função de carregamento de dados e inicializa as variáveis de estado
             st.session_state.data = load_data(file_type, file, delimiter)
             initialize_state()
-            st.sidebar.success(f"Conjunto de dados {file_type} carregado com sucesso!")
+            st.sidebar.success(f"Conjunto de dados {file_type} carregado com sucesso!")  # Mensagem de sucesso
 
-            # Botão para avançar para a pré-visualização dos dados
+            # Botão para avançar para a próxima etapa (pré-visualização dos dados)
             if st.sidebar.button("Dados Carregados"):
-                st.session_state.step = 'data_preview'
-                st.stop()  # Atualiza a página para refletir o novo estado
+                st.session_state.step = 'data_preview'  # Atualiza o estado para a pré-visualização
+                st.stop()  # Para a execução para refletir as mudanças
 
         except Exception as e:
-            st.sidebar.error(f"Erro ao carregar o arquivo: {e}")
+            st.sidebar.error(f"Erro ao carregar o arquivo: {e}")  # Exibe mensagem de erro caso algo corra mal
 
-# Função para carregar dados com cache
-@st.cache_data
+# -------------------------------------
+# 📌 Função para carregar dados com cache (evita recarregamento desnecessário)
+# -------------------------------------
+
+@st.cache_data  # Usa cache para evitar recarregar os dados várias vezes
 def load_data(file_type, file, delimiter):
+    """Carrega um ficheiro de dados conforme o tipo selecionado pelo utilizador."""
+    
     if file_type == "CSV":
-        return pd.read_csv(file, delimiter=delimiter)
+        return pd.read_csv(file, delimiter=delimiter)  # Carrega dados CSV com o delimitador escolhido
     elif file_type == "Excel":
-        return pd.read_excel(file)
+        return pd.read_excel(file)  # Carrega ficheiro Excel
     elif file_type == "JSON":
-        return pd.read_json(file)
+        return pd.read_json(file)  # Carrega ficheiro JSON
 
 ##############################################
-# FUNÇÃO DE SELEÇÃO DE COLUNAS 
+# -------------------------------------
+# 📌 FUNÇÃO DE SELEÇÃO DE COLUNAS
+# -------------------------------------
 
-# Função para visualização de dados e seleção de colunas e tipos de dados
+# Função para pré-visualizar os dados e permitir a seleção de colunas e tipos de variáveis
 def data_preview():
-    st.subheader("Pré-visualização dos dados")
-    st.dataframe(fix_dataframe_types(st.session_state.data.head()))
+    """Permite visualizar os dados carregados, selecionar colunas e definir os seus tipos."""
 
-    # Seleção de colunas
+    # Exibir uma pré-visualização dos primeiros registos do dataset (com correção de tipos)
+    st.subheader("Pré-visualização dos dados")
+    st.dataframe(fix_dataframe_types(st.session_state.data.head()))  # Corrige os tipos antes da exibição
+
+    # Obter a lista de colunas do dataset
     columns = st.session_state.data.columns.tolist()
-    selected_columns = st.multiselect("Colunas", columns, columns)
-    st.session_state.selected_columns = selected_columns
+
+    # Criar uma caixa de seleção múltipla para escolher quais colunas utilizar
+    selected_columns = st.multiselect("Colunas", columns, columns)  # Por defeito, todas as colunas são selecionadas
+    st.session_state.selected_columns = selected_columns  # Guardar as colunas selecionadas no estado global
 
     # Preservar transformações no estado global
     if 'filtered_data' not in st.session_state:
-        st.session_state.filtered_data = st.session_state.data.copy()
+        st.session_state.filtered_data = st.session_state.data.copy()  # Criar uma cópia inicial dos dados
     else:
-        # Filtra apenas colunas selecionadas sem perder transformações
+        # Atualizar os dados filtrados apenas com as colunas selecionadas, mantendo transformações já aplicadas
         st.session_state.filtered_data = st.session_state.data[selected_columns]
 
-
+    # Se houver colunas selecionadas, permitir a identificação dos tipos de variáveis
     if selected_columns:
         st.subheader("Identificar tipos de variáveis")
+
+        # Inicializar dicionário para armazenar os tipos de variáveis, caso ainda não exista
         if 'variable_types' not in st.session_state:
             st.session_state.variable_types = {}
-        variable_types = st.session_state.variable_types
-        st.session_state.numeric_types = {}
 
-        # Definir tipos de variáveis e configurar numéricos
+        variable_types = st.session_state.variable_types
+        st.session_state.numeric_types = {}  # Dicionário para armazenar os tipos numéricos
+
+        # Percorrer cada coluna selecionada para definir os tipos de variáveis
         for col in selected_columns:
+            # Criar um seletor para definir se a variável é Numérica, Categórica ou Data
             var_type = st.selectbox(
                 f"Tipo de variável para {col}",
                 ["Numérica", "Categórica", "Data"],
                 index=0 if pd.api.types.is_numeric_dtype(st.session_state.filtered_data[col]) else 1,
-                key=f"var_{col}"
+                key=f"var_{col}"  # Cada seletor tem uma chave única para evitar conflitos
             )
-            variable_types[col] = var_type
+            variable_types[col] = var_type  # Guardar o tipo selecionado
 
-            # Configurações de tipos para variáveis numéricas
+            # Se a variável for numérica, permitir configurar o tipo específico
             if var_type == "Numérica":
                 num_type = st.selectbox(
                     f"Tipo numérico para {col}",
                     ["Int", "Float", "Complex", "Dec", "Frac", "Bool"],
                     index=0 if pd.api.types.is_integer_dtype(st.session_state.filtered_data[col]) else 1,
-                    key=f"num_{col}"
+                    key=f"num_{col}"  # Chave única para o seletor de tipo numérico
                 )
-                st.session_state.numeric_types[col] = num_type
+                st.session_state.numeric_types[col] = num_type  # Guardar o tipo numérico no estado global
 
-                # Discretização - verifica antes se já foi aplicada
+                # Discretização da variável (conversão para categorias)
+                # Verifica primeiro se a coluna já foi discretizada
                 if col not in st.session_state.filtered_data.columns or pd.api.types.is_numeric_dtype(st.session_state.filtered_data[col]):
                     if st.checkbox(f"Discretizar {col}?", key=f"discretize_{col}"):
-                        discretize_column(col)
+                        discretize_column(col)  # Aplica a função de discretização
                 else:
-                    st.write(f"Coluna {col} já foi discretizada.")
+                    st.write(f"Coluna {col} já foi discretizada.")  # Informação para o utilizador
 
+        # Atualizar o estado global com os tipos de variáveis definidos
         st.session_state.variable_types = variable_types
 
-    # Atualizar estado global após processamento
+    # Criar uma cópia dos dados filtrados para manter alterações recentes
     st.session_state.filtered_data = st.session_state.filtered_data.copy()
 
-    # Navegação entre etapas
-    col1, col2 = st.columns(2)
+    # -------------------------------------
+    # 📌 Navegação entre etapas
+    # -------------------------------------
 
+    col1, col2 = st.columns(2)  # Criar duas colunas para os botões "Voltar" e "Próxima etapa"
+
+    # Botão para voltar à etapa anterior
     with col1:
         if st.button("Voltar"):
-            # Apagar estados salvos explicitamente
+            # Apagar estados salvos explicitamente para evitar conflitos
             keys_to_reset = [
                 'filtered_data', 'selected_columns', 'variable_types',
                 'numeric_types', 'treatment_state'
             ]
             for key in keys_to_reset:
-                st.session_state.pop(key, None)  # Remove se existir
+                st.session_state.pop(key, None)  # Remove do estado se existir
 
-            # Resetar para o dataset original
+            # Restaurar os dados originais
             st.session_state.data = st.session_state.data.copy()
 
-            # Voltar para a etapa anterior
+            # Voltar para a etapa de upload do ficheiro
             st.session_state.step = 'file_upload'
-            st.rerun()
+            st.rerun()  # Recarregar a aplicação para refletir as mudanças
 
+    # Botão para avançar para a próxima etapa
     with col2:
         if st.button("Próxima etapa"):
-            apply_numeric_types()
-            st.session_state.step = 'missing_values'
-            st.rerun()
+            apply_numeric_types()  # Aplicar os tipos numéricos definidos pelo utilizador
+            st.session_state.step = 'missing_values'  # Atualizar o estado para a etapa seguinte
+            st.rerun()  # Recarregar a aplicação para refletir as alterações
 
 
-# Função para aplicar tipos numéricos às colunas filtradas
+# -------------------------------------
+# 📌 Função para Aplicar Tipos Numéricos às Colunas Filtradas
+# -------------------------------------
+
 def apply_numeric_types():
+    """Aplica os tipos numéricos definidos pelo utilizador às colunas filtradas no dataset."""
+    
+    # Percorre todas as colunas que têm tipos numéricos definidos pelo utilizador
     for col, num_type in st.session_state.numeric_types.items():
+        # Verifica se a coluna ainda existe no conjunto de dados filtrado
         if col in st.session_state.filtered_data.columns:
+            # Converte a coluna para o tipo numérico selecionado
             st.session_state.filtered_data[col] = convert_numeric_type(st.session_state.filtered_data[col], num_type)
 
-# Conversão de tipos de dados numéricos
+# -------------------------------------
+# 📌 Função para Conversão de Tipos de Dados Numéricos
+# -------------------------------------
+
 def convert_numeric_type(series, num_type):
+    """
+    Converte uma série de dados para o tipo numérico especificado.
+    
+    Parâmetros:
+    - series: pd.Series -> Coluna do DataFrame a ser convertida.
+    - num_type: str -> Tipo numérico desejado ("Int", "Float", "Complex", "Dec", "Frac", "Bool", "Date", "Duration").
+
+    Retorna:
+    - pd.Series convertida para o tipo especificado ou a mesma série original caso ocorra um erro.
+    """
+    
     try:
+        # Conversão para número inteiro (Int64)
         if num_type == "Int":
-            return pd.to_numeric(series, errors='coerce').astype('Int64')
+            return pd.to_numeric(series, errors='coerce').astype('Int64')  # Mantém valores nulos compatíveis com Pandas
+
+        # Conversão para número decimal (Float)
         elif num_type == "Float":
             return pd.to_numeric(series, errors='coerce').astype(float)
+
+        # Conversão para número complexo
         elif num_type == "Complex":
             return pd.to_numeric(series, errors='coerce').apply(lambda x: complex(x) if pd.notnull(x) else np.nan)
+
+        # Conversão para Decimal (melhor precisão para cálculos financeiros)
         elif num_type == "Dec":
             return series.apply(lambda x: Decimal(x) if pd.notnull(x) else np.nan)
+
+        # Conversão para Fração (representação matemática exata)
         elif num_type == "Frac":
             return series.apply(lambda x: Fraction(x) if pd.notnull(x) else np.nan)
+
+        # Conversão para Booleano (True/False)
         elif num_type == "Bool":
             return series.apply(lambda x: str(x).strip().lower() in ['true', '1'])
+
+        # Conversão para Data/Hora
         elif num_type == "Date":
             return pd.to_datetime(series, errors='coerce')
+
+        # Conversão para Duração/Intervalo de Tempo
         elif num_type == "Duration":
             return pd.to_timedelta(series, errors='coerce')
+
+        # Se o tipo especificado não estiver listado, retorna a série original sem alterações
         else:
             return series
+
     except Exception as e:
+        # Exibe um erro no Streamlit caso ocorra um problema na conversão
         st.error(f"Erro ao converter coluna {series.name} para tipo {num_type}: {e}")
 
-# Função para discretizar uma coluna numérica
+
+# -------------------------------------
+# 📌 Função para Discretizar uma Coluna Numérica
+# -------------------------------------
+
 def discretize_column(col):
-    # Botão de ajuda
+    """Permite ao utilizador discretizar uma coluna numérica, transformando-a em categorias definidas manualmente."""
+
+    # -------------------------------------
+    # 📌 Seção de Ajuda - Explicação sobre Discretização
+    # -------------------------------------
+    
+    # Explicação interativa sobre como definir bins (intervalos) e labels (categorias)
     with st.expander("Como preencher os bins e labels?"):
         st.write("**Bins:** Intervalos numéricos para discretização.")
         st.write("**Labels:** Nomeiam os intervalos.")
         st.write("**Exemplo:**")
-        st.write("- Bins: -2,1,2,6,inf")
-        st.write("- Labels: Baixo, Médio, Alto, Muito Alto")
+        st.write("- **Bins:** -2,1,2,6,inf")
+        st.write("- **Labels:** Baixo, Médio, Alto, Muito Alto")
 
-    # Diagnóstico antes de confirmar
+    # -------------------------------------
+    # 📌 Diagnóstico Inicial Antes da Discretização
+    # -------------------------------------
+
     st.write("### Diagnóstico antes da discretização:")
-    st.write(f"- **Mínimo:** {st.session_state.filtered_data[col].min()}")
-    st.write(f"- **Máximo:** {st.session_state.filtered_data[col].max()}")
-    st.write(f"- **Média:** {st.session_state.filtered_data[col].mean():.2f}")
-    st.write(f"- **Mediana:** {st.session_state.filtered_data[col].median():.2f}")
-    st.write(f"- **Valores ausentes antes:** {st.session_state.filtered_data[col].isna().sum()}")
+    st.write(f"- **Mínimo:** {st.session_state.filtered_data[col].min()}")  # Valor mínimo da coluna
+    st.write(f"- **Máximo:** {st.session_state.filtered_data[col].max()}")  # Valor máximo da coluna
+    st.write(f"- **Média:** {st.session_state.filtered_data[col].mean():.2f}")  # Média da coluna
+    st.write(f"- **Mediana:** {st.session_state.filtered_data[col].median():.2f}")  # Mediana da coluna
+    st.write(f"- **Valores ausentes antes:** {st.session_state.filtered_data[col].isna().sum()}")  # Contagem de valores nulos
 
-    # Pré-preencher com exemplos
+    # -------------------------------------
+    # 📌 Entrada de Dados do Utilizador (Bins e Labels)
+    # -------------------------------------
+
+    # Caixa de texto para o utilizador inserir os bins (intervalos numéricos)
     bins_input = st.text_input(
         f"Digite os bins para {col} (separados por vírgulas)",
         value="-2,1,2,6,inf", key=f"bins_{col}"
     )
+
+    # Caixa de texto para o utilizador inserir os labels (nomes das categorias correspondentes aos bins)
     labels_input = st.text_input(
         f"Digite os labels para {col} (separados por vírgulas)",
         value="Baixo,Médio,Alto,Muito Alto", key=f"labels_{col}"
     )
 
-    # Botão para confirmar discretização
+    # -------------------------------------
+    # 📌 Aplicação da Discretização Após Confirmação
+    # -------------------------------------
+
+    # Se o utilizador clicar no botão, iniciar a conversão
     if st.button(f"Confirmar Discretização para {col}", key=f"confirm_{col}"):
+
+        # Verificar se o utilizador preencheu os bins e labels corretamente
         if bins_input and labels_input:
             try:
-                # Converter inputs
+                # Converter a string de bins para uma lista de valores numéricos (float)
                 bins = list(map(float, bins_input.split(',')))
+
+                # Converter a string de labels para uma lista de nomes de categorias
                 labels = labels_input.split(',')
 
-                # Validar bins e labels
+                # -------------------------------------
+                # 📌 Validação de Dados Antes da Conversão
+                # -------------------------------------
+
+                # O número de labels deve ser igual ao número de bins menos um
                 if len(labels) != len(bins) - 1:
                     st.error(f"O número de labels deve ser igual ao número de bins menos um para a coluna {col}.")
+
                 else:
-                    # Garantir tipo float
+                    # Converter a coluna para tipo numérico para evitar erros
                     st.session_state.filtered_data[col] = pd.to_numeric(
                         st.session_state.filtered_data[col], errors='coerce'
                     )
 
-                    # Preencher valores faltantes com a mediana
+                    # Preencher valores ausentes com a mediana da coluna
                     median_value = st.session_state.filtered_data[col].median()
                     st.session_state.filtered_data[col].fillna(median_value, inplace=True)
 
-                    # Diagnóstico após preenchimento
+                    # Diagnóstico após preenchimento de valores ausentes
                     st.write(f"Valores ausentes após preenchimento: {st.session_state.filtered_data[col].isna().sum()}")
 
-                    # Discretizar
+                    # -------------------------------------
+                    # 📌 Aplicação da Discretização
+                    # -------------------------------------
+
+                    # Criar categorias com base nos bins e labels definidos pelo utilizador
                     categorized = pd.cut(
-                        st.session_state.filtered_data[col],
-                        bins=bins,
-                        labels=labels,
-                        include_lowest=True
+                        st.session_state.filtered_data[col],  # Coluna de dados a ser discretizada
+                        bins=bins,  # Intervalos definidos
+                        labels=labels,  # Nomes das categorias correspondentes
+                        include_lowest=True  # Inclui o menor valor nos intervalos
                     )
 
-                    # Garantir categórico e adicionar categoria para valores fora do intervalo
+                    # Converter para tipo categórico
                     categorized = categorized.astype('category')
-                    categorized = categorized.cat.add_categories(["Fora do Intervalo"])
-                    categorized = categorized.fillna("Fora do Intervalo")
 
-                    # Salvar no estado global e garantir consistência
+                    # Adicionar uma categoria extra para valores fora do intervalo definido
+                    categorized = categorized.cat.add_categories(["Fora do Intervalo"])
+                    categorized = categorized.fillna("Fora do Intervalo")  # Substituir valores não categorizados
+
+                    # -------------------------------------
+                    # 📌 Atualização do Estado Global e Diagnóstico Final
+                    # -------------------------------------
+
+                    # Salvar a coluna discretizada no dataset filtrado
                     st.session_state.filtered_data[col] = categorized
+
+                    # Criar uma nova cópia do dataset para garantir a consistência dos dados
                     st.session_state.filtered_data = st.session_state.filtered_data.copy()
 
-                    # Diagnóstico após salvar
+                    # Mensagem de sucesso
                     st.success(f"Coluna {col} discretizada com sucesso!")
+
+                    # Exibir o tipo de dados final da coluna
                     st.write(st.session_state.filtered_data[col].dtype)
+
+                    # Exibir as categorias únicas geradas
                     st.write(st.session_state.filtered_data[col].unique())
+
+                    # Exibir uma pré-visualização dos dados após a discretização
                     st.write("Pré-visualização dos dados após discretização:")
                     st.dataframe(fix_dataframe_types(st.session_state.filtered_data.head()))
 
             except ValueError as e:
+                # Mensagem de erro caso a conversão falhe
                 st.error(f"Erro ao discretizar {col}: {e}")
 
 
-##############################################
-# FUNÇÃO DE TRATAMENTO DE VALORES OMISSOS
 
-# Função para DataFrame com destaque para valores ausentes
+##############################################
+# -------------------------------------
+# 📌 FUNÇÃO DE TRATAMENTO DE VALORES OMISSOS (MISSING VALUES)
+# -------------------------------------
+
+# -------------------------------------
+# 📌 Função para destacar valores ausentes no DataFrame
+# -------------------------------------
+
 def highlight_missing():
+    """Aplica um estilo ao DataFrame, destacando células com valores ausentes em amarelo."""
+
+    # Função interna que aplica a cor amarela às células com valores nulos (NaN)
     def highlight_na(s):
         return ['background-color: yellow' if pd.isnull(v) else '' for v in s]
+
+    # Aplica o estilo ao DataFrame filtrado e retorna o objeto Styler
     return st.session_state.filtered_data.style.apply(highlight_na, subset=st.session_state.filtered_data.columns)
 
-# Função para formatar valores na tabela
-def format_table():
-    formatted_df = st.session_state.filtered_data.copy()
-    for col in formatted_df.columns:
-        if pd.api.types.is_numeric_dtype(formatted_df[col]):
-            formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
-    return formatted_df
+# -------------------------------------
+# 📌 Função para formatar valores na tabela
+# -------------------------------------
 
-# Função para mostrar a pré-visualização com tipos de variáveis
+def format_table():
+    """Formata os valores do DataFrame para exibição, ajustando casas decimais e representações de NaN."""
+    
+    # Criar uma cópia do DataFrame para evitar modificar os dados originais
+    formatted_df = st.session_state.filtered_data.copy()
+
+    # Iterar sobre todas as colunas do DataFrame
+    for col in formatted_df.columns:
+        # Verificar se a coluna contém valores numéricos
+        if pd.api.types.is_numeric_dtype(formatted_df[col]):
+            # Formatar os valores numéricos para exibição com 2 casas decimais
+            formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
+
+    return formatted_df  # Retorna o DataFrame formatado
+
+# -------------------------------------
+# 📌 Função para exibir a pré-visualização dos dados com tipos de variáveis
+# -------------------------------------
+
 def show_preview_with_types(variable_types):
+    """Exibe os dados com uma pré-visualização dos tipos de variáveis identificados."""
+
+    # Título da seção
     st.subheader("Pré-visualização dos dados com tipos de variáveis")
+
+    # Exibir os tipos de variáveis definidos pelo utilizador
     st.write("Tipos de variáveis:")
     st.write(variable_types)
-    
-    # Usa o filtered_data diretamente
+
+    # Formatar os dados antes da exibição
     formatted_df = format_table()
+
+    # Aplicar destaque para valores ausentes e corrigir tipos de dados antes de exibir
     st.dataframe(fix_dataframe_types(highlight_missing(formatted_df)))
 
-# Função para aplicar tratamento de valores ausentes
+
+# -------------------------------------
+# 📌 Função para Aplicar Tratamento de Valores Ausentes
+# -------------------------------------
+
 def apply_missing_value_treatment(column, method, constant_value=None):
-    # Usa diretamente o filtered_data do estado global
+    """Aplica um tratamento específico para valores ausentes numa coluna selecionada do dataset."""
+
+    # Usa diretamente os dados filtrados armazenados no estado global
     data = st.session_state.filtered_data
-    
+
+    # Verifica se a coluna é numérica
     if pd.api.types.is_numeric_dtype(data[column]):
+        # Substituir valores ausentes pela média da coluna
         if method == "Média":
             data[column].fillna(data[column].mean(), inplace=True)
+
+        # Substituir valores ausentes pela mediana da coluna
         elif method == "Mediana":
             data[column].fillna(data[column].median(), inplace=True)
+
+        # Substituir valores ausentes pela moda (valor mais frequente) da coluna
         elif method == "Moda":
             data[column].fillna(data[column].mode().iloc[0], inplace=True)
+
+        # Excluir linhas onde há valores ausentes nesta coluna
         elif method == "Excluir":
             data.dropna(subset=[column], inplace=True)
+
+        # Substituir por um valor constante definido pelo utilizador
         elif method == "Valor constante" and constant_value is not None:
             data[column].fillna(constant_value, inplace=True)
+
+    # Se a coluna for categórica (texto, categorias, etc.)
     else:
+        # Substituir valores ausentes pela moda (valor mais frequente)
         if method == "Substituir por moda":
             data[column].fillna(data[column].mode().iloc[0], inplace=True)
+
+        # Substituir valores ausentes por um valor fixo definido pelo utilizador
         elif method == "Substituir por valor constante" and constant_value is not None:
             data[column].fillna(constant_value, inplace=True)
+
+        # Não faz nada (mantém os valores ausentes)
         elif method == "Manter valores ausentes":
-            pass  # Não faz nada
+            pass  
+
+        # Excluir linhas com valores ausentes nesta coluna
         elif method == "Excluir":
             data.dropna(subset=[column], inplace=True)
 
     # Atualiza os dados processados no estado global
     st.session_state.filtered_data = data
 
+# -------------------------------------
+# 📌 Função para Selecionar Automaticamente o Método de Tratamento de Valores Ausentes
+# -------------------------------------
+
 def auto_select_method(column_name):
-    # Usa diretamente o filtered_data
+    """Seleciona automaticamente o melhor método para tratar valores ausentes numa coluna."""
+
+    # Obtém a coluna a partir dos dados filtrados
     column = st.session_state.filtered_data[column_name]
+
+    # Calcula a percentagem de valores ausentes na coluna
     missing_percentage = column.isnull().sum() / len(column)
 
     # Para colunas numéricas
     if pd.api.types.is_numeric_dtype(column):
         if missing_percentage > 0.5:
-            return "Excluir"
+            return "Excluir"  # Se mais de 50% dos valores estão ausentes, sugere excluir a coluna
         else:
-            return "Substituir por Mediana"
-    # Para colunas categóricas
+            return "Substituir por Mediana"  # Caso contrário, sugere substituir pela mediana
+
+    # Para colunas categóricas (texto, categorias)
     else:
         if missing_percentage > 0.5:
-            return "Excluir"
+            return "Excluir"  # Se mais de 50% dos valores estão ausentes, sugere excluir a coluna
         else:
-            return "Substituir por Moda"
+            return "Substituir por Moda"  # Caso contrário, sugere substituir pela moda (valor mais frequente)
+
+# -------------------------------------
+# 📌 Função para Exibir Tabela com Valores Ausentes
+# -------------------------------------
 
 def display_missing_values(dataframe):
-    # Verifica valores ausentes
+    """Exibe uma tabela com a contagem de valores ausentes em cada coluna do dataset."""
+
+    # Conta o número de valores ausentes por coluna
     missing_data = dataframe.isnull().sum()
+
+    # Mantém apenas as colunas que possuem valores ausentes
     missing_data = missing_data[missing_data > 0]
+    
+    # Converte para DataFrame para melhor visualização
     missing_data = missing_data.reset_index()
     missing_data.columns = ['Coluna', 'Valores Ausentes']
 
+    # Se houver valores ausentes, exibir a tabela
     if not missing_data.empty:
         st.write("Tabela de valores ausentes:")
-        st.dataframe(fix_dataframe_types(missing_data))
+        st.dataframe(fix_dataframe_types(missing_data))  # Aplica correções de tipo antes de exibir
     else:
-        st.write("Não há valores ausentes.")
+        st.write("Não há valores ausentes.")  # Mensagem caso não existam valores em falta
 
-# Função para mostrar e tratar valores ausentes
+# -------------------------------------
+# 📌 FUNÇÃO PARA MOSTRAR E TRATAR VALORES AUSENTES
+# -------------------------------------
+
 def handle_missing_values():
+    """Gerencia o tratamento de valores ausentes no dataset carregado."""
+
+    # Exibe o título da seção no Streamlit
     st.subheader("Tratamento de Valores Ausentes")
 
-    # Acesso aos dados filtrados no estado da sessão
+    # Obtém os dados filtrados armazenados no estado da sessão
     filtered_data = st.session_state.get('filtered_data', None)
 
+    # -------------------------------------
+    # 📌 Verificação Inicial dos Dados
+    # -------------------------------------
+
+    # Verifica se há dados carregados e não estão vazios
     if filtered_data is not None and not filtered_data.empty:
-        # Exibir valores ausentes
+
+        # -------------------------------------
+        # 📌 Função Interna para Exibir Valores Ausentes
+        # -------------------------------------
+
         def display_missing_values(df):
+            """Gera uma tabela resumida com a contagem de valores ausentes por coluna."""
+
+            # Conta a quantidade de valores ausentes em cada coluna
             missing_data = df.isnull().sum()
+
+            # Mantém apenas as colunas que possuem valores ausentes
             missing_data = missing_data[missing_data > 0]
+
+            # Exibe os valores ausentes caso existam
             if not missing_data.empty:
                 st.write("Resumo dos Valores Ausentes:")
                 st.dataframe(fix_dataframe_types(missing_data.rename("Total de Valores Ausentes")))
             else:
-                st.success("Não há valores ausentes nos dados.")
+                st.success("Não há valores ausentes nos dados.")  # Exibe uma mensagem caso não haja valores ausentes
 
-        # Exibir os valores ausentes
+        # Exibir o resumo dos valores ausentes no dataset
         display_missing_values(filtered_data)
 
-        # Verificar se existem valores ausentes
+        # -------------------------------------
+        # 📌 Configuração das Opções de Tratamento de Valores Ausentes
+        # -------------------------------------
+
+        # Verifica se existem valores ausentes em qualquer coluna
         has_missing_values = filtered_data.isnull().any().any()
 
         if has_missing_values:
+            # Inicializar dicionário de tratamento no estado global, caso ainda não exista
             if 'treatment_state' not in st.session_state:
                 st.session_state.treatment_state = {
                     col: {"method": None, "constant": None}
                     for col in filtered_data.columns
                 }
 
-            # Exibir opções para cada coluna com valores ausentes
+            # Percorre cada coluna que possui valores ausentes para exibir opções de tratamento
             for col in filtered_data.columns:
                 if filtered_data[col].isnull().sum() > 0:
                     col_state = st.session_state.treatment_state.get(col, {"method": None, "constant": None})
                     is_numeric = pd.api.types.is_numeric_dtype(filtered_data[col])
 
+                    # -------------------------------------
+                    # 📌 Tratamento de Valores Ausentes em Colunas Numéricas
+                    # -------------------------------------
+
                     if is_numeric:
+                        # Opções disponíveis para tratamento de valores ausentes em variáveis numéricas
                         options = ["Substituir por Média", "Substituir por Mediana", "Substituir por Moda", 
                                    "Substituir por Valor Constante", "Excluir", "Manter Valores Ausentes"]
+                        
+                        # Seletor para escolher o método de tratamento
                         missing_value_method = st.selectbox(
                             f"Método para tratar valores ausentes em {col}",
                             options,
                             index=options.index(col_state["method"]) if col_state["method"] in options else 0,
                             key=f"missing_value_{col}"
                         )
+
+                        # Definir valor constante caso o utilizador escolha essa opção
                         constant_value = None
                         if missing_value_method == "Substituir por Valor Constante":
                             constant_value = st.text_input(
@@ -584,14 +851,24 @@ def handle_missing_values():
                                 value=col_state["constant"] if col_state["constant"] else '',
                                 key=f"constant_{col}"
                             )
+
+                    # -------------------------------------
+                    # 📌 Tratamento de Valores Ausentes em Colunas Categóricas
+                    # -------------------------------------
+
                     else:
+                        # Opções disponíveis para colunas categóricas
                         options = ["Substituir por Moda", "Substituir por Valor Constante", "Manter Valores Ausentes", "Excluir"]
+                        
+                        # Seletor para escolher o método de tratamento
                         missing_value_method = st.selectbox(
                             f"Método para tratar valores ausentes em {col}",
                             options,
                             index=options.index(col_state["method"]) if col_state["method"] in options else 0,
                             key=f"cat_missing_value_{col}"
                         )
+
+                        # Definir valor constante caso o utilizador escolha essa opção
                         constant_value = None
                         if missing_value_method == "Substituir por Valor Constante":
                             constant_value = st.text_input(
@@ -600,15 +877,19 @@ def handle_missing_values():
                                 key=f"cat_constant_{col}"
                             )
 
-                    # Atualizar o estado com as escolhas do utilizador
+                    # Atualizar o estado global com as escolhas do utilizador para essa coluna
                     st.session_state.treatment_state[col] = {"method": missing_value_method, "constant": constant_value}
 
-            # Botão para aplicar os tratamentos
+            # -------------------------------------
+            # 📌 Aplicação dos Tratamentos Escolhidos
+            # -------------------------------------
+
             if st.button("Aplicar tratamentos"):
                 for col, treatment in st.session_state.treatment_state.items():
                     method = treatment["method"]
                     constant_value = treatment["constant"]
 
+                    # Aplicar o método selecionado para tratamento dos valores ausentes
                     if method == "Substituir por Média":
                         filtered_data[col].fillna(filtered_data[col].mean(), inplace=True)
                     elif method == "Substituir por Mediana":
@@ -620,114 +901,215 @@ def handle_missing_values():
                     elif method == "Excluir":
                         filtered_data.dropna(subset=[col], inplace=True)
 
+                # Atualizar os dados processados no estado global
                 st.session_state.data = filtered_data.copy()
+
+                # Mensagem de sucesso
                 st.success("Tratamentos aplicados com sucesso!")
 
+        # -------------------------------------
+        # 📌 Navegação entre Etapas
+        # -------------------------------------
 
-        # Navegação
         col1, col2 = st.columns(2)
+
+        # Botão para voltar à etapa anterior
         with col1:
             if st.button("Voltar"):
                 st.session_state.step = 'data_preview'
                 st.rerun()
+
+        # Botão para avançar para a próxima etapa
         with col2:
             if st.button("Próxima etapa"):
                 st.session_state.step = 'outlier_detection'
                 st.rerun()
+
     else:
+        # Caso não haja dados disponíveis, exibir uma mensagem de erro
         st.error("Nenhum dado disponível para tratamento de valores ausentes.")
 
+
 ##############################################
-# FUNÇÃO DE TRATAMENTO DE OUTLIERS
+# -------------------------------------
+# 📌 FUNÇÃO DE TRATAMENTO DE OUTLIERS (VALORES EXTREMOS)
+# -------------------------------------
 
-# Função para detectar e calcular informações de outliers
-@st.cache_data
+# -------------------------------------
+# 📌 Função para Detetar e Calcular Informações sobre Outliers
+# -------------------------------------
 
+@st.cache_data  # Usa cache para evitar recálculo desnecessário ao interagir com a aplicação
 def calculate_outliers(columns, data):
+    """
+    Identifica e calcula estatísticas sobre outliers em variáveis numéricas.
+
+    Parâmetros:
+    - columns: lista com os nomes das colunas a serem analisadas.
+    - data: DataFrame contendo os dados.
+
+    Retorna:
+    - variables_with_outliers: Lista com as variáveis que possuem outliers.
+    - outlier_summary: Lista de dicionários com informações detalhadas sobre os outliers identificados.
+    """
+
+    # Lista para armazenar os nomes das variáveis que contêm outliers
     variables_with_outliers = []
+
+    # Lista para armazenar o resumo estatístico dos outliers encontrados
     outlier_summary = []
 
+    # Percorre todas as colunas selecionadas para análise de outliers
     for col in columns:
+        # Verifica se a coluna contém dados numéricos antes de continuar a análise
         if pd.api.types.is_numeric_dtype(data[col]):
+
+            # -------------------------------------
+            # 📌 Cálculo do Intervalo Interquartil (IQR)
+            # -------------------------------------
+
+            # Primeiro quartil (Q1) - 25% dos dados estão abaixo deste valor
             Q1 = data[col].quantile(0.25)
+
+            # Terceiro quartil (Q3) - 75% dos dados estão abaixo deste valor
             Q3 = data[col].quantile(0.75)
+
+            # Intervalo Interquartil (IQR) - Diferença entre Q3 e Q1
             IQR = Q3 - Q1
 
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
+            # Definição dos limites para deteção de outliers
+            lower_bound = Q1 - 1.5 * IQR  # Limite inferior
+            upper_bound = Q3 + 1.5 * IQR  # Limite superior
 
-            # Identificar outliers
+            # -------------------------------------
+            # 📌 Identificação de Outliers
+            # -------------------------------------
+
+            # Contagem de outliers, ou seja, valores que estão abaixo do limite inferior ou acima do superior
             num_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
+
+            # Se forem encontrados outliers na coluna, armazenar os resultados
             if num_outliers > 0:
+                # Calcular a percentagem de outliers em relação ao total de dados na variável
                 percentage_outliers = (num_outliers / len(data[col])) * 100
+
+                # Adicionar o nome da variável à lista de variáveis com outliers
                 variables_with_outliers.append(col)
+
+                # Criar um dicionário com o resumo estatístico dos outliers na variável analisada
                 outlier_summary.append({
                     "Variável": col,
                     "Total de Outliers": num_outliers,
                     "Percentagem de Outliers (%)": round(percentage_outliers, 2)
                 })
 
+    # Retorna a lista de variáveis que possuem outliers e o resumo estatístico
     return variables_with_outliers, outlier_summary
 
-# Interface de detecção e tratamento de outliers
-def outlier_detection():
-    st.subheader("Detecção de Outliers")
 
-    # Armazenar os dados originais (apenas na primeira execução)
+# Interface de detecção e tratamento de outliers
+# -------------------------------------
+# 📌 FUNÇÃO DE DETEÇÃO E TRATAMENTO DE OUTLIERS
+# -------------------------------------
+
+def outlier_detection():
+    """Realiza a deteção e o tratamento de outliers (valores extremos) em variáveis numéricas do dataset."""
+
+    # Exibir o título da seção no Streamlit
+    st.subheader("Deteção de Outliers")
+
+    # -------------------------------------
+    # 📌 Armazenamento dos Dados Originais
+    # -------------------------------------
+
+    # Se for a primeira execução, armazenar uma cópia dos dados originais
     if 'original_data' not in st.session_state:
         st.session_state.original_data = st.session_state.data.copy()
 
-    # **Boxplot Inicial - Fixo**
+    # -------------------------------------
+    # 📌 Boxplot Inicial (Visualização dos Dados Antes do Tratamento)
+    # -------------------------------------
+
     st.write("### Boxplot Inicial (Dados Originais)")
     fig, ax = plt.subplots(figsize=(12, 6))
-    st.session_state.original_data.boxplot(ax=ax)
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-    # Inicializar estado global
+    st.session_state.original_data.boxplot(ax=ax)  # Criar boxplot para visualizar outliers
+    plt.xticks(rotation=45)  # Ajustar rotação dos rótulos do eixo X
+    st.pyplot(fig)  # Exibir gráfico no Streamlit
+
+    # -------------------------------------
+    # 📌 Inicializar Estados Globais Necessários
+    # -------------------------------------
+
+    # Armazena colunas que já passaram por tratamento
     if 'treated_columns' not in st.session_state:
         st.session_state.treated_columns = []
+
+    # Armazena detalhes sobre os outliers identificados
     if 'outlier_details' not in st.session_state:
         st.session_state.outlier_details = {}
+
+    # Armazena os limites iniciais dos outliers (antes do tratamento)
     if 'initial_limits' not in st.session_state:
         st.session_state.initial_limits = {}
+
+    # Lista de colunas que possuem outliers
     if 'columns_with_outliers' not in st.session_state:
-        st.session_state.columns_with_outliers = []  # Apenas variáveis com outliers
+        st.session_state.columns_with_outliers = []
+
+    # Estado global para armazenar as decisões do utilizador sobre tratamento de outliers
     if 'outlier_treatment_state' not in st.session_state:
         st.session_state.outlier_treatment_state = {}
-    if 'all_outliers_treated' not in st.session_state:  # Novo estado
+
+    # Flag para indicar se todos os outliers foram tratados
+    if 'all_outliers_treated' not in st.session_state:
         st.session_state.all_outliers_treated = False
 
-    # Garantir que os dados estão disponíveis
+    # -------------------------------------
+    # 📌 Verificação da Disponibilidade dos Dados
+    # -------------------------------------
+
     if 'data' not in st.session_state or st.session_state.data is None:
         st.error("Os dados não estão carregados! Volte para a etapa anterior.")
         return
 
-    # Identificar colunas numéricas
+    # -------------------------------------
+    # 📌 Identificação de Outliers
+    # -------------------------------------
+
+    # Selecionar apenas as colunas numéricas do dataset
     numeric_columns = list(st.session_state.data.select_dtypes(include=[np.number]).columns)
+
+    # Lista para armazenar resumo dos outliers
     outlier_summary = []
 
-    # Processar cada coluna para calcular limites e outliers
+    # Percorrer todas as colunas numéricas para calcular limites e identificar outliers
     for col in numeric_columns:
-        # Ignorar colunas já tratadas
+
+        # Ignorar colunas que já foram tratadas
         if col in st.session_state.treated_columns:
             continue
 
-        # Calcular limites
+        # Calcular o primeiro quartil (Q1) e o terceiro quartil (Q3)
         Q1 = st.session_state.data[col].quantile(0.25)
         Q3 = st.session_state.data[col].quantile(0.75)
+
+        # Calcular o intervalo interquartil (IQR)
         IQR = Q3 - Q1
+
+        # Definir limites inferior e superior para identificação de outliers
         lower_bound = Q1 - 1.5 * IQR
         upper_bound = Q3 + 1.5 * IQR
 
-        # Contar outliers
+        # Contar outliers normais (fora do intervalo IQR)
         total_outliers = len(st.session_state.data[(st.session_state.data[col] < lower_bound) | 
                                                    (st.session_state.data[col] > upper_bound)])
+
+        # Contar outliers severos (fora do intervalo 3*IQR)
         total_severe_outliers = len(st.session_state.data[(st.session_state.data[col] < (Q1 - 3.0 * IQR)) | 
                                                            (st.session_state.data[col] > (Q3 + 3.0 * IQR))])
 
-        # Se a coluna tiver outliers, salvar detalhes
+        # Se a variável contiver outliers, armazenar detalhes
         if total_outliers > 0:
-            # Armazenar limites e detalhes no estado global
             st.session_state.initial_limits[col] = {
                 "lower_bound": lower_bound,
                 "upper_bound": upper_bound,
@@ -736,128 +1118,93 @@ def outlier_detection():
             st.session_state.outlier_details[col] = {
                 "total_outliers": total_outliers,
                 "total_severe_outliers": total_severe_outliers,
-                "skewness": st.session_state.data[col].skew()
+                "skewness": st.session_state.data[col].skew()  # Assimetria da distribuição
             }
 
-            # Adicionar ao resumo
+            # Adicionar ao resumo estatístico
             outlier_summary.append({
                 "Nome variável": col,
                 "Total de outliers": total_outliers,
                 "Total de outliers severos": total_severe_outliers
             })
 
-            # Adicionar na lista de variáveis com outliers
+            # Adicionar à lista de colunas com outliers
             if col not in st.session_state.columns_with_outliers:
                 st.session_state.columns_with_outliers.append(col)
 
-    # Salvar resumo no estado
+    # Salvar o resumo inicial no estado global
     st.session_state.initial_outlier_summary = outlier_summary
 
-    # Verificar se ainda há outliers não tratados
+    # -------------------------------------
+    # 📌 Verificar se Restam Outliers para Tratar
+    # -------------------------------------
+
     remaining_outliers = [col for col in st.session_state.columns_with_outliers 
                           if col not in st.session_state.treated_columns]
 
-    # Caso não existam mais outliers para tratar
     if not remaining_outliers:
-        # Se nunca houve outliers desde o início
         if not outlier_summary and not st.session_state.columns_with_outliers:
-            st.success("Nenhum outlier detectado nas variáveis numéricas!")
+            st.success("Nenhum outlier detetado nas variáveis numéricas!")
         else:
-            st.success("Todos os outliers detectados foram tratados!")  # Novo aviso
+            st.success("Todos os outliers detetados foram tratados!")
     else:
-        # Mostrar resumo dos outliers restantes
         st.write("Resumo dos Outliers:")
         st.dataframe(fix_dataframe_types(pd.DataFrame(outlier_summary)))
 
-    # **Exibir e tratar apenas variáveis com outliers não tratados**
-    for col in remaining_outliers:  # Somente as variáveis pendentes
-        # Diagnóstico
+    # -------------------------------------
+    # 📌 Exibição e Tratamento de Outliers Restantes
+    # -------------------------------------
+
+    for col in remaining_outliers:
         st.write(f"**Diagnóstico para {col}:**")
         details = st.session_state.outlier_details[col]
-        st.write(f"- Total: {len(st.session_state.data)}")
+        st.write(f"- Total de Registos: {len(st.session_state.data)}")
         st.write(f"- Outliers: {details['total_outliers']} ({(details['total_outliers'] / len(st.session_state.data)):.2%})")
         st.write(f"- Outliers Severos: {details['total_severe_outliers']} ({(details['total_severe_outliers'] / len(st.session_state.data)):.2%})")
         st.write(f"- Assimetria (Skewness): {details['skewness']:.2f}")
 
-        # Sugestão automática
+        # Sugestão automática de método de tratamento
         if col not in st.session_state.outlier_treatment_state:
             suggested_method = auto_select_outlier_treatment(
                 col, st.session_state.data, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"]
             )
             st.session_state.outlier_treatment_state[col] = suggested_method
 
-        # Selectbox com chave única
+        # Seletor de método de tratamento
         method = st.selectbox(
             f"Selecione o método para tratar outliers em {col}",
             ["Sem Ação", "Remover Outliers", "Remover Outliers Severos", "Substituir por Limites", "Substituir por Média", "Substituir por Mediana"],
             index=["Sem Ação", "Remover Outliers", "Remover Outliers Severos", "Substituir por Limites", "Substituir por Média", "Substituir por Mediana"].index(
                 st.session_state.outlier_treatment_state[col]
             ),
-            key=f"outlier_method_{col}_{len(st.session_state.treated_columns)}"  # Chave única
+            key=f"outlier_method_{col}_{len(st.session_state.treated_columns)}"
         )
 
-        # Botão para aplicar tratamento
+        # Botão para aplicar o tratamento selecionado
         if st.button(f"Aplicar tratamento em {col}"):
             apply_outlier_treatment(col, method, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"])
-            
-            # Esta linha é crucial - ela marca a coluna como tratada
             if col not in st.session_state.treated_columns:
                 st.session_state.treated_columns.append(col)
-                
-            st.rerun()  # Atualizar a página após o tratamento
+            st.rerun()
 
-    # **Boxplot Final**
+    # -------------------------------------
+    # 📌 Boxplot Final Após Tratamento
+    # -------------------------------------
+
     st.write("### Boxplot Após Tratamento")
     fig, ax = plt.subplots(figsize=(12, 6))
     st.session_state.data.boxplot(ax=ax)
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
-    # **Tabela para Verificar Outliers Restantes**
-    st.write("### Resumo Final de Outliers")
+    # -------------------------------------
+    # 📌 Botão para Avançar para a Próxima Etapa
+    # -------------------------------------
 
-    # Função para calcular outliers restantes
-    def calculate_remaining_outliers(data, numeric_columns):
-        outlier_summary = []
-        for col in numeric_columns:
-            # Se esta coluna foi tratada, não deve ter mais outliers
-            if col in st.session_state.treated_columns:
-                outlier_summary.append({
-                    "Coluna": col,
-                    "Outliers Restantes": 0,
-                    "Percentagem (%)": 0.00
-                })
-                continue
-                
-            # Para colunas não tratadas, calcular normalmente
-            Q1 = data[col].quantile(0.25)
-            Q3 = data[col].quantile(0.75)
-            IQR = Q3 - Q1
-    
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
-    
-            # Contar os outliers restantes
-            num_outliers = len(data[(data[col] < lower_bound) | (data[col] > upper_bound)])
-            percentage_outliers = (num_outliers / len(data)) * 100
-    
-            outlier_summary.append({
-                "Coluna": col,
-                "Outliers Restantes": num_outliers,
-                "Percentagem (%)": round(percentage_outliers, 2)
-            })
-        return pd.DataFrame(outlier_summary)
-
-    # Calcular e exibir a tabela
-    numeric_columns = st.session_state.data.select_dtypes(include=[np.number]).columns
-    remaining_outliers = calculate_remaining_outliers(st.session_state.data, numeric_columns)
-    st.write(remaining_outliers)
-
-    
-    # **Botão para próxima etapa sempre visível**
     if st.button("Próxima etapa"):
         st.session_state.step = 'data_summary'
         st.rerun()
+
 
 # Função de sugestão automática corrigida
 def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
@@ -874,7 +1221,7 @@ def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
     skewness = data[col].skew()
 
     # Regras baseadas na proporção de outliers
-    if severe_percentage > 0.10:  # Mais de 10% são severos
+    if severe_percentage > 0.10:  # Se a proporção de outliers severos for alta (>10%), sugere remover apenas os extremos
         return "Remover Outliers Severos"
     elif percentage > 0.20:  # Mais de 20% são outliers
         return "Remover Outliers"
@@ -1636,7 +1983,7 @@ def load_best_params():
             return pickle.load(f)
     return None
 
-
+# Treina um modelo de Regressão por Vetores de Suporte (SVR) com GridSearch opcional
 def train_svr_with_gridsearch(X_train, y_train, X_test, y_test, use_grid_search=True, manual_params=None):
     """
     Train Support Vector Regression (SVR) model with optional GridSearchCV
@@ -4411,7 +4758,7 @@ def get_metric_mapping(metric):
         return None
     
     # Converter para minúsculas, remover espaços, acentos
-    import unidecode
+    import unidecode # Normaliza caracteres acentuados, útil para lidar com strings em diferentes idiomas.
     metric_clean = unidecode.unidecode(metric.lower().replace(' ', '').replace('-', '').replace('_', ''))
     
     # Verificar se a métrica já está diretamente no formato esperado
