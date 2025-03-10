@@ -195,10 +195,10 @@ def choose_delimiter():
     # Lista de delimitadores possíveis, incluindo a opção em branco
     delimiters = [",", ";", "\t", "|", "Outro"]  # Adiciona a opção "Outro"
     
-    # Cria o selectbox para o usuário escolher o delimitador
+    # Cria o selectbox para o utilizador escolher o delimitador
     delimiter = st.sidebar.selectbox("Escolha o delimitador para CSV", delimiters, index=0)
     
-    # Se o usuário escolher a opção "Outro", permite que ele insira um delimitador personalizado
+    # Se o utilizador escolher a opção "Outro", permite que ele insira um delimitador personalizado
     if delimiter == "Outro":
         delimiter = st.sidebar.text_input("Digite o delimitador personalizado:")
     
@@ -600,7 +600,7 @@ def handle_missing_values():
                                 key=f"cat_constant_{col}"
                             )
 
-                    # Atualizar o estado com as escolhas do usuário
+                    # Atualizar o estado com as escolhas do utilizador
                     st.session_state.treatment_state[col] = {"method": missing_value_method, "constant": constant_value}
 
             # Botão para aplicar os tratamentos
@@ -1466,7 +1466,7 @@ def configure_manual_params(model_key, param_grid, manual_params):
             if param in param_ranges:
                 config = param_ranges[param]
 
-                # Mostrar intervalo aceito como dica para o usuário
+                # Mostrar intervalo aceito como dica para o utilizador
                 st.write(f"**{param}** (Intervalo: {config['min']} a {config['max']})")
 
                 # Configuração interativa
@@ -1528,7 +1528,7 @@ VALID_PARAMS = {
 }
 
 
-# Função para configurar a validação cruzada com base na escolha do usuário
+# Função para configurar a validação cruzada com base na escolha do utilizador
 def get_cv_strategy(cv_choice, X_train, y_train):
     if cv_choice == "K-Fold":
         return KFold(n_splits=5, shuffle=True, random_state=42)
@@ -1997,7 +1997,7 @@ def model_selection():
             if X.shape[0] > 1000 or X.shape[1] > 10:
                 st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é necessária para Clustering Hierárquico.")
             
-            # Permitir ao usuário escolher o número de componentes ou usar valor automático
+            # Permitir ao utilizador escolher o número de componentes ou usar valor automático
             use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True, key="auto_comp_hierarch")
             
             if use_auto_components:
@@ -2024,7 +2024,7 @@ def model_selection():
                 st.pyplot(fig)
                 plt.clf()
             else:
-                # Permitir que o usuário escolha o número de componentes
+                # Permitir que o utilizador escolha o número de componentes
                 max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
                 n_components = st.slider("Número de componentes PCA para Hierárquico", 2, max_components, value=min(3, max_components), key="n_comp_hierarch")
             
@@ -2047,7 +2047,7 @@ def model_selection():
                 if n_components >= 2:
                     st.write("### Visualização dos Dados Após PCA")
                     
-                    # Permitir que o usuário escolha quais componentes visualizar
+                    # Permitir que o utilizador escolha quais componentes visualizar
                     available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
                     
                     component_x = st.selectbox(
@@ -2098,7 +2098,7 @@ def model_selection():
             if X.shape[0] > 1000 or X.shape[1] > 10:
                 st.warning(f"Atenção: Seu dataset tem {X.shape[0]} registros e {X.shape[1]} dimensões. A aplicação de PCA é altamente recomendada.")
             
-            # Permitir ao usuário escolher o número de componentes ou usar valor automático
+            # Permitir ao utilizador escolher o número de componentes ou usar valor automático
             use_auto_components = st.checkbox("Determinar automaticamente o número de componentes", value=True)
             
             if use_auto_components:
@@ -2125,7 +2125,7 @@ def model_selection():
                 st.pyplot(fig)
                 plt.clf()
             else:
-                # Permitir que o usuário escolha o número de componentes
+                # Permitir que o utilizador escolha o número de componentes
                 max_components = min(X.shape[1], 20)  # Limitar ao número de features ou 20, o que for menor
                 n_components = st.slider("Número de componentes PCA", 2, max_components, value=min(3, max_components))
             
@@ -2148,7 +2148,7 @@ def model_selection():
                 if n_components >= 2:
                     st.write("### Visualização dos Dados Após PCA")
                     
-                    # Permitir que o usuário escolha quais componentes visualizar
+                    # Permitir que o utilizador escolha quais componentes visualizar
                     available_components = min(n_components, 10)  # Limitar a 10 para evitar sobrecarga
                     
                     component_x = st.selectbox(
@@ -2702,7 +2702,7 @@ def model_selection():
                 param_grid = {}  # Nenhum parâmetro para ajustar
                 st.session_state.grid_search_confirmed = True
             else:
-                # Perguntar ao usuário se quer usar GridSearch
+                # Perguntar ao utilizador se quer usar GridSearch
                 use_grid_search = st.radio(
                     "Usar GridSearch?", 
                     ["Sim", "Não"], 
@@ -2738,12 +2738,12 @@ def model_selection():
                         # Inicializar os parâmetros padrão do modelo selecionado
                         param_grid = get_default_param_grid(model_key)
                     
-                        # Se não houver parâmetros padrão, informar o usuário
+                        # Se não houver parâmetros padrão, informar o utilizador
                         if not param_grid:
                             st.warning(f"Parâmetros padrão não definidos para o modelo {model_key}.")
                             param_grid = {}
                     
-                        # Exibir os parâmetros para o usuário ajustar manualmente
+                        # Exibir os parâmetros para o utilizador ajustar manualmente
                         manual_params = {}
                         for param, values in param_grid.items():
                             # **Lógica Especial para o Kernel**
@@ -2944,7 +2944,7 @@ def model_selection():
                 st.write(f"**Modelo Selecionado**: {model_name}")
                 st.write(f"**Coluna Alvo**: {target_column}")
                 st.write(f"**Método de Validação**: {validation_method}")
-                st.write(f"GridSearch Ativado? {use_grid_search}")  # Debug para verificar a escolha do usuário
+                st.write(f"GridSearch Ativado? {use_grid_search}")  # Debug para verificar a escolha do utilizador
 
                 # Treino de um único modelo
                 param_grid = get_default_param_grid(model_name) if use_grid_search == "Sim" else {}
@@ -3510,7 +3510,7 @@ def evaluate_and_compare_models():
     # Recuperar o tipo de modelo
     model_type = st.session_state.get('model_type', 'Indefinido')
 
-    # Recuperar a métrica escolhida pelo usuário para seleção de features
+    # Recuperar a métrica escolhida pelo utilizador para seleção de features
     scoring_metric = st.session_state.get("selected_scoring", None)
     if not scoring_metric:
         st.error("Nenhuma métrica de avaliação foi escolhida. Por favor, volte à etapa de seleção de métricas.")
@@ -3603,7 +3603,7 @@ def evaluate_and_compare_models():
         scoring_metric = metric_columns[0] if metric_columns else None
     
     if scoring_metric:
-        # Gráfico de comparação usando a métrica escolhida pelo usuário
+        # Gráfico de comparação usando a métrica escolhida pelo utilizador
 
         x = comparison_df['Modelo']
         y1 = comparison_df[scoring_metric].iloc[0]  # Sem Seleção de Features (índice 0)
@@ -4343,7 +4343,7 @@ def gerar_relatorio_pdf(comparison_df, best_model, session_state):
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(0, 10, txt=clean_text("Conclusão"), ln=True)
     
-    # Determinar a melhor métrica com base na escolha do usuário
+    # Determinar a melhor métrica com base na escolha do utilizador
     scoring_metric = session_state.get("selected_scoring", None)
 
     # Fallback para métricas padrão se a métrica selecionada não estiver disponível
