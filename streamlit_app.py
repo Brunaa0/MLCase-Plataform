@@ -5182,8 +5182,6 @@ def main():
     # Inicialização das variáveis de estado da sessão
     initialize_session_state()
 
-    # Exibir estado atual para depuração (opcional)
-    st.write(f"Estado atual: {st.session_state.step}")
 
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
@@ -5213,8 +5211,6 @@ def main():
         st.session_state.step = 'file_upload'
         st.rerun()
 
-    # Exibir o estado após a execução para depuração (opcional)
-    st.write(f"Estado final: {st.session_state.step}")
 
 if __name__ == "__main__":
     main()
