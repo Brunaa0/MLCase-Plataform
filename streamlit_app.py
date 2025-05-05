@@ -469,7 +469,9 @@ def show_preview_with_types(variable_types):
     
     # Usa o filtered_data diretamente
     formatted_df = format_table()
-    st.dataframe(fix_dataframe_types(highlight_missing(formatted_df)))
+    styled_df = highlight_missing()
+    st.write(styled_df.to_html(escape=False), unsafe_allow_html=True)
+
 
 # Função para aplicar tratamento de valores ausentes
 def apply_missing_value_treatment(column, method, constant_value=None):
