@@ -961,7 +961,7 @@ def outlier_detection():
         st.session_state.step = 'data_summary'
         st.rerun()
 
-# Função de sugestão automática corrigida
+# Função de sugestão automática 
 def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
     """Função para sugerir tratamento de outliers com base nos dados"""
     # Proporção de outliers
@@ -994,9 +994,12 @@ def apply_outlier_treatment(col, method, lower_bound, upper_bound):
     # Obter os dados do estado
     data = st.session_state.data
     
+    # Garantir que a coluna seja do tipo float para permitir valores decimais
+    data[col] = data[col].astype(float)
+    
     if method == "Remover Outliers":
         # Remover todos os outliers (valores além de 1.5 * IQR)
-        st.session_state.data = data[
+        st.session_state.data = data[ 
             (data[col] >= lower_bound) & (data[col] <= upper_bound)
         ]
         st.success(f"Todos os outliers removidos na coluna '{col}'.")
@@ -1011,7 +1014,7 @@ def apply_outlier_treatment(col, method, lower_bound, upper_bound):
         severe_lower = Q1 - 3.0 * IQR
         severe_upper = Q3 + 3.0 * IQR
 
-        st.session_state.data = data[
+        st.session_state.data = data[ 
             (data[col] >= severe_lower) & (data[col] <= severe_upper)
         ]
         st.success(f"Outliers severos removidos na coluna '{col}'.")
@@ -5179,6 +5182,9 @@ def main():
     # Inicialização das variáveis de estado da sessão
     initialize_session_state()
 
+    # Exibir estado atual para depuração (opcional)
+    st.write(f"Estado atual: {st.session_state.step}")
+
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
         upload_file()
@@ -5206,6 +5212,9 @@ def main():
         st.error(f"⚠ Etapa desconhecida: {st.session_state.step}. Reiniciando a aplicação.")
         st.session_state.step = 'file_upload'
         st.rerun()
+
+    # Exibir o estado após a execução para depuração (opcional)
+    st.write(f"Estado final: {st.session_state.step}")
 
 if __name__ == "__main__":
     main()
