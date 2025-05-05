@@ -458,13 +458,7 @@ def format_table():
     formatted_df = st.session_state.filtered_data.copy()
     for col in formatted_df.columns:
         if pd.api.types.is_numeric_dtype(formatted_df[col]):
-            formatted_df[col] = formatted_df[col].apply(
-                lambda x: "⚠️ NA" if pd.isnull(x) else f"{x:.2f}"
-            )
-        else:
-            formatted_df[col] = formatted_df[col].apply(
-                lambda x: "⚠️ NA" if pd.isnull(x) else str(x)
-            )
+            formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
     return formatted_df
 
 # Função para mostrar a pré-visualização com tipos de variáveis
@@ -475,9 +469,7 @@ def show_preview_with_types(variable_types):
     
     # Usa o filtered_data diretamente
     formatted_df = format_table()
-    styled_df = highlight_missing()
-    st.write(styled_df.to_html(escape=False), unsafe_allow_html=True)
-
+    st.dataframe(fix_dataframe_types(highlight_missing(formatted_df)))
 
 # Função para aplicar tratamento de valores ausentes
 def apply_missing_value_treatment(column, method, constant_value=None):
