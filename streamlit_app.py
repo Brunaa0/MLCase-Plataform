@@ -518,134 +518,204 @@ def auto_select_method(column_name):
         else:
             return "Substituir por Moda"
 
-def display_missing_values(df):
-    # Cria um dataframe com o total de valores ausentes por coluna
-    missing_data = df.isnull().sum()
-    # Filtra apenas colunas que têm valores ausentes
-    missing_data = missing_data[missing_data > 0]
+import streamlit as st
+import pandas as pd
+import numpy as np
+
+# Função para exibir tabela de valores ausentes de forma simplificada
+def display_missing_values_table(df):
+    """
+    Exibe uma tabela formatada com informações sobre valores ausentes
+    """
+    # Calcula valores ausentes por coluna
+    missing_counts = df.isnull().sum()
+    # Filtra apenas colunas com valores ausentes
+    missing_cols = missing_counts[missing_counts > 0]
     
-    if not missing_data.empty:
-        # Converte para dataframe para melhor exibição no Streamlit
-        missing_df = missing_data.reset_index()
-        missing_df.columns = ['Coluna', 'Total de Valores Ausentes']
+    if len(missing_cols) > 0:
+        # Cria dataframe para exibição
+        missing_df = pd.DataFrame({
+            'Coluna': missing_cols.index,
+            'Valores Ausentes': missing_cols.values,
+            'Percentual (%)': round(missing_cols.values / len(df) * 100, 2)
+        })
         
-        # Adiciona coluna com percentual de valores ausentes
-        missing_df['Percentual (%)'] = round(missing_df['Total de Valores Ausentes'] / len(df) * 100, 2)
-        
-        st.write("Resumo dos Valores Ausentes:")
+        # Exibe a tabela diretamente
+        st.write("### Resumo dos Valores Ausentes:")
         st.dataframe(missing_df)
+        
+        # Exibe estatísticas para colunas numéricas com valores ausentes
+        numeric_cols = [col for col in missing_cols.index if pd.api.types.is_numeric_dtype(df[col])]
+        if numeric_cols:
+            st.write("### Estatísticas de colunas numéricas com valores ausentes:")
+            stats_df = df[numeric_cols].describe().T
+            stats_df = stats_df.round(2)  # Arredonda para 2 casas decimais
+            st.dataframe(stats_df)
     else:
         st.success("Não há valores ausentes nos dados.")
-
-# Função para tratar valores ausentes
+        
+# Função principal para tratamento de valores ausentes
 def handle_missing_values():
-    st.subheader("Tratamento de Valores Ausentes")
-
-    # Acesso aos dados filtrados no estado da sessão
-    filtered_data = st.session_state.get('filtered_data', None)
-
-    if filtered_data is not None and not filtered_data.empty:
-        # Exibir valores ausentes usando a função corrigida
-        display_missing_values(filtered_data)
-
-        # Verificar se existem valores ausentes
-        has_missing_values = filtered_data.isnull().any().any()
-
-        if has_missing_values:
-            if 'treatment_state' not in st.session_state:
-                st.session_state.treatment_state = {
-                    col: {"method": None, "constant": None}
-                    for col in filtered_data.columns
-                }
-
-            # Exibir opções para cada coluna com valores ausentes
-            for col in filtered_data.columns:
-                if filtered_data[col].isnull().sum() > 0:
-                    col_state = st.session_state.treatment_state.get(col, {"method": None, "constant": None})
-                    is_numeric = pd.api.types.is_numeric_dtype(filtered_data[col])
-
-                    if is_numeric:
-                        options = ["Substituir por Média", "Substituir por Mediana", "Substituir por Moda", 
-                                   "Substituir por Valor Constante", "Excluir", "Manter Valores Ausentes"]
-                        missing_value_method = st.selectbox(
-                            f"Método para tratar valores ausentes em {col}",
-                            options,
-                            index=options.index(col_state["method"]) if col_state["method"] in options else 0,
-                            key=f"missing_value_{col}"
-                        )
-                        constant_value = None
-                        if missing_value_method == "Substituir por Valor Constante":
-                            constant_value = st.text_input(
-                                f"Digite o valor constante para {col}:",
-                                value=col_state["constant"] if col_state["constant"] else '',
-                                key=f"constant_{col}"
-                            )
-                    else:
-                        options = ["Substituir por Moda", "Substituir por Valor Constante", "Manter Valores Ausentes", "Excluir"]
-                        missing_value_method = st.selectbox(
-                            f"Método para tratar valores ausentes em {col}",
-                            options,
-                            index=options.index(col_state["method"]) if col_state["method"] in options else 0,
-                            key=f"cat_missing_value_{col}"
-                        )
-                        constant_value = None
-                        if missing_value_method == "Substituir por Valor Constante":
-                            constant_value = st.text_input(
-                                f"Digite o valor constante para {col}:",
-                                value=col_state["constant"] if col_state["constant"] else '',
-                                key=f"cat_constant_{col}"
-                            )
-
-                    # Atualizar o estado com as escolhas do usuário
-                    st.session_state.treatment_state[col] = {"method": missing_value_method, "constant": constant_value}
-
-            # Botão para aplicar os tratamentos
-            if st.button("Aplicar tratamentos"):
-                for col, treatment in st.session_state.treatment_state.items():
-                    if filtered_data[col].isnull().sum() > 0:  # Apenas aplica em colunas com valores ausentes
-                        method = treatment["method"]
-                        constant_value = treatment["constant"]
-
-                        if method == "Substituir por Média":
-                            filtered_data[col].fillna(filtered_data[col].mean(), inplace=True)
-                        elif method == "Substituir por Mediana":
-                            filtered_data[col].fillna(filtered_data[col].median(), inplace=True)
-                        elif method == "Substituir por Moda":
-                            if not filtered_data[col].mode().empty:
-                                filtered_data[col].fillna(filtered_data[col].mode().iloc[0], inplace=True)
-                        elif method == "Substituir por Valor Constante" and constant_value is not None:
-                            # Converter para o tipo correto
-                            if pd.api.types.is_numeric_dtype(filtered_data[col]):
-                                try:
-                                    constant_value = float(constant_value)
-                                except ValueError:
-                                    st.error(f"O valor constante para {col} deve ser numérico.")
-                                    return
-                            filtered_data[col].fillna(constant_value, inplace=True)
-                        elif method == "Excluir":
-                            filtered_data.dropna(subset=[col], inplace=True)
-
-                # Atualiza os dados no estado da sessão
-                st.session_state.filtered_data = filtered_data.copy()
+    """
+    Função completa para gerenciar o tratamento de valores ausentes
+    """
+    st.header("Tratamento de Valores Ausentes")
+    
+    # Verifica se os dados estão disponíveis
+    if 'filtered_data' not in st.session_state or st.session_state.filtered_data is None:
+        st.error("Nenhum conjunto de dados carregado. Por favor, carregue os dados primeiro.")
+        return
+    
+    # Obtém os dados do estado da sessão
+    df = st.session_state.filtered_data
+    
+    # Exibe a tabela resumo de valores ausentes
+    display_missing_values_table(df)
+    
+    # Verifica se existem valores ausentes
+    has_missing = df.isnull().any().any()
+    
+    if has_missing:
+        # Inicializa o estado de tratamento se não existir
+        if 'treatment_state' not in st.session_state:
+            st.session_state.treatment_state = {}
+            
+        # Para cada coluna com valores ausentes
+        for col in df.columns:
+            missing_count = df[col].isnull().sum()
+            if missing_count > 0:
+                st.markdown(f"### Coluna: **{col}** ({missing_count} valores ausentes)")
+                
+                # Define opções baseadas no tipo de dados
+                is_numeric = pd.api.types.is_numeric_dtype(df[col])
+                
+                if is_numeric:
+                    options = [
+                        "Substituir por Média", 
+                        "Substituir por Mediana", 
+                        "Substituir por Moda",
+                        "Substituir por Valor Constante", 
+                        "Excluir Linhas", 
+                        "Manter Valores Ausentes"
+                    ]
+                else:
+                    options = [
+                        "Substituir por Moda", 
+                        "Substituir por Valor Constante", 
+                        "Excluir Linhas", 
+                        "Manter Valores Ausentes"
+                    ]
+                
+                # Gera uma chave única para o selectbox
+                select_key = f"method_{col}"
+                
+                # Obtém o método selecionado anteriormente ou usa o padrão
+                default_index = 0
+                if col in st.session_state.treatment_state and 'method' in st.session_state.treatment_state[col]:
+                    selected_method = st.session_state.treatment_state[col]['method']
+                    if selected_method in options:
+                        default_index = options.index(selected_method)
+                
+                # Seleção do método
+                method = st.selectbox(
+                    f"Método para tratar valores ausentes em {col}:",
+                    options=options,
+                    index=default_index,
+                    key=select_key
+                )
+                
+                # Campo para valor constante se necessário
+                constant_value = None
+                if method == "Substituir por Valor Constante":
+                    default_value = ""
+                    if col in st.session_state.treatment_state and 'constant' in st.session_state.treatment_state[col]:
+                        default_value = st.session_state.treatment_state[col]['constant']
+                    
+                    constant_value = st.text_input(
+                        f"Valor constante para {col}:",
+                        value=default_value,
+                        key=f"constant_{col}"
+                    )
+                
+                # Armazena os valores no estado da sessão
+                if col not in st.session_state.treatment_state:
+                    st.session_state.treatment_state[col] = {}
+                    
+                st.session_state.treatment_state[col]['method'] = method
+                if constant_value is not None:
+                    st.session_state.treatment_state[col]['constant'] = constant_value
+        
+        # Botão para aplicar os tratamentos
+        if st.button("Aplicar Tratamentos", key="apply_treatments"):
+            data_modified = False
+            # Copia o dataframe para não modificar o original antes de confirmar
+            temp_df = df.copy()
+            
+            for col, treatment in st.session_state.treatment_state.items():
+                # Verifica se a coluna ainda existe e tem valores ausentes
+                if col in temp_df.columns and temp_df[col].isnull().sum() > 0:
+                    method = treatment.get('method')
+                    constant = treatment.get('constant')
+                    
+                    if method == "Substituir por Média" and pd.api.types.is_numeric_dtype(temp_df[col]):
+                        temp_df[col].fillna(temp_df[col].mean(), inplace=True)
+                        data_modified = True
+                        
+                    elif method == "Substituir por Mediana" and pd.api.types.is_numeric_dtype(temp_df[col]):
+                        temp_df[col].fillna(temp_df[col].median(), inplace=True)
+                        data_modified = True
+                        
+                    elif method == "Substituir por Moda":
+                        if not temp_df[col].mode().empty:
+                            temp_df[col].fillna(temp_df[col].mode().iloc[0], inplace=True)
+                            data_modified = True
+                            
+                    elif method == "Substituir por Valor Constante" and constant:
+                        if pd.api.types.is_numeric_dtype(temp_df[col]):
+                            try:
+                                # Converte para numérico se a coluna for numérica
+                                num_value = float(constant)
+                                temp_df[col].fillna(num_value, inplace=True)
+                            except ValueError:
+                                st.error(f"Erro: O valor '{constant}' não é um número válido para a coluna {col}.")
+                                continue
+                        else:
+                            # Usa string diretamente para colunas não numéricas
+                            temp_df[col].fillna(constant, inplace=True)
+                        data_modified = True
+                        
+                    elif method == "Excluir Linhas":
+                        temp_df.dropna(subset=[col], inplace=True)
+                        data_modified = True
+            
+            if data_modified:
+                # Atualiza o dataframe se houve modificações
+                st.session_state.filtered_data = temp_df
                 st.success("Tratamentos aplicados com sucesso!")
                 
-                # Mostra a tabela atualizada
-                display_missing_values(filtered_data)
-        else:
-            st.success("Não há valores ausentes para tratar.")
-
-        # Navegação
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Voltar"):
-                st.session_state.step = 'data_preview'
-                st.rerun()
-        with col2:
-            if st.button("Próxima etapa"):
-                st.session_state.step = 'outlier_detection'
-                st.rerun()
-    else:
-        st.error("Nenhum dado disponível para tratamento de valores ausentes.")
+                # Exibe a tabela atualizada após os tratamentos
+                st.write("### Dados após tratamento:")
+                display_missing_values_table(temp_df)
+                
+                # Exibe informações sobre o número de linhas
+                old_rows = len(df)
+                new_rows = len(temp_df)
+                if old_rows != new_rows:
+                    st.info(f"Número de linhas reduzido de {old_rows} para {new_rows} ({old_rows - new_rows} linhas removidas)")
+            else:
+                st.info("Nenhuma modificação foi aplicada aos dados.")
+    
+    # Botões de navegação
+    st.write("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("⬅️ Voltar", key="back_button"):
+            st.session_state.step = 'data_preview'
+            st.rerun()
+    with col2:
+        if st.button("Próxima Etapa ➡️", key="next_button"):
+            st.session_state.step = 'outlier_detection'
+            st.rerun()
 ##############################################
 # FUNÇÃO DE TRATAMENTO DE OUTLIERS
 
