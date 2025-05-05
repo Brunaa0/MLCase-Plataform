@@ -458,20 +458,18 @@ def format_table():
     formatted_df = st.session_state.filtered_data.copy()
     for col in formatted_df.columns:
         if pd.api.types.is_numeric_dtype(formatted_df[col]):
-            formatted_df[col] = formatted_df[col].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else "⚠️ NA")
-        else:
-            formatted_df[col] = formatted_df[col].apply(lambda x: x if pd.notnull(x) else "⚠️ NA")
+            formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
     return formatted_df
-
 
 # Função para mostrar a pré-visualização com tipos de variáveis
 def show_preview_with_types(variable_types):
     st.subheader("Pré-visualização dos dados com tipos de variáveis")
     st.write("Tipos de variáveis:")
     st.write(variable_types)
-
+    
+    # Usa o filtered_data diretamente
     formatted_df = format_table()
-    st.dataframe(formatted_df)
+    st.dataframe(fix_dataframe_types(highlight_missing(formatted_df)))
 
 # Função para aplicar tratamento de valores ausentes
 def apply_missing_value_treatment(column, method, constant_value=None):
@@ -520,20 +518,26 @@ def auto_select_method(column_name):
         else:
             return "Substituir por Moda"
 
-def display_missing_values(dataframe):
-    # Verifica valores ausentes
-    missing_data = dataframe.isnull().sum()
+def display_missing_values(df):
+    # Cria um dataframe com o total de valores ausentes por coluna
+    missing_data = df.isnull().sum()
+    # Filtra apenas colunas que têm valores ausentes
     missing_data = missing_data[missing_data > 0]
-    missing_data = missing_data.reset_index()
-    missing_data.columns = ['Coluna', 'Valores Ausentes']
-
+    
     if not missing_data.empty:
-        st.write("Tabela de valores ausentes:")
-        st.dataframe(fix_dataframe_types(missing_data))
+        # Converte para dataframe para melhor exibição no Streamlit
+        missing_df = missing_data.reset_index()
+        missing_df.columns = ['Coluna', 'Total de Valores Ausentes']
+        
+        # Adiciona coluna com percentual de valores ausentes
+        missing_df['Percentual (%)'] = round(missing_df['Total de Valores Ausentes'] / len(df) * 100, 2)
+        
+        st.write("Resumo dos Valores Ausentes:")
+        st.dataframe(missing_df)
     else:
-        st.write("Não há valores ausentes.")
+        st.success("Não há valores ausentes nos dados.")
 
-# Função para mostrar e tratar valores ausentes
+# Função para tratar valores ausentes
 def handle_missing_values():
     st.subheader("Tratamento de Valores Ausentes")
 
@@ -541,17 +545,7 @@ def handle_missing_values():
     filtered_data = st.session_state.get('filtered_data', None)
 
     if filtered_data is not None and not filtered_data.empty:
-        # Exibir valores ausentes
-        def display_missing_values(df):
-            missing_data = df.isnull().sum()
-            missing_data = missing_data[missing_data > 0]
-            if not missing_data.empty:
-                st.write("Resumo dos Valores Ausentes:")
-                st.dataframe(fix_dataframe_types(missing_data.rename("Total de Valores Ausentes")))
-            else:
-                st.success("Não há valores ausentes nos dados.")
-
-        # Exibir os valores ausentes
+        # Exibir valores ausentes usando a função corrigida
         display_missing_values(filtered_data)
 
         # Verificar se existem valores ausentes
@@ -608,23 +602,37 @@ def handle_missing_values():
             # Botão para aplicar os tratamentos
             if st.button("Aplicar tratamentos"):
                 for col, treatment in st.session_state.treatment_state.items():
-                    method = treatment["method"]
-                    constant_value = treatment["constant"]
+                    if filtered_data[col].isnull().sum() > 0:  # Apenas aplica em colunas com valores ausentes
+                        method = treatment["method"]
+                        constant_value = treatment["constant"]
 
-                    if method == "Substituir por Média":
-                        filtered_data[col].fillna(filtered_data[col].mean(), inplace=True)
-                    elif method == "Substituir por Mediana":
-                        filtered_data[col].fillna(filtered_data[col].median(), inplace=True)
-                    elif method == "Substituir por Moda":
-                        filtered_data[col].fillna(filtered_data[col].mode().iloc[0], inplace=True)
-                    elif method == "Substituir por Valor Constante" and constant_value is not None:
-                        filtered_data[col].fillna(constant_value, inplace=True)
-                    elif method == "Excluir":
-                        filtered_data.dropna(subset=[col], inplace=True)
+                        if method == "Substituir por Média":
+                            filtered_data[col].fillna(filtered_data[col].mean(), inplace=True)
+                        elif method == "Substituir por Mediana":
+                            filtered_data[col].fillna(filtered_data[col].median(), inplace=True)
+                        elif method == "Substituir por Moda":
+                            if not filtered_data[col].mode().empty:
+                                filtered_data[col].fillna(filtered_data[col].mode().iloc[0], inplace=True)
+                        elif method == "Substituir por Valor Constante" and constant_value is not None:
+                            # Converter para o tipo correto
+                            if pd.api.types.is_numeric_dtype(filtered_data[col]):
+                                try:
+                                    constant_value = float(constant_value)
+                                except ValueError:
+                                    st.error(f"O valor constante para {col} deve ser numérico.")
+                                    return
+                            filtered_data[col].fillna(constant_value, inplace=True)
+                        elif method == "Excluir":
+                            filtered_data.dropna(subset=[col], inplace=True)
 
-                st.session_state.data = filtered_data.copy()
+                # Atualiza os dados no estado da sessão
+                st.session_state.filtered_data = filtered_data.copy()
                 st.success("Tratamentos aplicados com sucesso!")
-
+                
+                # Mostra a tabela atualizada
+                display_missing_values(filtered_data)
+        else:
+            st.success("Não há valores ausentes para tratar.")
 
         # Navegação
         col1, col2 = st.columns(2)
@@ -638,7 +646,6 @@ def handle_missing_values():
                 st.rerun()
     else:
         st.error("Nenhum dado disponível para tratamento de valores ausentes.")
-
 ##############################################
 # FUNÇÃO DE TRATAMENTO DE OUTLIERS
 
