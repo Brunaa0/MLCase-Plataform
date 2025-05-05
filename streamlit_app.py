@@ -518,6 +518,7 @@ def auto_select_method(column_name):
         else:
             return "Substituir por Moda"
 
+# Função para mostrar valores ausentes
 def display_missing_values(dataframe):
     # Verifica valores ausentes
     missing_data = dataframe.isnull().sum()
@@ -527,9 +528,10 @@ def display_missing_values(dataframe):
 
     if not missing_data.empty:
         st.write("Tabela de valores ausentes:")
-        st.dataframe(fix_dataframe_types(missing_data))
+        st.dataframe(missing_data)  # Exibe a tabela sem alterações de tipos
     else:
         st.write("Não há valores ausentes.")
+
 
 # Função para mostrar e tratar valores ausentes
 def handle_missing_values():
