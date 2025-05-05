@@ -454,12 +454,20 @@ def highlight_missing():
     return st.session_state.filtered_data.style.apply(highlight_na, subset=st.session_state.filtered_data.columns)
 
 # Função para formatar valores na tabela
+
 def format_table():
-    formatted_df = st.session_state.filtered_data.copy()
+    formatted_df = st.session_state.filtered_data.copy()  # Copiar os dados filtrados
     for col in formatted_df.columns:
-        if pd.api.types.is_numeric_dtype(formatted_df[col]):
+        if pd.api.types.is_numeric_dtype(formatted_df[col]):  # Verifica se a coluna é numérica
             formatted_df[col] = formatted_df[col].map(lambda x: f"{x:.2f}" if pd.notnull(x) else 'NaN')
+    
     return formatted_df
+
+# Função para destacar valores ausentes
+def highlight_missing(df):
+    def highlight_na(s):
+        return ['background-color: yellow' if pd.isnull(v) else '' for v in s]
+    return df.style.apply(highlight_na, subset=df.columns)
 
 # Função para mostrar a pré-visualização com tipos de variáveis
 def show_preview_with_types(variable_types):
@@ -518,27 +526,8 @@ def auto_select_method(column_name):
         else:
             return "Substituir por Moda"
 
-# Função para mostrar valores ausentes
-# Função para mostrar valores ausentes
-def display_missing_values(dataframe):
-    # Verifica os valores ausentes no dataframe
-    missing_data = dataframe.isnull().sum()
-
-    # Filtra apenas as colunas com valores ausentes
-    missing_data = missing_data[missing_data > 0]
-
-    if missing_data.empty:
-        st.write("Não há valores ausentes.")
-    else:
-        # Exibe as colunas e quantidades de valores ausentes
-        missing_data = missing_data.reset_index()
-        missing_data.columns = ['Coluna', 'Valores Ausentes']
-        st.write("Tabela de valores ausentes:")
-        st.dataframe(missing_data)  # Exibe a tabela com valores ausentes
 
 
-# Função para mostrar e tratar valores ausentes
-def handle_missing_values():
     st.subheader("Tratamento de Valores Ausentes")
 
     # Acesso aos dados filtrados no estado da sessão
@@ -546,16 +535,6 @@ def handle_missing_values():
 
     if filtered_data is not None and not filtered_data.empty:
         # Exibir valores ausentes
-        def display_missing_values(df):
-            missing_data = df.isnull().sum()
-            missing_data = missing_data[missing_data > 0]
-            if not missing_data.empty:
-                st.write("Resumo dos Valores Ausentes:")
-                st.dataframe(fix_dataframe_types(missing_data.rename("Total de Valores Ausentes")))
-            else:
-                st.success("Não há valores ausentes nos dados.")
-
-        # Exibir os valores ausentes
         display_missing_values(filtered_data)
 
         # Verificar se existem valores ausentes
@@ -629,6 +608,122 @@ def handle_missing_values():
                 st.session_state.data = filtered_data.copy()
                 st.success("Tratamentos aplicados com sucesso!")
 
+        # Navegação
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Voltar"):
+                st.session_state.step = 'data_preview'
+                st.rerun()
+        with col2:
+            if st.button("Próxima etapa"):
+                st.session_state.step = 'outlier_detection'
+                st.rerun()
+    else:
+        st.error("Nenhum dado disponível para tratamento de valores ausentes.")
+
+# Função para mostrar valores ausentes de maneira destacada
+def display_missing_values(dataframe):
+    # Verifica os valores ausentes no dataframe
+    missing_data = dataframe.isnull().sum()
+
+    # Filtra apenas as colunas com valores ausentes
+    missing_data = missing_data[missing_data > 0]
+
+    if missing_data.empty:
+        st.write("Não há valores ausentes.")
+    else:
+        # Exibe as colunas e quantidades de valores ausentes
+        missing_data = missing_data.reset_index()
+        missing_data.columns = ['Coluna', 'Valores Ausentes']
+        st.write("Tabela de valores ausentes:")
+        st.dataframe(missing_data)  # Exibe a tabela com valores ausentes
+
+# Função para mostrar e tratar valores ausentes
+def handle_missing_values():
+    st.subheader("Tratamento de Valores Ausentes")
+
+    # Acesso aos dados filtrados no estado da sessão
+    filtered_data = st.session_state.get('filtered_data', None)
+
+    if filtered_data is not None and not filtered_data.empty:
+        # Exibir valores ausentes
+        display_missing_values(filtered_data)
+
+        # Verificar se existem valores ausentes
+        has_missing_values = filtered_data.isnull().any().any()
+
+        if has_missing_values:
+            if 'treatment_state' not in st.session_state:
+                st.session_state.treatment_state = {
+                    col: {"method": None, "constant": None}
+                    for col in filtered_data.columns
+                }
+
+            # Exibir a tabela com destaque para valores ausentes
+            st.write("Tabela com valores ausentes destacados:")
+            styled_df = highlight_missing(filtered_data)
+            st.dataframe(styled_df)  # Exibe a tabela com as células em amarelo para valores ausentes
+
+            # Exibir opções para cada coluna com valores ausentes
+            for col in filtered_data.columns:
+                if filtered_data[col].isnull().sum() > 0:
+                    col_state = st.session_state.treatment_state.get(col, {"method": None, "constant": None})
+                    is_numeric = pd.api.types.is_numeric_dtype(filtered_data[col])
+
+                    if is_numeric:
+                        options = ["Substituir por Média", "Substituir por Mediana", "Substituir por Moda", 
+                                   "Substituir por Valor Constante", "Excluir", "Manter Valores Ausentes"]
+                        missing_value_method = st.selectbox(
+                            f"Método para tratar valores ausentes em {col}",
+                            options,
+                            index=options.index(col_state["method"]) if col_state["method"] in options else 0,
+                            key=f"missing_value_{col}"
+                        )
+                        constant_value = None
+                        if missing_value_method == "Substituir por Valor Constante":
+                            constant_value = st.text_input(
+                                f"Digite o valor constante para {col}:",
+                                value=col_state["constant"] if col_state["constant"] else '',
+                                key=f"constant_{col}"
+                            )
+                    else:
+                        options = ["Substituir por Moda", "Substituir por Valor Constante", "Manter Valores Ausentes", "Excluir"]
+                        missing_value_method = st.selectbox(
+                            f"Método para tratar valores ausentes em {col}",
+                            options,
+                            index=options.index(col_state["method"]) if col_state["method"] in options else 0,
+                            key=f"cat_missing_value_{col}"
+                        )
+                        constant_value = None
+                        if missing_value_method == "Substituir por Valor Constante":
+                            constant_value = st.text_input(
+                                f"Digite o valor constante para {col}:",
+                                value=col_state["constant"] if col_state["constant"] else '',
+                                key=f"cat_constant_{col}"
+                            )
+
+                    # Atualizar o estado com as escolhas do usuário
+                    st.session_state.treatment_state[col] = {"method": missing_value_method, "constant": constant_value}
+
+            # Botão para aplicar os tratamentos
+            if st.button("Aplicar tratamentos"):
+                for col, treatment in st.session_state.treatment_state.items():
+                    method = treatment["method"]
+                    constant_value = treatment["constant"]
+
+                    if method == "Substituir por Média":
+                        filtered_data[col].fillna(filtered_data[col].mean(), inplace=True)
+                    elif method == "Substituir por Mediana":
+                        filtered_data[col].fillna(filtered_data[col].median(), inplace=True)
+                    elif method == "Substituir por Moda":
+                        filtered_data[col].fillna(filtered_data[col].mode().iloc[0], inplace=True)
+                    elif method == "Substituir por Valor Constante" and constant_value is not None:
+                        filtered_data[col].fillna(constant_value, inplace=True)
+                    elif method == "Excluir":
+                        filtered_data.dropna(subset=[col], inplace=True)
+
+                st.session_state.data = filtered_data.copy()
+                st.success("Tratamentos aplicados com sucesso!")
 
         # Navegação
         col1, col2 = st.columns(2)
@@ -642,6 +737,7 @@ def handle_missing_values():
                 st.rerun()
     else:
         st.error("Nenhum dado disponível para tratamento de valores ausentes.")
+
 
 ##############################################
 # FUNÇÃO DE TRATAMENTO DE OUTLIERS
@@ -5083,8 +5179,8 @@ def main():
     # Inicialização das variáveis de estado da sessão
     initialize_session_state()
 
-    # Exibir estado atual para depuração
-    #st.write(f"📌 Estado atual: {st.session_state.step}")
+    # Exibir estado atual para depuração (opcional)
+    st.write(f"Estado atual: {st.session_state.step}")
 
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
@@ -5105,18 +5201,17 @@ def main():
         train_with_selected_features_page()
     elif st.session_state.step == 'evaluate_and_compare_models':
         evaluate_and_compare_models()
-    elif st.session_state.step == 'clustering_final_page':  # ✅ Adicionado!
-        clustering_final_page()  # ✅ Chama a função do relatório final de clustering
+    elif st.session_state.step == 'clustering_final_page':
+        clustering_final_page()
     elif st.session_state.step == 'final_page':
         final_page()
     else:
         st.error(f"⚠ Etapa desconhecida: {st.session_state.step}. Reiniciando a aplicação.")
         st.session_state.step = 'file_upload'
         st.rerun()
-        
-    # Exibir o estado após a execução para depuração
-    #st.write(f"Estado final: {st.session_state.step}")
 
+    # Exibir o estado após a execução para depuração (opcional)
+    st.write(f"Estado final: {st.session_state.step}")
 
 if __name__ == "__main__":
     main()
