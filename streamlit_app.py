@@ -900,13 +900,13 @@ def outlier_detection():
 
         # Botão para aplicar tratamento
         if st.button(f"Aplicar tratamento em {col}"):
-            apply_outlier_treatment(col, method, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"])
-            
-            # Esta linha é crucial - ela marca a coluna como tratada
-            if col not in st.session_state.treated_columns:
-                st.session_state.treated_columns.append(col)
-                
-            st.rerun()  # Atualizar a página após o tratamento
+            if method != "Sem Ação":
+                apply_outlier_treatment(col, method, st.session_state.initial_limits[col]["lower_bound"], st.session_state.initial_limits[col]["upper_bound"])
+                if col not in st.session_state.treated_columns:
+                    st.session_state.treated_columns.append(col)
+            # Se for "Sem Ação", não adiciona aos tratados, para que continue sendo analisado
+            st.rerun()
+
 
     # **Boxplot Final**
     st.write("### Boxplot Após Tratamento")
@@ -991,52 +991,40 @@ def auto_select_outlier_treatment(col, data, lower_bound, upper_bound):
 
 def apply_outlier_treatment(col, method, lower_bound, upper_bound):
     """Aplica o tratamento de outliers na coluna especificada."""
-    # Obter os dados do estado
-    data = st.session_state.data
-    
-    # Garantir que a coluna seja do tipo float para permitir valores decimais
-    data[col] = data[col].astype(float)
-    
-    if method == "Remover Outliers":
-        # Remover todos os outliers (valores além de 1.5 * IQR)
-        st.session_state.data = data[ 
-            (data[col] >= lower_bound) & (data[col] <= upper_bound)
-        ]
-        st.success(f"Todos os outliers removidos na coluna '{col}'.")
 
+    if method == "Sem Ação":
+        st.info(f"Nenhum tratamento aplicado na coluna '{col}'.")
+        return False  # ⚠️ importante: retorna False para indicar que não foi tratado
+
+    data = st.session_state.data
+    data[col] = data[col].astype(float)
+
+    if method == "Remover Outliers":
+        st.session_state.data = data[(data[col] >= lower_bound) & (data[col] <= upper_bound)]
+        st.success(f"Todos os outliers removidos na coluna '{col}'.")
     elif method == "Remover Outliers Severos":
-        # Remover apenas outliers severos (>3xIQR)
         Q1 = data[col].quantile(0.25)
         Q3 = data[col].quantile(0.75)
         IQR = Q3 - Q1
-        
-        # Definição correta de outliers severos (3 * IQR)
         severe_lower = Q1 - 3.0 * IQR
         severe_upper = Q3 + 3.0 * IQR
-
-        st.session_state.data = data[ 
-            (data[col] >= severe_lower) & (data[col] <= severe_upper)
-        ]
+        st.session_state.data = data[(data[col] >= severe_lower) & (data[col] <= severe_upper)]
         st.success(f"Outliers severos removidos na coluna '{col}'.")
-
     elif method == "Substituir por Limites":
-        # Substituir valores fora dos limites pelos próprios limites
         st.session_state.data[col] = data[col].clip(lower_bound, upper_bound)
         st.success(f"Valores substituídos pelos limites na coluna '{col}'.")
-
     elif method == "Substituir por Média":
-        # Substituir valores fora dos limites pela média
         mean_value = data[col].mean()
         mask = (data[col] < lower_bound) | (data[col] > upper_bound)
         st.session_state.data.loc[mask, col] = mean_value
         st.success(f"Valores substituídos pela média ({mean_value:.2f}) na coluna '{col}'.")
-
     elif method == "Substituir por Mediana":
-        # Substituir valores fora dos limites pela mediana
         median_value = data[col].median()
         mask = (data[col] < lower_bound) | (data[col] > upper_bound)
         st.session_state.data.loc[mask, col] = median_value
         st.success(f"Valores substituídos pela mediana ({median_value:.2f}) na coluna '{col}'.")
+
+    return True  # ⚠️ tratamento foi aplicado com sucesso
 
 ##########################################################
 # FUNÇÃO DE GUARDAR O DATASET DEPOIS DO PRÉ-PROCESSAMENTO
@@ -5181,8 +5169,7 @@ def initialize_session_state():
 def main():
     # Inicialização das variáveis de estado da sessão
     initialize_session_state()
-
-
+    
     # Roteamento baseado no estado atual
     if st.session_state.step == 'file_upload':
         upload_file()
